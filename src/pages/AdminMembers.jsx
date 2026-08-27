@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { Navbar } from '../components/Navbar';
-import { Toast } from '../components/ui/Toast';
-import { triggerHaptic, playSuccessSound } from '../utils/hapticsSound';
 import { Users, ShieldCheck, CheckCircle2, XCircle } from 'lucide-react';
 
 export function AdminMembers() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [toastMessage, setToastMessage] = useState(null);
 
   useEffect(() => {
     loadMembers();
@@ -28,30 +25,6 @@ export function AdminMembers() {
     }
   };
 
-  const handleToggleStatus = async (memberId, currentStatus) => {
-    triggerHaptic(20);
-    const nextStatus = currentStatus === 'Inactive' ? 'Active' : 'Inactive';
-    try {
-      const res = await api.toggleMemberStatus(memberId, nextStatus);
-      if (res.success) {
-        setMembers((prev) =>
-          prev.map((m) =>
-            m.memberId === memberId
-              ? { ...m, status: nextStatus, active: nextStatus === 'Active' }
-              : m
-          )
-        );
-        playSuccessSound();
-        setToastMessage({
-          type: 'success',
-          text: `Member status updated to ${nextStatus}!`,
-        });
-      }
-    } catch (err) {
-      setToastMessage({ type: 'error', text: 'Failed to update member status.' });
-    }
-  };
-
   return (
     <div className="centered-container py-6 sm:py-10 space-y-6">
       {/* Standalone Logo on Top */}
@@ -63,7 +36,7 @@ export function AdminMembers() {
         />
       </div>
 
-      {/* Clean Centered Title (No underline, no tagline) */}
+      {/* Clean Centered Title */}
       <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight flex items-center justify-center gap-2">
           <Users className="w-6 h-6 text-[#0f52ba] shrink-0" />
@@ -74,22 +47,12 @@ export function AdminMembers() {
       {/* Segmented Navigation Tab Bar */}
       <Navbar />
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <Toast
-          message={toastMessage.text}
-          type={toastMessage.type}
-          onClose={() => setToastMessage(null)}
-          autoHideDuration={1200}
-        />
-      )}
-
       {/* Members Directory List Card */}
       <div className="reference-card p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h3 className="text-base font-bold text-[#0f172a]">Active Members ({members.length})</h3>
           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0f52ba] border border-blue-200">
-            Live Directory
+            Managed via Google Sheets
           </span>
         </div>
 
@@ -109,8 +72,6 @@ export function AdminMembers() {
                 activeVal === 'true' ||
                 activeVal === '1' ||
                 mem.active === true;
-
-              const currentStatusText = isActive ? 'Active' : 'Inactive';
 
               return (
                 <div
@@ -132,14 +93,12 @@ export function AdminMembers() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleToggleStatus(mem.memberId, currentStatusText)}
-                    title="Click to toggle status (Active <-> Inactive)"
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition-all active:scale-95 cursor-pointer ${
+                  {/* Read-Only Status Badge (Managed in Google Sheets) */}
+                  <div
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
                       isActive
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                        : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-rose-50 text-rose-700 border-rose-200'
                     }`}
                   >
                     {isActive ? (
@@ -153,7 +112,7 @@ export function AdminMembers() {
                         <span>Inactive</span>
                       </>
                     )}
-                  </button>
+                  </div>
                 </div>
               );
             })}

@@ -21,6 +21,41 @@ export function AuthProvider({ children }) {
       localStorage.setItem('PR_YOUTH_USER', JSON.stringify(user));
     } else {
       localStorage.removeItem('PR_YOUTH_USER');
+      sessionStorage.clear();
+    }
+  }, [user]);
+
+  // Check if current user was deactivated in Google Sheets
+  const checkMemberDeactivation = useCallback(async () => {
+    if (!user || user.role === 'Admin') return;
+
+    try {
+      const res = await api.getMembers();
+      if (res.success && Array.isArray(res.data)) {
+        const matched = res.data.find(
+          (m) => String(m.memberId).toUpperCase() === String(user.memberId).toUpperCase()
+        );
+
+        if (matched) {
+          const statusStr = String(matched.status || '').toLowerCase();
+          const activeVal = String(matched.active).toLowerCase();
+          const isInactive =
+            statusStr === 'inactive' ||
+            activeVal === 'false' ||
+            activeVal === '0' ||
+            matched.active === false;
+
+          if (isInactive) {
+            console.warn(`User ${user.memberId} has been deactivated in Google Sheets. Evicting session.`);
+            setUser(null);
+            sessionStorage.clear();
+            localStorage.removeItem('PR_YOUTH_USER');
+            alert('Your account has been marked Inactive by administrator. You have been logged out.');
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to verify member status', err);
     }
   }, [user]);
 
@@ -29,16 +64,17 @@ export function AuthProvider({ children }) {
     setIsSyncing(true);
     setRefreshTrigger((prev) => prev + 1);
     setLastSyncTime(new Date());
+    checkMemberDeactivation();
     setTimeout(() => setIsSyncing(false), 800);
-  }, []);
+  }, [checkMemberDeactivation]);
 
-  // Automatic Background Polling (Every 10 seconds when logged in)
+  // Automatic Background Polling (Every 8 seconds when logged in)
   useEffect(() => {
     if (!user) return;
 
     const timer = setInterval(() => {
       triggerRefresh();
-    }, 10000); // Poll every 10 seconds
+    }, 8000);
 
     return () => clearInterval(timer);
   }, [user, triggerRefresh]);
@@ -76,6 +112,8 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null);
     setActiveTab('dashboard');
+    sessionStorage.clear();
+    localStorage.removeItem('PR_YOUTH_USER');
   };
 
   const updateGasUrl = (url) => {
