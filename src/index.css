@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background: linear-gradient(180deg, #dcebfa 0%, #edf4fc 40%, #f5f9fd 100%);
+    color: #0f172a;
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Centered Container matching Reference Screenshot */
+.centered-container {
+  max-width: 36rem; /* 576px */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.reference-card {
+  background-color: #ffffff;
+  border-radius: 1.5rem; /* 24px */
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease-in-out;
+}
+
+.reference-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.apple-card {
+  background-color: #ffffff;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Input Wrapper & Icon Protection - NO OVERLAPPING */
+.apple-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.apple-input-icon {
+  position: absolute;
+  left: 0.875rem; /* 14px */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.125rem; /* 18px */
+  height: 1.125rem;
+  color: #64748b;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.apple-currency-prefix {
+  position: absolute;
+  left: 0.875rem; /* 14px */
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f52ba;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.apple-input {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 1rem; /* 16px rounded inputs */
+  padding: 0.75rem 1rem;
+  color: #0f172a;
+  font-size: 0.875rem;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  outline: none;
+  transition: all 0.15s ease-in-out;
+}
+
+/* Enforce 44px left padding whenever input has leading icon or currency prefix */
+.apple-input-with-icon {
+  padding-left: 2.75rem !important;
+}
+
+select.apple-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 0.65rem auto;
+  padding-right: 2.5rem !important;
+}
+
+.apple-input:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+
+/* Action Buttons */
+.action-pill-button {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border-radius: 9999px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.action-pill-button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.action-pill-button:active {
+  transform: scale(0.98);
+}
+
+.submit-pill-button {
+  background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+  border-radius: 1rem;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  transition: all 0.15s ease-in-out;
+}
+
+.submit-pill-button:hover {
+  background: linear-gradient(180deg, #bfdbfe 0%, #93c5fd 100%);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
