@@ -1,0 +1,23 @@
+{
+  "short_name": "PR Youth",
+  "name": "PR Youth — Committee Expenses Tracker",
+  "icons": [
+    {
+      "src": "/Favicon.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Logo.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#edf4fc",
+  "theme_color": "#0f52ba",
+  "display": "standalone",
+  "orientation": "portrait"
+}
