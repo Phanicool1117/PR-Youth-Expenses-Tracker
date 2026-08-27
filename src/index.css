@@ -164,3 +164,17 @@ select.apple-input {
   background: #cbd5e1;
   border-radius: 9999px;
 }
+
+/* Completely Hide Vercel Feedback & Live Toolbar elements */
+#vercel-live-feedback,
+[data-vercel-toolbar],
+[data-vercel-edit-mode],
+.vercel-toolbar,
+iframe[src*="vercel.live"],
+div[id*="vercel-toolbar"],
+vercel-live-feedback {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
