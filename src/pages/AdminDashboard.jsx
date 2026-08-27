@@ -64,6 +64,17 @@ export function AdminDashboard() {
     recentActivity = [],
   } = data || {};
 
+  // Build complete dynamic category breakdown combining active Google Sheet categories + logged expenses
+  const mergedCategoryBreakdown = {};
+  if (categories && categories.length > 0) {
+    categories.forEach((cat) => {
+      mergedCategoryBreakdown[cat] = categoryBreakdown[cat] || 0;
+    });
+  }
+  Object.keys(categoryBreakdown).forEach((cat) => {
+    mergedCategoryBreakdown[cat] = categoryBreakdown[cat];
+  });
+
   return (
     <div className="centered-container py-6 sm:py-10 space-y-6">
       {/* Standalone Logo on Top */}
@@ -167,8 +178,8 @@ export function AdminDashboard() {
         </div>
 
         <div className="space-y-3 pt-1">
-          {Object.keys(categoryBreakdown).length > 0 ? (
-            Object.entries(categoryBreakdown).map(([cat, amt]) => {
+          {Object.keys(mergedCategoryBreakdown).length > 0 ? (
+            Object.entries(mergedCategoryBreakdown).map(([cat, amt]) => {
               const pct = totalExpenses > 0 ? Math.round((amt / totalExpenses) * 100) : 0;
               return (
                 <div key={cat} className="space-y-1">
@@ -188,7 +199,7 @@ export function AdminDashboard() {
               );
             })
           ) : (
-            <p className="text-xs text-slate-400 text-center py-4">No expenses recorded yet.</p>
+            <p className="text-xs text-slate-400 text-center py-4">No categories found.</p>
           )}
         </div>
       </div>

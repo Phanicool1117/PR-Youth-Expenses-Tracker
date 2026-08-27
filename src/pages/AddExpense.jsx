@@ -30,6 +30,9 @@ export function AddExpense() {
       const res = await api.getCategories();
       if (res.success && res.data) {
         setCategories(res.data);
+        if (res.data.length > 0 && !res.data.includes(category)) {
+          setCategory(res.data[0]);
+        }
       }
     } catch (err) {
       console.error('Failed to load categories', err);
@@ -111,7 +114,7 @@ export function AddExpense() {
         />
       </div>
 
-      {/* Clean Centered Title (No underline, no tagline) */}
+      {/* Clean Centered Title */}
       <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight flex items-center justify-center gap-2">
           <PlusCircle className="w-6 h-6 text-emerald-600 shrink-0" />
@@ -171,9 +174,10 @@ export function AddExpense() {
             </div>
           </div>
 
-          {/* Category Carousel */}
+          {/* Dynamic Category Carousel */}
           <QuickAddCarousel
             selectedCategory={category}
+            categories={categories}
             onSelectCategory={(catName) => {
               triggerHaptic(10);
               setCategory(catName);
@@ -191,7 +195,7 @@ export function AddExpense() {
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="e.g. Flowers & decoration strings"
+                placeholder="e.g. Water bottles & cans"
                 className="apple-input apple-input-with-icon text-xs py-3"
               />
             </div>
