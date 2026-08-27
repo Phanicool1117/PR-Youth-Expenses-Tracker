@@ -455,10 +455,36 @@ function getMembersSummary() {
 function getActiveCategories() {
   var rows = getSheetData("Categories");
   var activeCats = [];
+  
   for (var i = 0; i < rows.length; i++) {
-    if (String(rows[i]['Active']).toLowerCase() === 'true') {
-      activeCats.push(rows[i]['Category']);
+    var r = rows[i];
+    var catName = r['Category'] || r['Category Name'] || r['Name'] || r['CategoryName'];
+    var activeVal = String(r['Active'] !== undefined && r['Active'] !== '' ? r['Active'] : 'true').toLowerCase();
+    var isActive = activeVal === 'true' || activeVal === 'active' || activeVal === '1' || activeVal === '';
+    
+    if (catName && isActive) {
+      var trimmed = String(catName).trim();
+      if (trimmed && activeCats.indexOf(trimmed) === -1) {
+        activeCats.push(trimmed);
+      }
     }
   }
+  
+  var defaultCats = [
+    'Decoration Expenses',
+    'Pooja Expenses',
+    'Crackers Expenses',
+    'Lights Expenses',
+    'Travel Expenses',
+    'Banner Expenses',
+    'DJ Expenses',
+    'Prasadam Expenses',
+    'Other Expenses'
+  ];
+
+  if (activeCats.length === 0) {
+    return { success: true, data: defaultCats };
+  }
+  
   return { success: true, data: activeCats };
 }

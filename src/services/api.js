@@ -14,6 +14,7 @@ export function setGasUrl(url) {
 const LOCAL_STORAGE_EXPENSES_KEY = 'PR_YOUTH_LOCAL_EXPENSES';
 const LOCAL_STORAGE_DONATIONS_KEY = 'PR_YOUTH_LOCAL_DONATIONS';
 const LOCAL_STORAGE_MEMBERS_KEY = 'PR_YOUTH_LOCAL_MEMBERS';
+const LOCAL_STORAGE_CATEGORIES_KEY = 'PR_YOUTH_LOCAL_CATEGORIES';
 
 const DEFAULT_MEMBERS = [
   { memberId: 'ADM000', name: 'Admin', role: 'Admin', status: 'Active' },
@@ -21,6 +22,18 @@ const DEFAULT_MEMBERS = [
   { memberId: 'PRY002', name: 'Kumar', role: 'Member', status: 'Active' },
   { memberId: 'PRY003', name: 'Srinivas', role: 'Member', status: 'Active' },
   { memberId: 'PRY004', name: 'Ramesh', role: 'Member', status: 'Inactive' },
+];
+
+const DEFAULT_CATEGORIES = [
+  'Decoration Expenses',
+  'Pooja Expenses',
+  'Crackers Expenses',
+  'Lights Expenses',
+  'Travel Expenses',
+  'Banner Expenses',
+  'DJ Expenses',
+  'Prasadam Expenses',
+  'Other Expenses',
 ];
 
 function getLocalMembers() {
@@ -114,6 +127,27 @@ export const api = {
       }
     }
     return { success: true, data: getLocalMembers() };
+  },
+
+  // Get Dynamic Categories List from Google Sheets
+  async getCategories() {
+    const currentUrl = getGasUrl();
+    if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
+      try {
+        const res = await fetch(`${currentUrl}?action=getCategories`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          localStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(json.data));
+          return json;
+        }
+      } catch (err) {
+        console.warn('Backend categories fetch failed, using local categories', err);
+      }
+    }
+
+    const savedCats = localStorage.getItem(LOCAL_STORAGE_CATEGORIES_KEY);
+    const categories = savedCats ? JSON.parse(savedCats) : DEFAULT_CATEGORIES;
+    return { success: true, data: categories };
   },
 
   // Toggle Member Status (Active <-> Inactive)
@@ -227,6 +261,14 @@ export const api = {
     };
     expenses.unshift(newTx);
     saveLocalExpenses(expenses);
+
+    // Ensure category is added to local categories if missing
+    const savedCats = JSON.parse(localStorage.getItem(LOCAL_STORAGE_CATEGORIES_KEY) || JSON.stringify(DEFAULT_CATEGORIES));
+    if (!savedCats.includes(payload.category)) {
+      savedCats.push(payload.category);
+      localStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(savedCats));
+    }
+
     return { success: true, data: newTx };
   },
 
@@ -256,23 +298,5 @@ export const api = {
     donations.unshift(newDonation);
     saveLocalDonations(donations);
     return { success: true, data: newDonation };
-  },
-
-  // Get Expense Categories List
-  async getCategories() {
-    return {
-      success: true,
-      data: [
-        'Decoration Expenses',
-        'Pooja Expenses',
-        'Crackers Expenses',
-        'Lights Expenses',
-        'Travel Expenses',
-        'Banner Expenses',
-        'DJ Expenses',
-        'Prasadam Expenses',
-        'Other Expenses',
-      ],
-    };
   },
 };
