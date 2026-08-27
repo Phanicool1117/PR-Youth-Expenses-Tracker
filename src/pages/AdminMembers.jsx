@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { Navbar } from '../components/Navbar';
 import { Toast } from '../components/ui/Toast';
+import { triggerHaptic, playSuccessSound } from '../utils/hapticsSound';
 import { Users, ShieldCheck, CheckCircle2, XCircle } from 'lucide-react';
 
 export function AdminMembers() {
@@ -28,6 +29,7 @@ export function AdminMembers() {
   };
 
   const handleToggleStatus = async (memberId, currentStatus) => {
+    triggerHaptic(20);
     const nextStatus = currentStatus === 'Inactive' ? 'Active' : 'Inactive';
     try {
       const res = await api.toggleMemberStatus(memberId, nextStatus);
@@ -39,6 +41,7 @@ export function AdminMembers() {
               : m
           )
         );
+        playSuccessSound();
         setToastMessage({
           type: 'success',
           text: `Member status updated to ${nextStatus}!`,
@@ -51,7 +54,7 @@ export function AdminMembers() {
 
   return (
     <div className="centered-container py-6 sm:py-10 space-y-6">
-      {/* 1. Standalone Logo on Top */}
+      {/* Standalone Logo on Top */}
       <div className="flex items-center justify-center pt-2">
         <img
           src="/Logo.png"
@@ -60,18 +63,15 @@ export function AdminMembers() {
         />
       </div>
 
-      {/* 2. Header */}
-      <div className="text-center space-y-1 border-b border-slate-200 pb-4">
+      {/* Clean Centered Title (No underline, no tagline) */}
+      <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight flex items-center justify-center gap-2">
-          <Users className="w-6 h-6 text-[#0f52ba]" />
-          Committee Members Directory
+          <Users className="w-6 h-6 text-[#0f52ba] shrink-0" />
+          <span>Members Directory</span>
         </h1>
-        <p className="text-xs text-slate-500 font-medium">
-          Active committee members &amp; status management.
-        </p>
       </div>
 
-      {/* 3. Segmented Navigation Tab Bar */}
+      {/* Segmented Navigation Tab Bar */}
       <Navbar />
 
       {/* Toast Notification */}
@@ -80,11 +80,11 @@ export function AdminMembers() {
           message={toastMessage.text}
           type={toastMessage.type}
           onClose={() => setToastMessage(null)}
-          autoHideDuration={3000}
+          autoHideDuration={1200}
         />
       )}
 
-      {/* 4. Members Directory List Card */}
+      {/* Members Directory List Card */}
       <div className="reference-card p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h3 className="text-base font-bold text-[#0f172a]">Active Members ({members.length})</h3>
@@ -132,7 +132,6 @@ export function AdminMembers() {
                     </div>
                   </div>
 
-                  {/* Interactive Status Badge: Green for Active, Red for Inactive */}
                   <button
                     type="button"
                     onClick={() => handleToggleStatus(mem.memberId, currentStatusText)}

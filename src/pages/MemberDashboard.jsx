@@ -16,7 +16,6 @@ export function MemberDashboard() {
   });
   const [loading, setLoading] = useState(!data);
 
-  // Quick Form State
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Decoration Expenses');
   const [note, setNote] = useState('');
@@ -149,26 +148,23 @@ export function MemberDashboard() {
         />
       </div>
 
-      {/* Greeting Section */}
-      <div className="text-center space-y-1">
+      {/* Greeting Section (No underline, no tagline) */}
+      <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
           Hi, {user.name}
         </h1>
-        <p className="text-sm font-medium text-slate-500">Here's your expense tracker.</p>
       </div>
 
       {/* Segmented Tab Bar */}
       <Navbar />
 
-      {/* Hierarchical Financial Status Bar (Subtle Slate Grey Bold Label under Amount) */}
+      {/* Hierarchical Financial Status Bar */}
       <div className="reference-card rounded-3xl p-5 px-6 bg-gradient-to-br from-white via-slate-50/50 to-white shadow-sm border border-slate-200 flex items-center justify-between gap-4">
         <div className="space-y-0.5">
-          {/* Large Bold Amount - Primary Focus */}
           <div className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
             ₹{totalSpent.toLocaleString('en-IN')}
           </div>
 
-          {/* Under Amount: Subtle Slate Grey Bold Label */}
           <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 pt-0.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
             <span>Total Expenses Spent</span>
@@ -293,7 +289,6 @@ export function MemberDashboard() {
         transactions={recentActivity}
         showMember={false}
         title="My Activity History"
-        subtitle="Search & browse your submitted expenses in 10-item pages"
         categories={categories}
       />
     </div>

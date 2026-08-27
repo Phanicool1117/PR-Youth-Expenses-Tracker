@@ -9,7 +9,6 @@ import { Layers, RefreshCw, Wallet, LogOut } from 'lucide-react';
 export function AdminDashboard() {
   const { logout, refreshTrigger, triggerRefresh, isSyncing } = useAuth();
   
-  // Instant Session Caching for 0ms Tab Switching
   const [data, setData] = useState(() => {
     const cached = sessionStorage.getItem('ADMIN_DASH_DATA');
     return cached ? JSON.parse(cached) : null;
@@ -82,38 +81,33 @@ export function AdminDashboard() {
         />
       </div>
 
-      {/* 2. Centered Greeting Section */}
-      <div className="text-center space-y-1">
+      {/* 2. Clean Centered Title (No underline, no tagline) */}
+      <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
           Executive Dashboard
         </h1>
-        <p className="text-sm font-medium text-slate-500">Here's your committee overview.</p>
       </div>
 
       {/* 3. Segmented Tab Bar */}
       <Navbar />
 
-      {/* 4. Hierarchical Financial Status Bar (Dull Slate Grey Bold Label under Large Amount) */}
+      {/* 4. Hierarchical Financial Status Bar */}
       <div className="reference-card rounded-3xl p-5 px-6 bg-gradient-to-br from-white via-slate-50/50 to-white shadow-sm border border-slate-200 flex items-center justify-between gap-4">
         <div className="space-y-0.5">
-          {/* Top: Large Bold Amount - Primary Focus */}
           <div className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
             ₹{currentBalance.toLocaleString('en-IN')}
           </div>
 
-          {/* Under Amount: Subtle Slate Grey Bold Label */}
           <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 pt-0.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
             <span>Net Committee Balance</span>
           </div>
 
-          {/* Sub-line */}
           <div className="text-[11px] font-medium text-slate-500 pt-0.5">
             {expenseCount} Receipts Logged · {members.length} Members Active
           </div>
         </div>
 
-        {/* Sync & Logout Controls */}
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => {
@@ -210,7 +204,6 @@ export function AdminDashboard() {
         transactions={recentActivity}
         showMember={true}
         title="Committee Financial Audit Activity"
-        subtitle="Search, filter by member/category & browse in 10-item pages"
         categories={categories}
         members={members}
       />

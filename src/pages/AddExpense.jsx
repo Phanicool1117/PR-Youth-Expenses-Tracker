@@ -111,15 +111,12 @@ export function AddExpense() {
         />
       </div>
 
-      {/* Heading & Tagline */}
-      <div className="text-center space-y-1 border-b border-slate-200 pb-4">
+      {/* Clean Centered Title (No underline, no tagline) */}
+      <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight flex items-center justify-center gap-2">
-          <PlusCircle className="w-6 h-6 text-emerald-600" />
-          Add Expenses
+          <PlusCircle className="w-6 h-6 text-emerald-600 shrink-0" />
+          <span>Add Expenses</span>
         </h1>
-        <p className="text-xs text-slate-500 font-medium">
-          Quickly log committee purchases &amp; receipts.
-        </p>
       </div>
 
       {/* Segmented Tab Bar */}
@@ -224,7 +221,7 @@ export function AddExpense() {
             </div>
           </div>
 
-          {/* Haptic Submit Button */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={submitting}

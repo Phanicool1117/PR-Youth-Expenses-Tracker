@@ -41,7 +41,7 @@ export function AdminExpenses() {
 
   return (
     <div className="centered-container py-6 sm:py-10 space-y-6">
-      {/* 1. Standalone Logo on Top */}
+      {/* Standalone Logo on Top */}
       <div className="flex items-center justify-center pt-2">
         <img
           src="/Logo.png"
@@ -50,21 +50,18 @@ export function AdminExpenses() {
         />
       </div>
 
-      {/* 2. Header */}
-      <div className="text-center space-y-1 border-b border-slate-200 pb-4">
+      {/* Clean Centered Title (No underline, no tagline) */}
+      <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight flex items-center justify-center gap-2">
-          <CreditCard className="w-6 h-6 text-amber-600" />
-          Committee Expense Audit Log
+          <CreditCard className="w-6 h-6 text-amber-600 shrink-0" />
+          <span>Expenses Audit Ledger</span>
         </h1>
-        <p className="text-xs text-slate-500 font-medium">
-          Comprehensive real-time receipt ledger across all members.
-        </p>
       </div>
 
-      {/* 3. Segmented Navigation Tab Bar */}
+      {/* Segmented Navigation Tab Bar */}
       <Navbar />
 
-      {/* 4. Paginated & Filtered Expenses Feed (10 items per page) */}
+      {/* Paginated & Filtered Expenses Feed */}
       {loading ? (
         <div className="reference-card p-6 space-y-3">
           {[1, 2, 3, 4].map((n) => (
@@ -76,7 +73,6 @@ export function AdminExpenses() {
           transactions={expenses}
           showMember={true}
           title="Full Committee Expenses Ledger"
-          subtitle="Search & filter by category or member in 10-item pages"
           categories={categories}
           members={members}
         />
