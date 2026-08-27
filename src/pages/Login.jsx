@@ -24,14 +24,19 @@ export function Login() {
     setIsSubmitting(true);
 
     try {
+      // 1. Verify credentials via Auth API
       const res = await login(usernameOrId.trim(), password);
+      
       if (res.success) {
-        // Trigger Apple-style success chime & vibration!
+        // 2. Show solid green tick & play Apple chime
         setIsSuccessState(true);
         triggerHaptic([30, 50, 30]);
         playSuccessSound();
+
+        // 3. Keep tick visible while transitioning smoothly
+        // (AuthContext has already logged the user in, component will unmount cleanly with tick visible)
       } else {
-        setError(res.message);
+        setError(res.message || 'Invalid User ID or Password.');
         setIsSubmitting(false);
       }
     } catch (err) {
@@ -131,7 +136,7 @@ export function Login() {
                 isSuccessState
                   ? 'bg-emerald-600 text-white scale-[1.02] shadow-emerald-500/25'
                   : isSubmitting
-                  ? 'bg-[#0f172a] text-white cursor-wait'
+                  ? 'bg-emerald-600 text-white cursor-wait'
                   : 'bg-[#1e293b] hover:bg-[#0f172a] text-white'
               }`}
             >
