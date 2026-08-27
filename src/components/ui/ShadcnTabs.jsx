@@ -16,7 +16,7 @@ export function ShadcnTabs({ tabs = [], activeTab, onSelectTab }) {
               triggerHaptic(15);
               onSelectTab(tab.id);
             }}
-            className={`shrink-0 sm:flex-1 py-2.5 px-3.5 rounded-xl text-xs font-bold transition-all duration-300 ease-out flex items-center justify-center gap-2 select-none whitespace-nowrap active:scale-95 ${
+            className={`flex-1 min-w-[100px] py-2.5 px-4 rounded-xl text-xs font-bold transition-all duration-300 ease-out flex items-center justify-center gap-2 select-none whitespace-nowrap active:scale-95 ${
               isActive
                 ? 'bg-white text-[#0f52ba] shadow-md scale-[1.01] ring-1 ring-black/5 font-extrabold'
                 : 'text-slate-600 hover:text-[#0f172a] hover:bg-white/40'
