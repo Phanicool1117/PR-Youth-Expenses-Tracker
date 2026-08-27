@@ -165,6 +165,20 @@ select.apple-input {
   border-radius: 9999px;
 }
 
+/* Reverse Spin Animation for LoadingSpinner */
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse 1.2s linear infinite;
+}
+
 /* Completely Hide Vercel Feedback & Live Toolbar elements */
 #vercel-live-feedback,
 [data-vercel-toolbar],

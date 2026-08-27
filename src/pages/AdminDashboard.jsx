@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { ActivityLedger } from '../components/ActivityLedger';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Navbar } from '../components/Navbar';
 import { Layers, RefreshCw, Wallet, LogOut } from 'lucide-react';
 
@@ -51,14 +52,7 @@ export function AdminDashboard() {
   };
 
   if (loading && !data) {
-    return (
-      <div className="centered-container py-8 space-y-6">
-        <div className="h-28 w-28 bg-slate-200/60 rounded-full mx-auto animate-pulse" />
-        <div className="h-10 w-48 bg-slate-200/60 rounded-xl mx-auto animate-pulse" />
-        <div className="h-12 bg-slate-200/60 rounded-2xl animate-pulse" />
-        <div className="h-24 bg-white rounded-3xl animate-pulse" />
-      </div>
-    );
+    return <LoadingSpinner text="Loading Committee Dashboard..." />;
   }
 
   const {
@@ -72,7 +66,7 @@ export function AdminDashboard() {
 
   return (
     <div className="centered-container py-6 sm:py-10 space-y-6">
-      {/* 1. Standalone Logo on Top */}
+      {/* Standalone Logo on Top */}
       <div className="flex items-center justify-center pt-2">
         <img
           src="/Logo.png"
@@ -81,17 +75,17 @@ export function AdminDashboard() {
         />
       </div>
 
-      {/* 2. Clean Centered Title (No underline, no tagline) */}
+      {/* Clean Centered Title */}
       <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
           Executive Dashboard
         </h1>
       </div>
 
-      {/* 3. Segmented Tab Bar */}
+      {/* Segmented Tab Bar */}
       <Navbar />
 
-      {/* 4. Hierarchical Financial Status Bar */}
+      {/* Hierarchical Financial Status Bar */}
       <div className="reference-card rounded-3xl p-5 px-6 bg-gradient-to-br from-white via-slate-50/50 to-white shadow-sm border border-slate-200 flex items-center justify-between gap-4">
         <div className="space-y-0.5">
           <div className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
@@ -134,7 +128,7 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      {/* 5. Financial Summary Card */}
+      {/* Financial Summary Card */}
       <div className="reference-card p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h2 className="text-base font-bold text-[#0f172a] flex items-center gap-2">
@@ -162,7 +156,7 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      {/* 6. Category Spending Analytics Card */}
+      {/* Category Spending Analytics Card */}
       <div className="reference-card p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h3 className="text-base font-bold text-[#0f172a] flex items-center gap-2">
@@ -199,7 +193,7 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      {/* 7. Paginated & Filtered Activity Ledger */}
+      {/* Paginated & Filtered Activity Ledger */}
       <ActivityLedger
         transactions={recentActivity}
         showMember={true}

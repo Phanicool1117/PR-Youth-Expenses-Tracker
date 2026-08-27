@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { ActivityLedger } from '../components/ActivityLedger';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Navbar } from '../components/Navbar';
 import { RefreshCw, LogOut } from 'lucide-react';
 
@@ -47,14 +48,7 @@ export function MemberDashboard() {
   };
 
   if (loading && !data) {
-    return (
-      <div className="centered-container py-8 space-y-6">
-        <div className="h-28 w-28 bg-slate-200/60 rounded-full mx-auto animate-pulse" />
-        <div className="h-10 w-48 bg-slate-200/60 rounded-xl mx-auto animate-pulse" />
-        <div className="h-12 bg-slate-200/60 rounded-2xl animate-pulse" />
-        <div className="h-24 bg-white rounded-3xl animate-pulse" />
-      </div>
-    );
+    return <LoadingSpinner text="Loading Member Portal..." />;
   }
 
   const totalSpent = data?.totalExpenses || 0;
@@ -62,7 +56,7 @@ export function MemberDashboard() {
 
   return (
     <div className="centered-container py-6 sm:py-10 space-y-6">
-      {/* 1. Standalone Logo on Top */}
+      {/* Standalone Logo on Top */}
       <div className="flex items-center justify-center pt-2">
         <img
           src="/Logo.png"
@@ -71,17 +65,17 @@ export function MemberDashboard() {
         />
       </div>
 
-      {/* 2. Greeting Section */}
+      {/* Greeting Section */}
       <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
           Hi, {user.name}
         </h1>
       </div>
 
-      {/* 3. Symmetrical 50/50 Segmented Tab Bar (Home | Add) */}
+      {/* Segmented Tab Bar */}
       <Navbar />
 
-      {/* 4. Hierarchical Financial Status Bar */}
+      {/* Hierarchical Financial Status Bar */}
       <div className="reference-card rounded-3xl p-5 px-6 bg-gradient-to-br from-white via-slate-50/50 to-white shadow-sm border border-slate-200 flex items-center justify-between gap-4">
         <div className="space-y-0.5">
           <div className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
@@ -124,7 +118,7 @@ export function MemberDashboard() {
         </div>
       </div>
 
-      {/* 5. Clean & Simple Activity Ledger (Removed duplicate form card!) */}
+      {/* Activity Ledger */}
       <ActivityLedger
         transactions={recentActivity}
         showMember={false}
