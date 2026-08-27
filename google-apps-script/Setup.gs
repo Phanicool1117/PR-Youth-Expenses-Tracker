@@ -3,7 +3,7 @@
  * Penumuli Perantalamma Youth Team
  * 
  * - Admin_Overview tab has 2 clean columns: Metric/Name & Live Amount (₹).
- * - Removed Status, Share (%), and Spending Share columns as requested.
+ * - Dynamically builds Category Breakdown from Categories tab in Google Sheets.
  */
 
 function setupPRYouthSheets() {
@@ -54,7 +54,8 @@ function setupPRYouthSheets() {
       "Pooja Expenses",
       "DJ Expenses",
       "Prasadam Expenses",
-      "Other Expenses"
+      "Other Expenses",
+      "Water Expenses"
     ];
     for (var c = 0; c < defaultCats.length; c++) {
       catSheet.appendRow([defaultCats[c], "TRUE"]);
@@ -70,10 +71,12 @@ function setupPRYouthSheets() {
     formatHeaderRow(auditSheet);
   }
 
-  // 6. Admin_Overview Tab (CLEAN 2-COLUMN LIVE MONITORING DASHBOARD)
+  // 6. Admin_Overview Tab (DYNAMIC 2-COLUMN LIVE MONITORING DASHBOARD)
   setupAdminOverviewTab(ss);
 
-  SpreadsheetApp.getUi().alert("PR Youth Sheets & Admin_Overview monitoring setup completed successfully!");
+  if (SpreadsheetApp.getUi()) {
+    SpreadsheetApp.getUi().alert("PR Youth Sheets & Admin_Overview monitoring setup completed successfully!");
+  }
 }
 
 function setupAdminOverviewTab(ss) {
@@ -100,21 +103,38 @@ function setupAdminOverviewTab(ss) {
   overviewSheet.appendRow(["Other Donations", '=SUMIF(Donations!D2:D, "Other", Donations!E2:E)']);
   overviewSheet.appendRow(["", ""]);
 
-  // Section 4: Expense Category Breakdown (2 Columns)
+  // Section 4: Dynamic Expense Category Breakdown (2 Columns)
   overviewSheet.appendRow(["EXPENSE CATEGORY BREAKDOWN", ""]);
   overviewSheet.appendRow(["Category Name", "Live Amount (₹)"]);
   
-  var categories = [
-    "Travel Expenses",
-    "Crackers Expenses",
-    "Lights Expenses",
-    "Banner Expenses",
-    "Decoration Expenses",
-    "Pooja Expenses",
-    "DJ Expenses",
-    "Prasadam Expenses",
-    "Other Expenses"
-  ];
+  var catSheet = ss.getSheetByName("Categories");
+  var categories = [];
+  
+  if (catSheet && catSheet.getLastRow() > 1) {
+    var catData = catSheet.getDataRange().getValues();
+    for (var r = 1; r < catData.length; r++) {
+      var cName = catData[r][0];
+      var activeStr = String(catData[r][1] !== undefined ? catData[r][1] : 'TRUE').toUpperCase();
+      if (cName && (activeStr === 'TRUE' || activeStr === '1' || activeStr === '')) {
+        categories.push(String(cName).trim());
+      }
+    }
+  }
+
+  if (categories.length === 0) {
+    categories = [
+      "Travel Expenses",
+      "Crackers Expenses",
+      "Lights Expenses",
+      "Banner Expenses",
+      "Decoration Expenses",
+      "Pooja Expenses",
+      "DJ Expenses",
+      "Prasadam Expenses",
+      "Other Expenses",
+      "Water Expenses"
+    ];
+  }
 
   for (var i = 0; i < categories.length; i++) {
     var catName = categories[i];
@@ -130,9 +150,11 @@ function setupAdminOverviewTab(ss) {
   overviewSheet.getRange("A9:B9").setFontWeight("bold").setBackground("#e2e2e5");
   overviewSheet.getRange("B10:B12").setNumberFormat("₹#,##0.00");
 
-  overviewSheet.getRange("A14:B14").setFontWeight("bold").setBackground("#0071e3").setFontColor("#ffffff");
-  overviewSheet.getRange("A15:B15").setFontWeight("bold").setBackground("#e2e2e5");
-  overviewSheet.getRange("B16:B24").setNumberFormat("₹#,##0.00");
+  var catStartRow = 14;
+  var catEndRow = catStartRow + categories.length + 1;
+  overviewSheet.getRange(catStartRow, 1, 1, 2).setFontWeight("bold").setBackground("#0071e3").setFontColor("#ffffff");
+  overviewSheet.getRange(catStartRow + 1, 1, 1, 2).setFontWeight("bold").setBackground("#e2e2e5");
+  overviewSheet.getRange(catStartRow + 2, 2, categories.length, 1).setNumberFormat("₹#,##0.00");
 
   overviewSheet.setColumnWidth(1, 300);
   overviewSheet.setColumnWidth(2, 200);

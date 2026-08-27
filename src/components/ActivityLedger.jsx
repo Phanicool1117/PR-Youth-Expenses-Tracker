@@ -53,15 +53,45 @@ export function ActivityLedger({
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
 
-  const categoryOptions = [
-    { value: 'All', label: 'All Categories' },
-    ...categories.map((c) => ({ value: c, label: c })),
-  ];
+  // Dynamically compute categoryOptions combining categories prop + transaction categories
+  const categoryOptions = useMemo(() => {
+    const set = new Set();
+    if (Array.isArray(categories)) {
+      categories.forEach((c) => c && set.add(c));
+    }
+    if (Array.isArray(transactions)) {
+      transactions.forEach((tx) => tx.category && set.add(tx.category));
+    }
+    
+    // Default categories fallback
+    if (set.size === 0) {
+      [
+        'Decoration Expenses',
+        'Pooja Expenses',
+        'Crackers Expenses',
+        'Lights Expenses',
+        'Travel Expenses',
+        'Banner Expenses',
+        'DJ Expenses',
+        'Prasadam Expenses',
+        'Water Expenses',
+        'Other Expenses'
+      ].forEach((c) => set.add(c));
+    }
 
-  const memberOptions = [
-    { value: 'All', label: 'All Members' },
-    ...members.map((m) => ({ value: m.memberId || m.name, label: `${m.name} (${m.memberId || 'ID'})` })),
-  ];
+    const catList = Array.from(set);
+    return [
+      { value: 'All', label: 'All Categories' },
+      ...catList.map((c) => ({ value: c, label: c })),
+    ];
+  }, [categories, transactions]);
+
+  const memberOptions = useMemo(() => {
+    return [
+      { value: 'All', label: 'All Members' },
+      ...members.map((m) => ({ value: m.memberId || m.name, label: `${m.name} (${m.memberId || 'ID'})` })),
+    ];
+  }, [members]);
 
   return (
     <div className="reference-card p-6 space-y-4">
