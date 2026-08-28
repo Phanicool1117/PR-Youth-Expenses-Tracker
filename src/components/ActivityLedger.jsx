@@ -161,7 +161,7 @@ export function ActivityLedger({
       {currentItems.length > 0 ? (
         <div className="space-y-2.5">
           {currentItems.map((tx, idx) => (
-            <TransactionItem key={tx.id || idx} transaction={tx} showMember={showMember} />
+            <TransactionItem key={tx.id || idx} transaction={tx} showMember={showMember} members={members} />
           ))}
         </div>
       ) : (

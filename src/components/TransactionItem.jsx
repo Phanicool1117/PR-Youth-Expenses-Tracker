@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { DonationReceiptModal } from './DonationReceiptModal';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { ShoppingBag, Flame, Lightbulb, Flag, Flower2, Heart, Music, Utensils, Tag, Calendar, User, HandHeart, Receipt } from 'lucide-react';
 
-export function TransactionItem({ transaction, showMember = false }) {
+export function TransactionItem({ transaction, showMember = false, members = [] }) {
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
 
   const isDonation =
@@ -22,6 +22,19 @@ export function TransactionItem({ transaction, showMember = false }) {
       minute: '2-digit',
     });
   };
+
+  // Resolve live Member Name from Google Sheets Members tab by matching Member ID
+  const resolvedMemberName = useMemo(() => {
+    if (members && members.length > 0 && transaction.memberId) {
+      const match = members.find(
+        (m) =>
+          String(m.memberId || '').toUpperCase() === String(transaction.memberId).toUpperCase() ||
+          String(m.name || '').toUpperCase() === String(transaction.memberName || '').toUpperCase()
+      );
+      if (match && match.name) return match.name;
+    }
+    return transaction.memberName || 'Member';
+  }, [members, transaction.memberId, transaction.memberName]);
 
   // Category Icon & Color Palette
   const getCategoryIcon = (category) => {
@@ -92,16 +105,16 @@ export function TransactionItem({ transaction, showMember = false }) {
               </span>
             </div>
 
-            {showMember && transaction.memberName && (
+            {showMember && (transaction.memberId || transaction.memberName) && !isDonation && (
               <div className="text-[11px] font-semibold text-[#0f52ba] flex items-center gap-1">
                 <User className="w-3 h-3" />
-                <span>{transaction.memberName} ({transaction.memberId})</span>
+                <span>{resolvedMemberName} ({transaction.memberId || 'ID'})</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Differentiated Color Amount Display: Red for Minus (-), Green for Plus (+) */}
+        {/* Amount Display: Red for Minus (-), Green for Plus (+) */}
         <div className="text-right shrink-0">
           <span
             className={`text-base sm:text-lg font-extrabold tracking-tight ${

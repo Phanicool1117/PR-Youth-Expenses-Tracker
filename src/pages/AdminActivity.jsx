@@ -5,6 +5,7 @@ import { History } from 'lucide-react';
 
 export function AdminActivity() {
   const [activity, setActivity] = useState([]);
+  const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -14,9 +15,15 @@ export function AdminActivity() {
   const loadActivity = async () => {
     setLoading(true);
     try {
-      const res = await api.getMyActivity(''); // Pass empty memberId to get all expenses
-      if (res.success && res.data) {
-        setActivity(res.data);
+      const [actRes, memRes] = await Promise.all([
+        api.getMyActivity(''),
+        api.getMembers(),
+      ]);
+      if (actRes.success && actRes.data) {
+        setActivity(actRes.data);
+      }
+      if (memRes.success && memRes.data) {
+        setMembers(memRes.data);
       }
     } catch (err) {
       console.error('Failed to load global activity log', err);
@@ -48,7 +55,7 @@ export function AdminActivity() {
       ) : activity.length > 0 ? (
         <div className="space-y-3">
           {activity.map((tx, idx) => (
-            <TransactionItem key={tx.id || idx} transaction={tx} showMember={true} />
+            <TransactionItem key={tx.id || idx} transaction={tx} showMember={true} members={members} />
           ))}
         </div>
       ) : (
