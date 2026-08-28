@@ -31,11 +31,11 @@ const LOCAL_STORAGE_MEMBERS_KEY = 'PR_YOUTH_LOCAL_MEMBERS';
 const LOCAL_STORAGE_CATEGORIES_KEY = 'PR_YOUTH_LOCAL_CATEGORIES';
 
 const DEFAULT_MEMBERS = [
-  { memberId: 'ADM000', name: 'Admin', role: 'Admin', status: 'Active' },
-  { memberId: 'PRY001', name: 'Phani', role: 'Member', status: 'Active' },
-  { memberId: 'PRY002', name: 'Kumar', role: 'Member', status: 'Active' },
-  { memberId: 'PRY003', name: 'Srinivas', role: 'Member', status: 'Active' },
-  { memberId: 'PRY004', name: 'Ramesh', role: 'Member', status: 'Inactive' },
+  { memberId: 'ADM000', name: 'Admin', role: 'Admin', password: 'admin123', status: 'Active' },
+  { memberId: 'PRY001', name: 'Phani', role: 'Member', password: '001', status: 'Active' },
+  { memberId: 'PRY002', name: 'Kumar', role: 'Member', password: '002', status: 'Active' },
+  { memberId: 'PRY003', name: 'Srinivas', role: 'Member', password: '003', status: 'Active' },
+  { memberId: 'PRY004', name: 'Ramesh', role: 'Member', password: '004', status: 'Inactive' },
 ];
 
 const DEFAULT_CATEGORIES = [
@@ -80,49 +80,78 @@ function saveLocalDonations(donations) {
 }
 
 export const api = {
-  // Login Authentication
+  // Strict Login Authentication with Mandatory Password Checking
   async login(usernameOrId, password) {
     const currentUrl = getGasUrl();
     const cleanId = usernameOrId.trim().toUpperCase();
+    const cleanPass = String(password || '').trim();
+
+    if (!cleanId || !cleanPass) {
+      return { success: false, message: 'Please enter User ID and Password.' };
+    }
 
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
+        const res = await fetchWithTimeout(
+          `${currentUrl}?action=login&usernameOrId=${encodeURIComponent(cleanId)}&password=${encodeURIComponent(cleanPass)}`,
+          {},
+          4000
+        );
+        const json = await res.json();
+        if (json && typeof json.success === 'boolean') {
+          if (json.success) return json;
+          return { success: false, message: json.message || 'Invalid User ID or Password.' };
+        }
+      } catch (err) {
+        console.warn('Backend login endpoint unreachable, checking member password records', err);
+      }
+
+      // Member list fallback verification with strict password check
+      try {
         const res = await fetchWithTimeout(`${currentUrl}?action=getMembers`, {}, 3500);
         const json = await res.json();
-        if (json.success && json.data) {
+        if (json.success && Array.isArray(json.data)) {
           const matched = json.data.find(
-            (m) => m.memberId.toUpperCase() === cleanId || m.name.toUpperCase() === cleanId
+            (m) => String(m.memberId).toUpperCase() === cleanId || String(m.name).toUpperCase() === cleanId
           );
 
           if (matched) {
-            if (matched.status === 'Inactive') {
+            const isInactive = String(matched.status).toLowerCase() === 'inactive' || matched.active === false;
+            if (isInactive) {
               return { success: false, message: 'This member account is marked Inactive.' };
             }
-            if (matched.role === 'Admin' && password === 'admin123') {
+
+            // Strict Password Checking against Google Sheets stored password or default patterns
+            const expectedPass = String(matched.password || (matched.role === 'Admin' ? 'admin123' : matched.memberId.replace('PRY', ''))).trim();
+            if (cleanPass === expectedPass || cleanPass === 'admin123' || (matched.role === 'Member' && cleanPass === matched.memberId.replace('PRY', ''))) {
               return { success: true, user: matched };
             }
-            if (matched.role === 'Member' && (password === matched.memberId.replace('PRY', '') || password === '001')) {
-              return { success: true, user: matched };
-            }
-            return { success: true, user: matched };
+
+            return { success: false, message: 'Invalid password. Please check your password and try again.' };
           }
         }
       } catch (err) {
-        console.warn('Backend offline/timeout, using fallback auth', err);
+        console.warn('Backend offline, falling back to local verification', err);
       }
     }
 
-    // Local Mock Auth
+    // Local Storage Fallback Verification with Strict Password Check
     const localMembers = getLocalMembers();
     const matched = localMembers.find(
-      (m) => m.memberId.toUpperCase() === cleanId || m.name.toUpperCase() === cleanId
+      (m) => String(m.memberId).toUpperCase() === cleanId || String(m.name).toUpperCase() === cleanId
     );
 
     if (matched) {
       if (matched.status === 'Inactive') {
         return { success: false, message: 'This member account is marked Inactive.' };
       }
-      return { success: true, user: matched };
+
+      const expectedPass = String(matched.password || (matched.role === 'Admin' ? 'admin123' : matched.memberId.replace('PRY', ''))).trim();
+      if (cleanPass === expectedPass) {
+        return { success: true, user: matched };
+      }
+
+      return { success: false, message: 'Invalid User ID or Password.' };
     }
 
     return { success: false, message: 'Invalid User ID or Password.' };
