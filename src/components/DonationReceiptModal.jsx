@@ -172,7 +172,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             </p>
             <div className="pt-0.5 flex justify-center">
               <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <ShieldCheck className="w-3 h-3 text-emerald-600" />
                 <span>OFFICIAL DONATION RECEIPT</span>
               </span>
             </div>
@@ -207,10 +207,10 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           </div>
 
           {/* ========================================== */}
-          {/* MAIN HERO DONATION CONTEXT (Center Aligned) */}
+          {/* MAIN HERO DONATION CONTEXT (Expanded Typography Fills the Center Beautifully) */}
           {/* ========================================== */}
-          <div className="py-1.5 px-2 text-center space-y-1">
-            <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-normal text-center">
+          <div className="py-2 px-1 text-center space-y-1.5">
+            <p className="text-[15px] sm:text-base text-slate-700 leading-relaxed font-normal text-center">
               <span className="font-bold text-slate-900">Mr/Miss: </span>
               <span className="font-black text-orange-600 text-base sm:text-lg tracking-tight">
                 {donorName}
@@ -222,7 +222,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           </div>
 
           {/* Complementary Centered Amount Pill */}
-          <div className="flex justify-center pt-1">
+          <div className="flex justify-center pt-0.5">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-300 shadow-2xs">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
                 Amount Received:
@@ -234,7 +234,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           </div>
 
           {/* Thanking Note */}
-          <div className="pt-2">
+          <div className="pt-1.5">
             <p className="text-xs sm:text-sm font-bold text-[#0f52ba]">
               Thanking you for your contribution.
             </p>

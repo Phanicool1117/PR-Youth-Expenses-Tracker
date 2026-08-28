@@ -20,7 +20,7 @@ export async function createDonationReceiptCanvas(donation) {
   // Scale for ultra-crisp 3x Retina output
   const scale = 3;
   const baseWidth = 440;
-  const baseHeight = 490;
+  const baseHeight = 475; // Perfectly proportioned to eliminate any dead space
 
   const canvas = document.createElement('canvas');
   canvas.width = baseWidth * scale;
@@ -68,7 +68,7 @@ export async function createDonationReceiptCanvas(donation) {
 
   // Draw Circular Emblem Logo Badge (Top Center)
   const logoCenterX = baseWidth / 2;
-  const logoCenterY = 38;
+  const logoCenterY = 36;
   const logoRadius = 24;
 
   ctx.beginPath();
@@ -98,18 +98,18 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.textAlign = 'center';
   ctx.fillStyle = '#0f172a';
   ctx.font = 'bold 17px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText('Penumuli Perantalamma Youth', logoCenterX, 82);
+  ctx.fillText('Penumuli Perantalamma Youth', logoCenterX, 78);
 
   // Tagline: Penumuli Village, Duggirala Mandal, Guntur District
   ctx.fillStyle = '#64748b';
   ctx.font = '600 10.5px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText('Penumuli Village, Duggirala Mandal, Guntur District', logoCenterX, 97);
+  ctx.fillText('Penumuli Village, Duggirala Mandal, Guntur District', logoCenterX, 93);
 
   // Official Donor Receipt Badge
   const badgeWidth = 156;
   const badgeHeight = 20;
   const badgeX = logoCenterX - badgeWidth / 2;
-  const badgeY = 106;
+  const badgeY = 102;
 
   drawRoundedRect(badgeX, badgeY, badgeWidth, badgeHeight, 10, '#ecfdf5', '#a7f3d0');
   ctx.fillStyle = '#065f46';
@@ -121,14 +121,14 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.strokeStyle = '#e2e8f0';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(25, 136);
-  ctx.lineTo(baseWidth - 25, 136);
+  ctx.moveTo(25, 130);
+  ctx.lineTo(baseWidth - 25, 130);
   ctx.stroke();
   ctx.setLineDash([]);
 
   // Secondary Metadata Grid (Date, Paid At, Method)
-  const metaBoxY = 146;
-  const metaBoxH = 56;
+  const metaBoxY = 138;
+  const metaBoxH = 54;
   drawRoundedRect(25, metaBoxY, baseWidth - 50, metaBoxH, 10, '#f8fafc', '#f1f5f9');
 
   const colLeft = 36;
@@ -146,35 +146,36 @@ export async function createDonationReceiptCanvas(donation) {
     ctx.fillText(value, colRight, y);
   };
 
-  drawMetaRow('Date', dateFormatted, metaBoxY + 16);
-  drawMetaRow('Paid At', timeFormatted, metaBoxY + 32);
-  drawMetaRow('Payment Method', paymentMethod, metaBoxY + 48);
+  drawMetaRow('Date', dateFormatted, metaBoxY + 15);
+  drawMetaRow('Paid At', timeFormatted, metaBoxY + 30);
+  drawMetaRow('Payment Method', paymentMethod, metaBoxY + 45);
 
   // Dashed Divider 2
   ctx.setLineDash([4, 4]);
   ctx.strokeStyle = '#e2e8f0';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(25, 214);
-  ctx.lineTo(baseWidth - 25, 214);
+  ctx.moveTo(25, 202);
+  ctx.lineTo(baseWidth - 25, 202);
   ctx.stroke();
   ctx.setLineDash([]);
 
   // ==========================================
-  // MAIN HERO SECTION: CENTER-ALIGNED DONATION CONTEXT
+  // MAIN HERO SECTION: LARGE, GRAND, PROMINENT CENTERED TYPOGRAPHY
+  // (Fills the white space with prominent, prestigious typography!)
   // ==========================================
-  const statementStartY = 238;
-  const maxLineWidth = baseWidth - 50;
-  const lineHeight = 22;
+  const statementStartY = 226;
+  const maxLineWidth = baseWidth - 44;
+  const lineHeight = 26; // Generous line height filling the center space beautifully
 
   const tokens = [
-    { text: 'Mr/Miss: ', font: 'bold 14px "Plus Jakarta Sans", sans-serif', color: '#0f172a' },
-    { text: `${donorName} `, font: '900 15px "Plus Jakarta Sans", sans-serif', color: '#ea580c' },
-    { text: 'has generously contributed an amount of ', font: '500 13px "Plus Jakarta Sans", sans-serif', color: '#334155' },
-    { text: `₹${amount.toLocaleString('en-IN')} `, font: 'bold 14px "Plus Jakarta Sans", sans-serif', color: '#047857' },
-    { text: 'towards the ', font: '500 13px "Plus Jakarta Sans", sans-serif', color: '#334155' },
-    { text: 'Vinayaka festival / Puja', font: 'bold 13px "Plus Jakarta Sans", sans-serif', color: '#0f172a' },
-    { text: ', and the amount has been received with heartfelt thanks.', font: '500 13px "Plus Jakarta Sans", sans-serif', color: '#334155' },
+    { text: 'Mr/Miss: ', font: 'bold 15px "Plus Jakarta Sans", sans-serif', color: '#0f172a' },
+    { text: `${donorName} `, font: '900 17px "Plus Jakarta Sans", sans-serif', color: '#ea580c' },
+    { text: 'has generously contributed an amount of ', font: '500 14px "Plus Jakarta Sans", sans-serif', color: '#334155' },
+    { text: `₹${amount.toLocaleString('en-IN')} `, font: 'bold 15.5px "Plus Jakarta Sans", sans-serif', color: '#047857' },
+    { text: 'towards the ', font: '500 14px "Plus Jakarta Sans", sans-serif', color: '#334155' },
+    { text: 'Vinayaka festival / Puja', font: 'bold 14.5px "Plus Jakarta Sans", sans-serif', color: '#0f172a' },
+    { text: ', and the amount has been received with heartfelt thanks.', font: '500 14px "Plus Jakarta Sans", sans-serif', color: '#334155' },
   ];
 
   // Break tokens into wrapped lines
@@ -221,12 +222,12 @@ export async function createDonationReceiptCanvas(donation) {
   });
 
   // ==========================================
-  // COMPLEMENTARY AMOUNT BADGE (Compact, Centered Pill)
+  // COMPLEMENTARY AMOUNT BADGE (Immediately below the expanded hero statement)
   // ==========================================
-  const pillWidth = 220;
+  const pillWidth = 230;
   const pillHeight = 36;
   const pillX = (baseWidth - pillWidth) / 2;
-  const pillY = 345;
+  const pillY = curY + 12; // Snug, balanced gap below the text
 
   drawRoundedRect(pillX, pillY, pillWidth, pillHeight, 18, '#ecfdf5', '#a7f3d0', 1.5);
 
@@ -240,7 +241,7 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.fillText(`₹${amount.toLocaleString('en-IN')}`, logoCenterX + 48, pillY + 23);
 
   // Closing Thank You Note
-  const thankYouY = 412;
+  const thankYouY = pillY + 54;
   ctx.textAlign = 'center';
   ctx.fillStyle = '#0f52ba';
   ctx.font = 'bold 13px "Plus Jakarta Sans", sans-serif, Arial';
@@ -249,10 +250,10 @@ export async function createDonationReceiptCanvas(donation) {
   // Footer Verification Note
   ctx.fillStyle = '#64748b';
   ctx.font = '600 9.5px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText('Penumuli Youth Committee · Authorized Digital Receipt', logoCenterX, thankYouY + 26);
+  ctx.fillText('Penumuli Youth Committee · Authorized Digital Receipt', logoCenterX, thankYouY + 24);
   ctx.fillStyle = '#94a3b8';
   ctx.font = '400 8.5px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText('May Lord Ganesha shower blessings upon you and your family.', logoCenterX, thankYouY + 40);
+  ctx.fillText('May Lord Ganesha shower blessings upon you and your family.', logoCenterX, thankYouY + 38);
 
   return canvas;
 }
