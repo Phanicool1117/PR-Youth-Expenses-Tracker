@@ -77,13 +77,13 @@ export function AuthProvider({ children }) {
     setTimeout(() => setIsSyncing(false), 800);
   }, [checkMemberDeactivation]);
 
-  // Automatic Background Polling (Every 8 seconds when logged in)
+  // Smooth Background Polling (Every 15 seconds when logged in)
   useEffect(() => {
     if (!user) return;
 
     const timer = setInterval(() => {
       triggerRefresh();
-    }, 8000);
+    }, 15000);
 
     return () => clearInterval(timer);
   }, [user, triggerRefresh]);

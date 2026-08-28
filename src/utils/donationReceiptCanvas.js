@@ -84,7 +84,7 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.font = '600 11px "Plus Jakarta Sans", sans-serif, Arial';
   ctx.fillText('Penumuli Village, Duggirala Mandal, Guntur District', logoCenterX, 126);
 
-  // Official Donor Receipt Badge
+  // Official Donor Receipt Badge (Ends at Y = 164)
   const badgeWidth = 170;
   const badgeHeight = 24;
   const badgeX = logoCenterX - badgeWidth / 2;
@@ -102,18 +102,18 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.font = 'bold 10.5px "Plus Jakarta Sans", sans-serif, Arial';
   ctx.fillText('OFFICIAL DONATION RECEIPT', logoCenterX, badgeY + 16);
 
-  // Dashed Divider
+  // Symmetric Dashed Divider: exactly 18px below badge (Y = 182) and 18px above metadata box (Y = 200)
   ctx.setLineDash([4, 4]);
   ctx.strokeStyle = '#cbd5e1';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(30, 180);
-  ctx.lineTo(baseWidth - 30, 180);
+  ctx.moveTo(30, 182);
+  ctx.lineTo(baseWidth - 30, 182);
   ctx.stroke();
   ctx.setLineDash([]); // reset dash
 
-  // Metadata Grid (Date, Paid At, Method) - Receipt No Removed
-  const metaBoxY = 194;
+  // Metadata Grid (Date, Paid At, Method) - Starts at Y = 200 (Exact 18px below dashed line)
+  const metaBoxY = 200;
   const metaBoxH = 72;
   ctx.beginPath();
   ctx.roundRect(30, metaBoxY, baseWidth - 60, metaBoxH, 12);
@@ -143,8 +143,8 @@ export async function createDonationReceiptCanvas(donation) {
   drawMetaRow('Payment Method', paymentMethod, metaBoxY + 66);
 
   // Formal Contribution Statement Box (Tight, Highlighted Orange Donor Name & Green Amount)
-  const statementBoxY = 280;
-  const statementBoxHeight = 100;
+  const statementBoxY = 286;
+  const statementBoxHeight = 98;
   ctx.beginPath();
   ctx.roundRect(30, statementBoxY, baseWidth - 60, statementBoxHeight, 14);
   ctx.fillStyle = '#eff6ff';
@@ -159,22 +159,22 @@ export async function createDonationReceiptCanvas(donation) {
   // Row 1: "Mr/Miss: " in dark slate, "[Donor Name]" in bold vibrant orange (#ea580c)
   ctx.fillStyle = '#334155';
   ctx.font = 'bold 12.5px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText('Mr/Miss: ', 45, statementBoxY + 26);
+  ctx.fillText('Mr/Miss: ', 45, statementBoxY + 25);
   
   const prefixWidth = ctx.measureText('Mr/Miss: ').width;
   ctx.fillStyle = '#ea580c'; // Vibrant Orange Highlight
   ctx.font = 'bold 13.5px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText(donorName, 45 + prefixWidth, statementBoxY + 26);
+  ctx.fillText(donorName, 45 + prefixWidth, statementBoxY + 25);
 
   // Row 2 & 3: Description
   ctx.fillStyle = '#475569';
   ctx.font = '500 11.5px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText(`has generously contributed towards the`, 45, statementBoxY + 48);
-  ctx.fillText(`Vinayaka festival / Puja, and the amount has been`, 45, statementBoxY + 68);
-  ctx.fillText(`received with heartfelt thanks.`, 45, statementBoxY + 88);
+  ctx.fillText(`has generously contributed towards the`, 45, statementBoxY + 46);
+  ctx.fillText(`Vinayaka festival / Puja, and the amount has been`, 45, statementBoxY + 66);
+  ctx.fillText(`received with heartfelt thanks.`, 45, statementBoxY + 86);
 
   // Highlighted Amount Card
-  const amtBoxY = 394;
+  const amtBoxY = 396;
   const amtBoxHeight = 72;
 
   ctx.beginPath();

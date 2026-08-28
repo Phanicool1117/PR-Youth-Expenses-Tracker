@@ -99,7 +99,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             <p className="text-[11px] sm:text-xs font-semibold text-slate-500">
               Penumuli Village, Duggirala Mandal, Guntur District
             </p>
-            <div className="pt-1 flex justify-center">
+            <div className="pt-1.5 flex justify-center">
               <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Official Donation Receipt</span>
@@ -107,10 +107,12 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             </div>
           </div>
 
-          {/* Dashed Separator */}
-          <div className="border-t border-dashed border-slate-200 my-1" />
+          {/* Symmetric Dashed Separator (Equal padding above and below) */}
+          <div className="py-2.5">
+            <div className="border-t border-dashed border-slate-200" />
+          </div>
 
-          {/* Receipt Key Metadata Details (Receipt No Removed) */}
+          {/* Receipt Key Metadata Details (Date, Paid At, Method) */}
           <div className="space-y-2 text-xs text-left bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
             <div className="flex justify-between items-center">
               <span className="text-slate-500 font-medium">Date</span>

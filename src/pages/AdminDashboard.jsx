@@ -26,7 +26,6 @@ export function AdminDashboard() {
     return cached ? JSON.parse(cached) : [];
   });
   const [categories, setCategories] = useState([]);
-  const [donationsList, setDonationsList] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -34,17 +33,11 @@ export function AdminDashboard() {
   }, [refreshTrigger]);
 
   const loadDashboard = async () => {
-    // Guaranteed 1.5s max timer to dismiss full-screen loading spinner immediately
-    const maxTimer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
-
     try {
-      const [dashRes, memRes, catRes, donRes] = await Promise.all([
+      const [dashRes, memRes, catRes] = await Promise.all([
         api.getAdminDashboard(),
         api.getMembers(),
         api.getCategories(),
-        api.getAllDonations(),
       ]);
 
       if (dashRes.success && dashRes.data) {
@@ -58,13 +51,9 @@ export function AdminDashboard() {
       if (catRes.success && catRes.data) {
         setCategories(catRes.data);
       }
-      if (donRes.success && donRes.data) {
-        setDonationsList(donRes.data);
-      }
     } catch (err) {
       console.error('Failed to load executive admin dashboard', err);
     } finally {
-      clearTimeout(maxTimer);
       setLoading(false);
     }
   };
@@ -82,34 +71,25 @@ export function AdminDashboard() {
     recentActivity = [],
   } = data || {};
 
-  // Combined audit ledger activity array combining ALL donations and expenses with no duplicates
+  // Combined audit ledger activity array combining ALL donations and expenses with guaranteed stability
   const combinedAuditLedger = useMemo(() => {
-    const set = new Map();
+    const list = Array.isArray(recentActivity) ? [...recentActivity] : [];
+    
+    // Normalize and stabilize transaction list
+    const normalized = list.map((tx, idx) => {
+      const isDonation = tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName);
+      return {
+        ...tx,
+        id: tx.id || `TX_${tx.timestamp || Date.now()}_${idx}`,
+        type: isDonation ? 'Donation' : (tx.type || 'Expenses'),
+        donorName: isDonation ? (tx.donorName || tx.name || 'Anonymous') : undefined,
+        category: isDonation ? 'Donation Received' : (tx.category || 'General Expense'),
+      };
+    });
 
-    if (Array.isArray(donationsList)) {
-      donationsList.forEach((d) => {
-        const id = d.id || `${d.timestamp}_${d.amount}_${d.donorName}`;
-        set.set(id, {
-          ...d,
-          type: 'Donation',
-          category: 'Donation Received',
-          donorName: d.donorName || d.name || 'Anonymous',
-        });
-      });
-    }
-
-    if (Array.isArray(recentActivity)) {
-      recentActivity.forEach((tx) => {
-        const isDonation = tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName);
-        const id = tx.id || `${tx.timestamp}_${tx.amount}_${isDonation ? tx.donorName : tx.category}`;
-        set.set(id, tx);
-      });
-    }
-
-    const list = Array.from(set.values());
-    list.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    return list;
-  }, [donationsList, recentActivity]);
+    normalized.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return normalized;
+  }, [recentActivity]);
 
   // Build complete dynamic category breakdown combining active Google Sheet categories + logged expenses
   const mergedCategoryBreakdown = {};
@@ -143,7 +123,7 @@ export function AdminDashboard() {
       {/* Segmented Tab Bar */}
       <Navbar />
 
-      {/* Hierarchical Financial Status Bar (Clean Mobile Alignment) */}
+      {/* Hierarchical Financial Status Bar */}
       <div className="reference-card rounded-3xl p-5 px-6 bg-gradient-to-br from-white via-slate-50/50 to-white shadow-sm border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1 w-full sm:w-auto">
           <div className="flex items-center justify-between sm:justify-start gap-3 w-full">
@@ -158,7 +138,7 @@ export function AdminDashboard() {
                   triggerHaptic(15);
                   triggerRefresh();
                 }}
-                className="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors border border-emerald-200 active:scale-95 shadow-2xs"
+                className="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors border border-emerald-200 active:scale-95 shadow-2xs cursor-pointer"
                 title="Sync live data"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
@@ -169,7 +149,7 @@ export function AdminDashboard() {
                   triggerHaptic(20);
                   logout();
                 }}
-                className="flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 shadow-2xs"
+                className="flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 shadow-2xs cursor-pointer"
                 title="Logout"
               >
                 <LogOut className="w-3 h-3" />
@@ -195,7 +175,7 @@ export function AdminDashboard() {
               triggerHaptic(15);
               triggerRefresh();
             }}
-            className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors border border-emerald-200 active:scale-95 shadow-2xs"
+            className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors border border-emerald-200 active:scale-95 shadow-2xs cursor-pointer"
             title="Sync live data"
           >
             <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
@@ -206,7 +186,7 @@ export function AdminDashboard() {
               triggerHaptic(20);
               logout();
             }}
-            className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-2.5 rounded-xl transition-all active:scale-95 shadow-2xs"
+            className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-2.5 rounded-xl transition-all active:scale-95 shadow-2xs cursor-pointer"
             title="Logout"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -243,7 +223,7 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      {/* Category Spending Analytics Card (Aligned Single-Line Header) */}
+      {/* Category Spending Analytics Card */}
       <div className="reference-card p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
           <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2 truncate">
