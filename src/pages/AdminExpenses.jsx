@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { ActivityLedger } from '../components/ActivityLedger';
 import { Navbar } from '../components/Navbar';
 import { CreditCard } from 'lucide-react';
 
 export function AdminExpenses() {
+  const { refreshTrigger } = useAuth();
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [members, setMembers] = useState([]);
@@ -12,10 +14,9 @@ export function AdminExpenses() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [refreshTrigger]);
 
   const loadData = async () => {
-    setLoading(true);
     try {
       const [dashRes, catRes, memRes] = await Promise.all([
         api.getAdminDashboard(),
@@ -50,7 +51,7 @@ export function AdminExpenses() {
         />
       </div>
 
-      {/* Clean Centered Title (No underline, no tagline) */}
+      {/* Clean Centered Title */}
       <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight flex items-center justify-center gap-2">
           <CreditCard className="w-6 h-6 text-amber-600 shrink-0" />
@@ -62,7 +63,7 @@ export function AdminExpenses() {
       <Navbar />
 
       {/* Paginated & Filtered Expenses Feed */}
-      {loading ? (
+      {loading && expenses.length === 0 ? (
         <div className="reference-card p-6 space-y-3">
           {[1, 2, 3, 4].map((n) => (
             <div key={n} className="h-16 bg-slate-100 rounded-2xl animate-pulse" />

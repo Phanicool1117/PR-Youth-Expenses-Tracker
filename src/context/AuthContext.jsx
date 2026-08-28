@@ -74,15 +74,37 @@ export function AuthProvider({ children }) {
     setRefreshTrigger((prev) => prev + 1);
     setLastSyncTime(new Date());
     checkMemberDeactivation();
-    setTimeout(() => setIsSyncing(false), 800);
+    setTimeout(() => setIsSyncing(false), 1200);
   }, [checkMemberDeactivation]);
+
+  // Live Auto-Sync Every 10 Seconds (Syncs with Google Sheets continuously)
+  useEffect(() => {
+    if (!user) return;
+
+    const timer = setInterval(() => {
+      triggerRefresh();
+    }, 10000); // Exactly 10 seconds
+
+    return () => clearInterval(timer);
+  }, [user, triggerRefresh]);
+
+  // Auto-sync when user focuses back on window/tab
+  useEffect(() => {
+    if (!user) return;
+
+    const handleFocus = () => {
+      triggerRefresh();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user, triggerRefresh]);
 
   const login = async (usernameOrId, password) => {
     setIsLoading(true);
     try {
       const res = await api.login(usernameOrId, password);
       if (res.success && res.user) {
-        // Pre-seed baseline session storage so dashboard mounts INSTANTLY (<50ms)
         const baseline = {
           totalDonations: 0,
           totalExpenses: 0,
