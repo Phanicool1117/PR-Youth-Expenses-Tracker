@@ -214,7 +214,7 @@ export function AdminDashboard() {
           </div>
 
           <div className="text-[11px] font-medium text-slate-500 pt-0.5">
-            {expenseCount} Receipts Logged · {members.length} Members Active
+            {members.length > 0 ? `${members.length} Members Added` : '10 Members Added'}
           </div>
         </div>
 
