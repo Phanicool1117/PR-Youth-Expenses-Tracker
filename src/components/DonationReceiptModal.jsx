@@ -149,7 +149,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         <div className="h-1.5 w-full bg-[#0f52ba]" />
 
         {/* Receipt Card Content */}
-        <div className="p-5 sm:p-6 space-y-3 text-center">
+        <div className="p-5 sm:p-6 space-y-3.5 text-center">
           
           {/* Circular Logo Emblem */}
           <div className="flex justify-center">
@@ -178,63 +178,70 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             </div>
           </div>
 
-          {/* Symmetric Dashed Separator */}
+          {/* Divider */}
           <div className="py-0.5">
             <div className="border-t border-dashed border-slate-200" />
           </div>
 
-          {/* Receipt Key Metadata Details (Date, Paid At, Method) */}
+          {/* Secondary Metadata Details (Date, Paid At, Method) */}
           <div className="space-y-1.5 text-xs text-left bg-slate-50/80 p-2.5 rounded-2xl border border-slate-100">
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-medium">Date</span>
-              <span className="font-bold text-[#0f172a]">{dateFormatted}</span>
+              <span className="text-slate-500 font-medium text-[11px]">Date</span>
+              <span className="font-bold text-[#0f172a] text-[11.5px]">{dateFormatted}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-medium">Paid At</span>
-              <span className="font-bold text-[#0f172a]">{timeFormatted}</span>
+              <span className="text-slate-500 font-medium text-[11px]">Paid At</span>
+              <span className="font-bold text-[#0f172a] text-[11.5px]">{timeFormatted}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-medium">Payment Method</span>
+              <span className="text-slate-500 font-medium text-[11px]">Payment Method</span>
               <span className="font-semibold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 text-[10.5px]">
                 {paymentMethod}
               </span>
             </div>
           </div>
 
-          {/* Formal Contribution Statement Box (Fully occupied, no dead space) */}
-          <div className="p-3 rounded-2xl bg-blue-50/50 border border-blue-200/80 text-left space-y-1 shadow-2xs">
-            <p className="text-xs sm:text-[12px] text-slate-700 leading-relaxed font-medium">
+          {/* Divider */}
+          <div className="py-0.5">
+            <div className="border-t border-dashed border-slate-200" />
+          </div>
+
+          {/* ========================================== */}
+          {/* MAIN HERO DONATION CONTEXT (Pure High-Impact Typography) */}
+          {/* ========================================== */}
+          <div className="py-1 px-1 text-left space-y-1">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-normal">
               <span className="font-bold text-slate-900">Mr/Miss: </span>
-              <span className="font-black text-orange-600 text-[12.5px] sm:text-xs tracking-tight">
+              <span className="font-black text-orange-600 text-base sm:text-lg tracking-tight">
                 {donorName}
               </span>{' '}
               has generously contributed an amount of{' '}
-              <span className="font-extrabold text-emerald-700">₹{amount.toLocaleString('en-IN')}</span> towards the{' '}
-              <span className="font-bold text-slate-800">Vinayaka festival / Puja</span>, and the amount has been received with heartfelt thanks.
+              <span className="font-black text-emerald-700 text-base sm:text-lg">₹{amount.toLocaleString('en-IN')}</span> towards the{' '}
+              <span className="font-bold text-slate-900">Vinayaka festival / Puja</span>, and the amount has been received with heartfelt thanks.
             </p>
           </div>
 
-          {/* Tight, Content-Adapted Amount Box (Narrow sideways, zero excess width) */}
-          <div className="flex justify-center pt-0.5">
-            <div className="w-fit min-w-[210px] max-w-[250px] py-1.5 px-5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-center space-y-0.5 shadow-2xs">
-              <span className="text-[9px] font-extrabold uppercase tracking-wider text-emerald-800 block">
-                DONATION CONTRIBUTION RECEIVED
+          {/* Complementary Centered Amount Pill */}
+          <div className="flex justify-center pt-1">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-300 shadow-2xs">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
+                Amount Received:
               </span>
-              <div className="text-xl sm:text-2xl font-black text-emerald-700 tracking-tight">
+              <span className="text-base sm:text-lg font-black text-emerald-700 tracking-tight">
                 ₹{amount.toLocaleString('en-IN')}
-              </div>
+              </span>
             </div>
           </div>
 
-          {/* Thanking Note with Balanced Margins */}
-          <div className="py-1">
-            <p className="text-xs font-bold text-[#0f52ba]">
+          {/* Thanking Note */}
+          <div className="pt-2">
+            <p className="text-xs sm:text-sm font-bold text-[#0f52ba]">
               Thanking you for your contribution.
             </p>
           </div>
 
           {/* Action Buttons: Share (On Top) & Export (Below) */}
-          <div className="space-y-2 pt-1">
+          <div className="space-y-2 pt-2">
             {/* Share Button (Top) */}
             <button
               onClick={handleShareReceipt}
