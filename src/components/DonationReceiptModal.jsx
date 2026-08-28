@@ -78,11 +78,11 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         <div className="h-1.5 w-full bg-[#0f52ba]" />
 
         {/* Receipt Card Content */}
-        <div className="p-5 sm:p-7 space-y-3.5 text-center">
+        <div className="p-5 sm:p-6 space-y-3.5 text-center">
           
           {/* Circular Logo Emblem */}
           <div className="flex justify-center">
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-blue-50/80 border-2 border-blue-200 flex items-center justify-center shadow-inner p-2">
+            <div className="w-16 h-16 rounded-full bg-blue-50/80 border-2 border-blue-200 flex items-center justify-center shadow-inner p-2">
               <img
                 src="/Logo.png"
                 alt="PR Youth Logo"
@@ -108,12 +108,12 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           </div>
 
           {/* Symmetric Dashed Separator */}
-          <div className="py-2">
+          <div className="py-1">
             <div className="border-t border-dashed border-slate-200" />
           </div>
 
           {/* Receipt Key Metadata Details (Date, Paid At, Method) */}
-          <div className="space-y-2 text-xs text-left bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
+          <div className="space-y-1.5 text-xs text-left bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
             <div className="flex justify-between items-center">
               <span className="text-slate-500 font-medium">Date</span>
               <span className="font-bold text-[#0f172a]">{dateFormatted}</span>
@@ -130,11 +130,11 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             </div>
           </div>
 
-          {/* Formal Contribution Statement Box */}
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-blue-50/50 border border-blue-200/80 text-left space-y-1.5 shadow-2xs">
-            <p className="text-xs sm:text-[13px] text-slate-700 leading-relaxed font-medium">
+          {/* Formal Contribution Statement Box (Naturally flowing text) */}
+          <div className="p-3.5 rounded-2xl bg-blue-50/50 border border-blue-200/80 text-left space-y-1 shadow-2xs">
+            <p className="text-xs sm:text-[12.5px] text-slate-700 leading-relaxed font-medium">
               <span className="font-bold text-slate-900">Mr/Miss: </span>
-              <span className="font-black text-orange-600 text-[13.5px] sm:text-sm tracking-tight">
+              <span className="font-black text-orange-600 text-[13px] sm:text-sm tracking-tight">
                 {donorName}
               </span>{' '}
               has generously contributed an amount of{' '}
@@ -143,23 +143,27 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             </p>
           </div>
 
-          {/* Highlighted Amount Badge with Strong Visual Hierarchy */}
-          <div className="p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-center space-y-0.5 shadow-2xs">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
-              DONATION CONTRIBUTION RECEIVED
-            </span>
-            <div className="text-2xl sm:text-3xl font-black text-emerald-700 tracking-tight">
-              ₹{amount.toLocaleString('en-IN')}
+          {/* Compact Content-Adapted Amount Box */}
+          <div className="flex justify-center pt-0.5">
+            <div className="w-full max-w-[280px] sm:max-w-xs py-2 px-5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-center space-y-0.5 shadow-2xs">
+              <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-emerald-800 block">
+                DONATION CONTRIBUTION RECEIVED
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-emerald-700 tracking-tight">
+                ₹{amount.toLocaleString('en-IN')}
+              </div>
             </div>
           </div>
 
-          {/* Thanking Note */}
-          <p className="text-xs font-bold text-[#0f52ba]">
-            Thanking you for your contribution.
-          </p>
+          {/* Thanking Note with Equal Balanced Margins */}
+          <div className="py-2">
+            <p className="text-xs sm:text-[13px] font-bold text-[#0f52ba]">
+              Thanking you for your contribution.
+            </p>
+          </div>
 
           {/* Export / Download PNG Button */}
-          <div className="pt-1">
+          <div className="pt-0.5">
             <button
               onClick={handleExportReceipt}
               disabled={isExporting}
