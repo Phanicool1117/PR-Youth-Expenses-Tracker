@@ -5,8 +5,13 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('PR_YOUTH_USER');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('PR_YOUTH_USER');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      console.warn('Failed to parse saved user credentials', e);
+      return null;
+    }
   });
 
   const [gasUrlState, setGasUrlState] = useState(() => getGasUrl());
@@ -18,7 +23,11 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem('PR_YOUTH_USER', JSON.stringify(user));
+      try {
+        localStorage.setItem('PR_YOUTH_USER', JSON.stringify(user));
+      } catch (e) {
+        console.warn('Failed to save user credentials', e);
+      }
     } else {
       localStorage.removeItem('PR_YOUTH_USER');
       sessionStorage.clear();
