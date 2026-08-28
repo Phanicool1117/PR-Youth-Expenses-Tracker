@@ -3,7 +3,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { LOGO_BASE64 } from '../utils/logoBase64';
-import { X, FileText, Image as ImageIcon, Download, Loader2, CheckCircle2 } from 'lucide-react';
+import { X, FileText, Image as ImageIcon, Download, Loader2, CheckCircle2, Printer } from 'lucide-react';
 
 export function ExportModal({ isOpen, onClose, transactions = [], title = "Committee Financial Audit Activity" }) {
   const printRef = useRef(null);
@@ -35,8 +35,8 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
 
   const netBalance = totalDonations - totalExpenses;
 
-  // Helper to trigger mobile-friendly file download
-  const triggerMobileDownload = (url, fileName) => {
+  // Helper to trigger mobile and desktop file download
+  const triggerDownload = (url, fileName) => {
     const a = document.createElement('a');
     a.href = url;
     a.download = fileName;
@@ -57,10 +57,8 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        allowTaint: true,
         logging: false,
         backgroundColor: '#ffffff',
-        windowWidth: 850,
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -71,17 +69,14 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       
       const fileName = `PR_Youth_Audit_Report_${Date.now()}.pdf`;
-      
-      // Mobile Safari / Chrome compatible blob download
-      const blob = pdf.output('blob');
-      const blobUrl = URL.createObjectURL(blob);
-      triggerMobileDownload(blobUrl, fileName);
+      pdf.save(fileName);
 
       setSuccessMsg('PDF Report downloaded successfully!');
       setTimeout(() => setSuccessMsg(''), 4000);
     } catch (err) {
       console.error('Failed to export PDF', err);
-      alert('Could not generate PDF. Please try again.');
+      // Fallback: Trigger native browser PDF print dialog
+      window.print();
     } finally {
       setIsExportingPdf(false);
     }
@@ -99,40 +94,30 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
-        allowTaint: true,
         logging: false,
         backgroundColor: '#ffffff',
-        windowWidth: 850,
       });
 
       const fileName = `PR_Youth_Audit_Report_${Date.now()}.png`;
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const blobUrl = URL.createObjectURL(blob);
-          triggerMobileDownload(blobUrl, fileName);
-          setSuccessMsg('PNG Image downloaded successfully!');
-          setTimeout(() => setSuccessMsg(''), 4000);
-        } else {
-          const dataUrl = canvas.toDataURL('image/png');
-          triggerMobileDownload(dataUrl, fileName);
-          setSuccessMsg('PNG Image downloaded successfully!');
-          setTimeout(() => setSuccessMsg(''), 4000);
-        }
-      }, 'image/png');
+      const dataUrl = canvas.toDataURL('image/png');
+      triggerDownload(dataUrl, fileName);
+
+      setSuccessMsg('PNG Image downloaded successfully!');
+      setTimeout(() => setSuccessMsg(''), 4000);
     } catch (err) {
       console.error('Failed to export PNG', err);
-      alert('Could not generate PNG. Please try again.');
+      alert('Could not generate PNG image.');
     } finally {
       setIsExportingPng(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-fade-in">
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-fade-in print:p-0 print:bg-white print:static">
+      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden my-auto print:shadow-none print:border-none print:max-h-none print:w-full">
         
-        {/* Modal Controls Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between gap-3 bg-slate-50/80">
+        {/* Modal Controls Header (Hidden during Print) */}
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between gap-3 bg-slate-50/80 print:hidden">
           <div>
             <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2">
               <Download className="w-4 h-4 sm:w-5 sm:h-5 text-[#0f52ba]" />
@@ -152,8 +137,8 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
           </button>
         </div>
 
-        {/* Action Buttons Toolbar */}
-        <div className="p-3.5 sm:p-4 bg-white border-b border-slate-100 flex items-center justify-between flex-wrap gap-3">
+        {/* Action Buttons Toolbar (Hidden during Print) */}
+        <div className="p-3.5 sm:p-4 bg-white border-b border-slate-100 flex items-center justify-between flex-wrap gap-3 print:hidden">
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <button
               onClick={handleExportPDF}
@@ -180,6 +165,15 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
               )}
               <span>Download PNG</span>
             </button>
+
+            <button
+              onClick={() => window.print()}
+              className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200 active:scale-95"
+              title="Print document"
+            >
+              <Printer className="w-4 h-4" />
+              <span className="hidden sm:inline">Print</span>
+            </button>
           </div>
 
           {successMsg && (
@@ -190,11 +184,11 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
           )}
         </div>
 
-        {/* Scrollable Container for Mobile Preview with Fixed 800px Width Canvas to ensure 100% perfect alignment */}
-        <div className="flex-1 overflow-x-auto overflow-y-auto p-3 sm:p-6 bg-slate-100/90">
+        {/* Scrollable Container for Mobile & Desktop Preview */}
+        <div className="flex-1 overflow-x-auto overflow-y-auto p-3 sm:p-6 bg-slate-100/90 print:p-0 print:bg-white print:overflow-visible">
           <div
             ref={printRef}
-            className="bg-white p-8 rounded-2xl border border-slate-200 shadow-md space-y-6 mx-auto"
+            className="bg-white p-8 rounded-2xl border border-slate-200 shadow-md space-y-6 mx-auto print:shadow-none print:border-none print:p-0"
             style={{ width: '800px', minWidth: '800px', backgroundColor: '#ffffff' }}
           >
             {/* Header: Company / Organization Logo & Title */}
@@ -212,7 +206,7 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
                 </div>
               </div>
 
-              {/* App Emblem Logo (Embedded Base64 for Zero Mobile CORS Taint) */}
+              {/* App Emblem Logo */}
               <div className="shrink-0 pt-1">
                 <img
                   src={LOGO_BASE64}
