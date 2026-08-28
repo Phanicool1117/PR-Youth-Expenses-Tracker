@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { triggerHaptic } from '../utils/hapticsSound';
@@ -35,7 +36,7 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
 
   const netBalance = totalDonations - totalExpenses;
 
-  // Helper to trigger file download
+  // Helper to trigger file download safely across mobile and desktop
   const downloadBlob = (blob, fileName) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -46,7 +47,7 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    }, 100);
+    }, 1000);
   };
 
   // Check 20-transaction threshold and ask user if > 20 entries
@@ -237,9 +238,13 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
       const doc = generatePdfDoc();
       const fileName = `PR_Youth_Audit_Report_${Date.now()}.pdf`;
 
-      // Save PDF directly without opening print window
-      const pdfBlob = doc.output('blob');
-      downloadBlob(pdfBlob, fileName);
+      try {
+        doc.save(fileName);
+      } catch (saveErr) {
+        console.warn('doc.save fallback to blob', saveErr);
+        const pdfBlob = doc.output('blob');
+        downloadBlob(pdfBlob, fileName);
+      }
 
       setSuccessMsg(
         transactions.length <= 20
@@ -264,36 +269,47 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
     setSuccessMsg('');
 
     try {
-      const doc = generatePdfDoc();
+      if (!printRef.current) throw new Error('Preview element not found');
+
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false,
+      });
+
       const fileName = `PR_Youth_Audit_Report_${Date.now()}.png`;
 
-      // Render high-res PNG from PDF document canvas
-      const pageCount = doc.internal.getNumberOfPages();
-      const pageDataUrl = doc.output('datauristring');
-
-      // Create image element and render to HD canvas
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width * 2;
-        canvas.height = img.height * 2;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
+      if (canvas.toBlob) {
         canvas.toBlob((blob) => {
           if (blob) {
             downloadBlob(blob, fileName);
-            setSuccessMsg('PNG Report Image downloaded successfully!');
-            setTimeout(() => setSuccessMsg(''), 4000);
+          } else {
+            const dataUrl = canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
           }
+          setSuccessMsg('PNG Report Image downloaded successfully!');
+          setTimeout(() => setSuccessMsg(''), 4000);
         }, 'image/png');
-      };
-      img.src = pageDataUrl;
+      } else {
+        const dataUrl = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setSuccessMsg('PNG Report Image downloaded successfully!');
+        setTimeout(() => setSuccessMsg(''), 4000);
+      }
     } catch (err) {
       console.error('Failed to export PNG', err);
-      alert('Could not generate PNG image.');
+      alert('Could not generate PNG image. Please try again.');
     } finally {
       setIsExportingPng(false);
     }
