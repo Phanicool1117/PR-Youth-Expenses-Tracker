@@ -26,6 +26,10 @@ export function AdminDashboard() {
     return cached ? JSON.parse(cached) : [];
   });
   const [categories, setCategories] = useState([]);
+  const [donationsList, setDonationsList] = useState(() => {
+    const cached = sessionStorage.getItem('ADMIN_DONATIONS_DATA');
+    return cached ? JSON.parse(cached) : [];
+  });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -34,10 +38,11 @@ export function AdminDashboard() {
 
   const loadDashboard = async () => {
     try {
-      const [dashRes, memRes, catRes] = await Promise.all([
+      const [dashRes, memRes, catRes, donRes] = await Promise.all([
         api.getAdminDashboard(),
         api.getMembers(),
         api.getCategories(),
+        api.getAllDonations(),
       ]);
 
       if (dashRes.success && dashRes.data) {
@@ -50,6 +55,10 @@ export function AdminDashboard() {
       }
       if (catRes.success && catRes.data) {
         setCategories(catRes.data);
+      }
+      if (donRes.success && Array.isArray(donRes.data)) {
+        setDonationsList(donRes.data);
+        sessionStorage.setItem('ADMIN_DONATIONS_DATA', JSON.stringify(donRes.data));
       }
     } catch (err) {
       console.error('Failed to load executive admin dashboard', err);
@@ -71,25 +80,48 @@ export function AdminDashboard() {
     recentActivity = [],
   } = data || {};
 
-  // Combined audit ledger activity array combining ALL donations and expenses with guaranteed stability
+  // Combined audit ledger combining ALL donations and expenses with guaranteed deduplication & stability
   const combinedAuditLedger = useMemo(() => {
-    const list = Array.isArray(recentActivity) ? [...recentActivity] : [];
-    
-    // Normalize and stabilize transaction list
-    const normalized = list.map((tx, idx) => {
-      const isDonation = tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName);
-      return {
-        ...tx,
-        id: tx.id || `TX_${tx.timestamp || Date.now()}_${idx}`,
-        type: isDonation ? 'Donation' : (tx.type || 'Expenses'),
-        donorName: isDonation ? (tx.donorName || tx.name || 'Anonymous') : undefined,
-        category: isDonation ? 'Donation Received' : (tx.category || 'General Expense'),
-      };
-    });
+    const map = new Map();
 
-    normalized.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    return normalized;
-  }, [recentActivity]);
+    // 1. Ingest all donations from donationsList
+    if (Array.isArray(donationsList)) {
+      donationsList.forEach((d, idx) => {
+        const donor = d.donorName || d.name || 'Anonymous Donor';
+        const key = `DON_${d.timestamp || ''}_${d.amount || 0}_${donor}`;
+        map.set(key, {
+          ...d,
+          id: d.id || key,
+          type: 'Donation',
+          category: 'Donation Received',
+          donorName: donor,
+        });
+      });
+    }
+
+    // 2. Ingest all transactions from recentActivity
+    if (Array.isArray(recentActivity)) {
+      recentActivity.forEach((tx, idx) => {
+        const isDonation = tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName);
+        const donor = tx.donorName || (isDonation ? tx.name || 'Anonymous Donor' : undefined);
+        const key = isDonation
+          ? `DON_${tx.timestamp || ''}_${tx.amount || 0}_${donor}`
+          : `EXP_${tx.timestamp || ''}_${tx.amount || 0}_${tx.category || ''}_${tx.memberId || ''}`;
+
+        map.set(key, {
+          ...tx,
+          id: tx.id || key,
+          type: isDonation ? 'Donation' : (tx.type || 'Expenses'),
+          donorName: donor,
+          category: isDonation ? 'Donation Received' : (tx.category || 'General Expense'),
+        });
+      });
+    }
+
+    const merged = Array.from(map.values());
+    merged.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+    return merged;
+  }, [donationsList, recentActivity]);
 
   // Build complete dynamic category breakdown combining active Google Sheet categories + logged expenses
   const mergedCategoryBreakdown = {};
