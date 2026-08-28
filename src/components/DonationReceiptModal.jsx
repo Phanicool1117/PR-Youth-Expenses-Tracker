@@ -69,7 +69,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             triggerHaptic(10);
             onClose();
           }}
-          className="absolute top-3.5 right-3.5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10"
+          className="absolute top-3.5 right-3.5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10 cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -78,7 +78,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         <div className="h-1.5 w-full bg-[#0f52ba]" />
 
         {/* Receipt Card Content */}
-        <div className="p-5 sm:p-7 space-y-4 text-center">
+        <div className="p-5 sm:p-7 space-y-3.5 text-center">
           
           {/* Circular Logo Emblem */}
           <div className="flex justify-center">
@@ -92,23 +92,23 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           </div>
 
           {/* Heading & Tagline */}
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <h2 className="text-lg sm:text-xl font-extrabold text-[#0f172a] tracking-tight">
               Penumuli Perantalamma Youth
             </h2>
             <p className="text-[11px] sm:text-xs font-semibold text-slate-500">
               Penumuli Village, Duggirala Mandal, Guntur District
             </p>
-            <div className="pt-1.5 flex justify-center">
+            <div className="pt-1 flex justify-center">
               <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Official Donation Receipt</span>
+                <span>OFFICIAL DONATION RECEIPT</span>
               </span>
             </div>
           </div>
 
-          {/* Symmetric Dashed Separator (Equal padding above and below) */}
-          <div className="py-2.5">
+          {/* Symmetric Dashed Separator */}
+          <div className="py-2">
             <div className="border-t border-dashed border-slate-200" />
           </div>
 
@@ -130,7 +130,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             </div>
           </div>
 
-          {/* Formal Contribution Statement Box (Highlighted Orange Donor Name) */}
+          {/* Formal Contribution Statement Box */}
           <div className="p-3.5 sm:p-4 rounded-2xl bg-blue-50/50 border border-blue-200/80 text-left space-y-1.5 shadow-2xs">
             <p className="text-xs sm:text-[13px] text-slate-700 leading-relaxed font-medium">
               <span className="font-bold text-slate-900">Mr/Miss: </span>
@@ -143,10 +143,10 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             </p>
           </div>
 
-          {/* Highlighted Amount Badge */}
-          <div className="p-3 sm:p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-center space-y-0.5 shadow-2xs">
+          {/* Highlighted Amount Badge with Strong Visual Hierarchy */}
+          <div className="p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-center space-y-0.5 shadow-2xs">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
-              Amount Received
+              DONATION CONTRIBUTION RECEIVED
             </span>
             <div className="text-2xl sm:text-3xl font-black text-emerald-700 tracking-tight">
               ₹{amount.toLocaleString('en-IN')}
