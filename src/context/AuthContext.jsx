@@ -105,6 +105,22 @@ export function AuthProvider({ children }) {
     try {
       const res = await api.login(usernameOrId, password);
       if (res.success && res.user) {
+        // Pre-seed baseline session storage so dashboard mounts INSTANTLY (<50ms)
+        const baseline = {
+          totalDonations: 0,
+          totalExpenses: 0,
+          currentBalance: 0,
+          expenseCount: 0,
+          categoryBreakdown: {},
+          recentActivity: [],
+        };
+        if (!sessionStorage.getItem('ADMIN_DASH_DATA')) {
+          sessionStorage.setItem('ADMIN_DASH_DATA', JSON.stringify(baseline));
+        }
+        if (!sessionStorage.getItem(`MEMBER_DASH_${res.user.memberId}`)) {
+          sessionStorage.setItem(`MEMBER_DASH_${res.user.memberId}`, JSON.stringify(baseline));
+        }
+
         setUser(res.user);
         setActiveTab('dashboard');
         triggerRefresh();

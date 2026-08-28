@@ -12,7 +12,14 @@ export function AdminDashboard() {
   
   const [data, setData] = useState(() => {
     const cached = sessionStorage.getItem('ADMIN_DASH_DATA');
-    return cached ? JSON.parse(cached) : null;
+    return cached ? JSON.parse(cached) : {
+      totalDonations: 0,
+      totalExpenses: 0,
+      currentBalance: 0,
+      expenseCount: 0,
+      categoryBreakdown: {},
+      recentActivity: [],
+    };
   });
   const [members, setMembers] = useState(() => {
     const cached = sessionStorage.getItem('ADMIN_MEMBERS_DATA');
@@ -20,13 +27,18 @@ export function AdminDashboard() {
   });
   const [categories, setCategories] = useState([]);
   const [donationsList, setDonationsList] = useState([]);
-  const [loading, setLoading] = useState(!data);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadDashboard();
   }, [refreshTrigger]);
 
   const loadDashboard = async () => {
+    // Guaranteed 1.5s max timer to dismiss full-screen loading spinner immediately
+    const maxTimer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+
     try {
       const [dashRes, memRes, catRes, donRes] = await Promise.all([
         api.getAdminDashboard(),
@@ -52,6 +64,7 @@ export function AdminDashboard() {
     } catch (err) {
       console.error('Failed to load executive admin dashboard', err);
     } finally {
+      clearTimeout(maxTimer);
       setLoading(false);
     }
   };
