@@ -6,13 +6,13 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import './index.css'
 
-// Register PWA Service Worker for instant Home Screen launch (<100ms)
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((err) => {
-      console.warn('Service worker registration error:', err);
-    });
-  });
+// Ensure clean direct browser rendering without Service Worker cache lockups
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (let registration of registrations) {
+      registration.unregister();
+    }
+  }).catch(() => {});
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
