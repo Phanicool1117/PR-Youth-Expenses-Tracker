@@ -150,6 +150,27 @@ export const api = {
     return { success: true, data: categories };
   },
 
+  // Get All Central Donations
+  async getAllDonations() {
+    const currentUrl = getGasUrl();
+    if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
+      try {
+        const res = await fetch(`${currentUrl}?action=getAllDonations`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) return json;
+      } catch (err) {
+        console.warn('Backend fetch failed, using local donations', err);
+      }
+    }
+    const donations = getLocalDonations().map((d) => ({
+      ...d,
+      type: 'Donation',
+      category: 'Donation Received',
+      note: `Donor: ${d.donorName || d.name || 'Anonymous'}`,
+    }));
+    return { success: true, data: donations };
+  },
+
   // Toggle Member Status (Active <-> Inactive)
   async toggleMemberStatus(memberId, newStatus) {
     const currentUrl = getGasUrl();

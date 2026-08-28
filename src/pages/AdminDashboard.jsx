@@ -20,6 +20,7 @@ export function AdminDashboard() {
     return cached ? JSON.parse(cached) : [];
   });
   const [categories, setCategories] = useState([]);
+  const [donationsList, setDonationsList] = useState([]);
   const [loading, setLoading] = useState(!data);
 
   useEffect(() => {
@@ -28,10 +29,11 @@ export function AdminDashboard() {
 
   const loadDashboard = async () => {
     try {
-      const [dashRes, memRes, catRes] = await Promise.all([
+      const [dashRes, memRes, catRes, donRes] = await Promise.all([
         api.getAdminDashboard(),
         api.getMembers(),
         api.getCategories(),
+        api.getAllDonations(),
       ]);
 
       if (dashRes.success && dashRes.data) {
@@ -44,6 +46,9 @@ export function AdminDashboard() {
       }
       if (catRes.success && catRes.data) {
         setCategories(catRes.data);
+      }
+      if (donRes.success && donRes.data) {
+        setDonationsList(donRes.data);
       }
     } catch (err) {
       console.error('Failed to load executive admin dashboard', err);
@@ -65,12 +70,63 @@ export function AdminDashboard() {
     recentActivity = [],
   } = data || {};
 
-  // Separate donation transactions for explicit Donation Activity card view
-  const donationActivities = useMemo(() => {
-    return recentActivity.filter(
-      (tx) => tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName)
-    );
-  }, [recentActivity]);
+  // Combine live donation records from getAllDonations() AND recentActivity
+  const mergedDonationActivities = useMemo(() => {
+    const map = new Map();
+    
+    // 1. Add from explicit donations API
+    if (Array.isArray(donationsList)) {
+      donationsList.forEach((d) => {
+        const id = d.id || `${d.timestamp}_${d.amount}_${d.donorName}`;
+        map.set(id, {
+          ...d,
+          type: 'Donation',
+          category: 'Donation Received',
+          donorName: d.donorName || d.name || 'Anonymous',
+        });
+      });
+    }
+
+    // 2. Add from recentActivity feed
+    if (Array.isArray(recentActivity)) {
+      recentActivity.forEach((tx) => {
+        if (tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName)) {
+          const id = tx.id || `${tx.timestamp}_${tx.amount}_${tx.donorName}`;
+          map.set(id, {
+            ...tx,
+            type: 'Donation',
+            category: 'Donation Received',
+            donorName: tx.donorName || tx.name || 'Anonymous',
+          });
+        }
+      });
+    }
+
+    const list = Array.from(map.values());
+    list.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return list;
+  }, [donationsList, recentActivity]);
+
+  // Combined audit ledger activity array combining ALL donations and expenses
+  const combinedAuditLedger = useMemo(() => {
+    const set = new Map();
+
+    mergedDonationActivities.forEach((d) => {
+      const id = d.id || `${d.timestamp}_${d.amount}_${d.donorName}`;
+      set.set(id, d);
+    });
+
+    if (Array.isArray(recentActivity)) {
+      recentActivity.forEach((tx) => {
+        const id = tx.id || `${tx.timestamp}_${tx.amount}_${tx.category || tx.donorName}`;
+        set.set(id, tx);
+      });
+    }
+
+    const list = Array.from(set.values());
+    list.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return list;
+  }, [mergedDonationActivities, recentActivity]);
 
   // Build complete dynamic category breakdown combining active Google Sheet categories + logged expenses
   const mergedCategoryBreakdown = {};
@@ -175,27 +231,27 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      {/* Dedicated Central Donations Received Activity Section */}
+      {/* Dedicated Donations Activity Section */}
       <div className="reference-card p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h3 className="text-base font-bold text-[#0f172a] flex items-center gap-2">
             <HandHeart className="w-5 h-5 text-emerald-600" />
-            Central Donations Received Activity
+            Donations Activity
           </h3>
           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-            {donationActivities.length} Entries
+            {mergedDonationActivities.length} Entries
           </span>
         </div>
 
-        {donationActivities.length > 0 ? (
+        {mergedDonationActivities.length > 0 ? (
           <div className="space-y-2.5">
-            {donationActivities.slice(0, 5).map((tx, idx) => (
+            {mergedDonationActivities.map((tx, idx) => (
               <TransactionItem key={tx.id || idx} transaction={tx} showMember={true} />
             ))}
           </div>
         ) : (
           <div className="text-center py-6">
-            <p className="text-xs font-semibold text-slate-500">No central donations recorded yet.</p>
+            <p className="text-xs font-semibold text-slate-500">No donations recorded yet.</p>
           </div>
         )}
       </div>
@@ -239,7 +295,7 @@ export function AdminDashboard() {
 
       {/* Paginated & Filtered Combined Activity Ledger */}
       <ActivityLedger
-        transactions={recentActivity}
+        transactions={combinedAuditLedger}
         showMember={true}
         title="Committee Financial Audit Activity (Donations & Expenses)"
         categories={categories}
