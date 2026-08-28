@@ -10,6 +10,20 @@ export function setGasUrl(url) {
   GAS_URL = url;
 }
 
+// Fast fetch helper with 4.5s timeout for mobile network speed optimization
+async function fetchWithTimeout(url, options = {}, timeoutMs = 4500) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return response;
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+}
+
 // Local mock data store for immediate fallback demo testing
 const LOCAL_STORAGE_EXPENSES_KEY = 'PR_YOUTH_LOCAL_EXPENSES';
 const LOCAL_STORAGE_DONATIONS_KEY = 'PR_YOUTH_LOCAL_DONATIONS';
@@ -73,7 +87,7 @@ export const api = {
 
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetch(`${currentUrl}?action=getMembers`);
+        const res = await fetchWithTimeout(`${currentUrl}?action=getMembers`, {}, 3500);
         const json = await res.json();
         if (json.success && json.data) {
           const matched = json.data.find(
@@ -94,7 +108,7 @@ export const api = {
           }
         }
       } catch (err) {
-        console.warn('Backend offline, using fallback auth', err);
+        console.warn('Backend offline/timeout, using fallback auth', err);
       }
     }
 
@@ -119,7 +133,7 @@ export const api = {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetch(`${currentUrl}?action=getMembers`);
+        const res = await fetchWithTimeout(`${currentUrl}?action=getMembers`, {}, 4000);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
@@ -134,7 +148,7 @@ export const api = {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetch(`${currentUrl}?action=getCategories`);
+        const res = await fetchWithTimeout(`${currentUrl}?action=getCategories`, {}, 4000);
         const json = await res.json();
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
           localStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(json.data));
@@ -155,7 +169,7 @@ export const api = {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetch(`${currentUrl}?action=getAllDonations`);
+        const res = await fetchWithTimeout(`${currentUrl}?action=getAllDonations`, {}, 4000);
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) return json;
       } catch (err) {
@@ -176,11 +190,11 @@ export const api = {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetch(currentUrl, {
+        const res = await fetchWithTimeout(currentUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'toggleMemberStatus', memberId, status: newStatus }),
-        });
+        }, 5000);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
@@ -201,7 +215,7 @@ export const api = {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetch(`${currentUrl}?action=getMemberDashboard&memberId=${memberId}`);
+        const res = await fetchWithTimeout(`${currentUrl}?action=getMemberDashboard&memberId=${memberId}`, {}, 4500);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
@@ -225,7 +239,7 @@ export const api = {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetch(`${currentUrl}?action=getAdminDashboard`);
+        const res = await fetchWithTimeout(`${currentUrl}?action=getAdminDashboard`, {}, 4500);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
@@ -271,11 +285,11 @@ export const api = {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetch(currentUrl, {
+        const res = await fetchWithTimeout(currentUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'addExpense', ...payload }),
-        });
+        }, 5000);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
@@ -307,11 +321,11 @@ export const api = {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetch(currentUrl, {
+        const res = await fetchWithTimeout(currentUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'addDonation', ...payload }),
-        });
+        }, 5000);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
