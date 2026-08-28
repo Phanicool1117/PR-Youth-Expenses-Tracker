@@ -31,11 +31,11 @@ const LOCAL_STORAGE_MEMBERS_KEY = 'PR_YOUTH_LOCAL_MEMBERS';
 const LOCAL_STORAGE_CATEGORIES_KEY = 'PR_YOUTH_LOCAL_CATEGORIES';
 
 const DEFAULT_MEMBERS = [
-  { memberId: 'ADM000', name: 'Admin', role: 'Admin', password: 'admin123', status: 'Active' },
-  { memberId: 'PRY001', name: 'Phani', role: 'Member', password: '001', status: 'Active' },
-  { memberId: 'PRY002', name: 'Kumar', role: 'Member', password: '002', status: 'Active' },
-  { memberId: 'PRY003', name: 'Srinivas', role: 'Member', password: '003', status: 'Active' },
-  { memberId: 'PRY004', name: 'Ramesh', role: 'Member', password: '004', status: 'Inactive' },
+  { memberId: 'ADM000', name: 'Admin', role: 'Admin', password: 'admin123', status: 'Active', active: true },
+  { memberId: 'PRY001', name: 'Phani', role: 'Member', password: '001', status: 'Active', active: true },
+  { memberId: 'PRY002', name: 'Ravi', role: 'Member', password: '002', status: 'Active', active: true },
+  { memberId: 'PRY003', name: 'Suresh', role: 'Member', password: '003', status: 'Active', active: true },
+  { memberId: 'PRY004', name: 'Venkat', role: 'Member', password: '004', status: 'Active', active: true },
 ];
 
 const DEFAULT_CATEGORIES = [
@@ -157,14 +157,18 @@ export const api = {
     return { success: false, message: 'Invalid User ID or Password.' };
   },
 
-  // Get Member List
+  // Get Member List (Always fetches live from Google Sheets and updates storage)
   async getMembers() {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
         const res = await fetchWithTimeout(`${currentUrl}?action=getMembers`, {}, 4000);
         const json = await res.json();
-        if (json.success) return json;
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          saveLocalMembers(json.data);
+          sessionStorage.setItem('ADMIN_MEMBERS_DATA', JSON.stringify(json.data));
+          return json;
+        }
       } catch (err) {
         console.warn('Backend fetch failed, using local members', err);
       }
