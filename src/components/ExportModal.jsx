@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import { createReportCanvas } from '../utils/reportCanvasGenerator';
 import { triggerHaptic } from '../utils/hapticsSound';
@@ -10,6 +10,32 @@ export function ExportModal({ isOpen, onClose, transactions = [], title = "Commi
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [isExportingPng, setIsExportingPng] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+
+  // Mobile Hardware / Gesture Back Button Handling
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let isPushed = false;
+    try {
+      window.history.pushState({ modal: 'exportModal' }, '');
+      isPushed = true;
+    } catch (e) {
+      console.warn('History push failed', e);
+    }
+
+    const handlePopState = () => {
+      onClose();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (isPushed && window.history.state?.modal === 'exportModal') {
+        window.history.back();
+      }
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 

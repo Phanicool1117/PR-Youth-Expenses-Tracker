@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createDonationReceiptCanvas } from '../utils/donationReceiptCanvas';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { LOGO_BASE64 } from '../utils/logoBase64';
@@ -9,6 +9,32 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
   const [isSharing, setIsSharing] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
+
+  // Mobile Hardware / Gesture Back Button Handling (Closes ONLY the popup instead of exiting app)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let isPushed = false;
+    try {
+      window.history.pushState({ modal: 'donationReceipt' }, '');
+      isPushed = true;
+    } catch (e) {
+      console.warn('History push failed', e);
+    }
+
+    const handlePopState = () => {
+      onClose();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (isPushed && window.history.state?.modal === 'donationReceipt') {
+        window.history.back();
+      }
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen || !donation) return null;
 
@@ -151,7 +177,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             triggerHaptic(10);
             onClose();
           }}
-          className="absolute top-3.5 right-3.5 p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10 cursor-pointer"
+          className="p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10 cursor-pointer absolute top-3.5 right-3.5"
         >
           <X className="w-5 h-5" />
         </button>
