@@ -31,11 +31,14 @@ const LOCAL_STORAGE_MEMBERS_KEY = 'PR_YOUTH_LOCAL_MEMBERS';
 const LOCAL_STORAGE_CATEGORIES_KEY = 'PR_YOUTH_LOCAL_CATEGORIES';
 
 const DEFAULT_MEMBERS = [
-  { memberId: 'ADM000', name: 'Admin', role: 'Admin', password: 'admin123', status: 'Active', active: true },
-  { memberId: 'PRY001', name: 'Phani', role: 'Member', password: '001', status: 'Active', active: true },
-  { memberId: 'PRY002', name: 'Ravi', role: 'Member', password: '002', status: 'Active', active: true },
-  { memberId: 'PRY003', name: 'Suresh', role: 'Member', password: '003', status: 'Active', active: true },
-  { memberId: 'PRY004', name: 'Venkat', role: 'Member', password: '004', status: 'Active', active: true },
+  { memberId: 'ADMIN', name: 'Admin', role: 'Admin', password: 'admin123', status: 'Active', active: true },
+  { memberId: 'PHANI001', name: 'Phani', role: 'Member', password: '001', status: 'Active', active: true },
+  { memberId: 'VISHNU002', name: 'Vishnu', role: 'Member', password: '002', status: 'Active', active: true },
+  { memberId: 'GANGA003', name: 'Ganga', role: 'Member', password: '003', status: 'Active', active: true },
+  { memberId: 'SASI004', name: 'Sasi', role: 'Member', password: '004', status: 'Active', active: true },
+  { memberId: 'PRASAD005', name: 'Prasad', role: 'Member', password: '005', status: 'Active', active: true },
+  { memberId: 'BHARAT006', name: 'Bharat', role: 'Member', password: '006', status: 'Active', active: true },
+  { memberId: 'PRY003', name: 'Srinivas', role: 'Member', password: '003', status: 'Active', active: true },
 ];
 
 const DEFAULT_CATEGORIES = [
