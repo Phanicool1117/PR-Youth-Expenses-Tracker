@@ -68,7 +68,7 @@ export function AuthProvider({ children }) {
     }
   }, [user]);
 
-  // Function to trigger live refresh across all active components
+  // Function to trigger live refresh across all active components on demand
   const triggerRefresh = useCallback(() => {
     setIsSyncing(true);
     setRefreshTrigger((prev) => prev + 1);
@@ -76,29 +76,6 @@ export function AuthProvider({ children }) {
     checkMemberDeactivation();
     setTimeout(() => setIsSyncing(false), 800);
   }, [checkMemberDeactivation]);
-
-  // Smooth Background Polling (Every 15 seconds when logged in)
-  useEffect(() => {
-    if (!user) return;
-
-    const timer = setInterval(() => {
-      triggerRefresh();
-    }, 15000);
-
-    return () => clearInterval(timer);
-  }, [user, triggerRefresh]);
-
-  // Automatic Refresh on Window / Tab Focus (Whenever user switches back from Google Sheets)
-  useEffect(() => {
-    if (!user) return;
-
-    const handleFocus = () => {
-      triggerRefresh();
-    };
-
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [user, triggerRefresh]);
 
   const login = async (usernameOrId, password) => {
     setIsLoading(true);

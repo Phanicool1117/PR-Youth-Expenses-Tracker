@@ -10,8 +10,8 @@ export function setGasUrl(url) {
   GAS_URL = url;
 }
 
-// Fast fetch helper with 4.5s timeout for mobile network speed optimization
-async function fetchWithTimeout(url, options = {}, timeoutMs = 4500) {
+// Fast fetch helper with 9s timeout for reliable mobile & Google Apps Script execution
+async function fetchWithTimeout(url, options = {}, timeoutMs = 9000) {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {

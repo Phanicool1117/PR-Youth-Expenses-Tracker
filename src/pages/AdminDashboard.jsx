@@ -45,18 +45,36 @@ export function AdminDashboard() {
         api.getAllDonations(),
       ]);
 
+      // Guarded updates: only update if response is genuine and contains data
       if (dashRes.success && dashRes.data) {
-        setData(dashRes.data);
-        sessionStorage.setItem('ADMIN_DASH_DATA', JSON.stringify(dashRes.data));
+        // Do not overwrite existing non-zero state with empty fallback values
+        setData((prev) => {
+          const isFreshEmpty =
+            dashRes.data.totalDonations === 0 &&
+            dashRes.data.totalExpenses === 0 &&
+            (!dashRes.data.recentActivity || dashRes.data.recentActivity.length === 0);
+
+          const prevHasData =
+            prev && (prev.totalDonations > 0 || prev.totalExpenses > 0 || (prev.recentActivity && prev.recentActivity.length > 0));
+
+          if (isFreshEmpty && prevHasData) {
+            return prev; // keep existing valid data
+          }
+          sessionStorage.setItem('ADMIN_DASH_DATA', JSON.stringify(dashRes.data));
+          return dashRes.data;
+        });
       }
-      if (memRes.success && memRes.data) {
+
+      if (memRes.success && Array.isArray(memRes.data) && memRes.data.length > 0) {
         setMembers(memRes.data);
         sessionStorage.setItem('ADMIN_MEMBERS_DATA', JSON.stringify(memRes.data));
       }
-      if (catRes.success && catRes.data) {
+
+      if (catRes.success && Array.isArray(catRes.data) && catRes.data.length > 0) {
         setCategories(catRes.data);
       }
-      if (donRes.success && Array.isArray(donRes.data)) {
+
+      if (donRes.success && Array.isArray(donRes.data) && donRes.data.length > 0) {
         setDonationsList(donRes.data);
         sessionStorage.setItem('ADMIN_DONATIONS_DATA', JSON.stringify(donRes.data));
       }
@@ -86,7 +104,7 @@ export function AdminDashboard() {
 
     // 1. Ingest all donations from donationsList
     if (Array.isArray(donationsList)) {
-      donationsList.forEach((d, idx) => {
+      donationsList.forEach((d) => {
         const donor = d.donorName || d.name || 'Anonymous Donor';
         const key = `DON_${d.timestamp || ''}_${d.amount || 0}_${donor}`;
         map.set(key, {
@@ -101,7 +119,7 @@ export function AdminDashboard() {
 
     // 2. Ingest all transactions from recentActivity
     if (Array.isArray(recentActivity)) {
-      recentActivity.forEach((tx, idx) => {
+      recentActivity.forEach((tx) => {
         const isDonation = tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName);
         const donor = tx.donorName || (isDonation ? tx.name || 'Anonymous Donor' : undefined);
         const key = isDonation
