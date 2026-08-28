@@ -49,10 +49,12 @@ export function AdminMembers() {
 
       {/* Members Directory List Card */}
       <div className="reference-card p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="text-base font-bold text-[#0f172a]">Active Members ({members.length})</h3>
-          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0f52ba] border border-blue-200">
-            Managed via Google Sheets
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
+          <h3 className="text-sm sm:text-base font-bold text-[#0f172a] whitespace-nowrap">
+            Active Members ({members.length})
+          </h3>
+          <span className="text-[10px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0f52ba] border border-blue-200 shrink-0 whitespace-nowrap">
+            via Google Sheets
           </span>
         </div>
 

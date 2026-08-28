@@ -130,11 +130,39 @@ export function AdminDashboard() {
       {/* Segmented Tab Bar */}
       <Navbar />
 
-      {/* Hierarchical Financial Status Bar */}
-      <div className="reference-card rounded-3xl p-5 px-6 bg-gradient-to-br from-white via-slate-50/50 to-white shadow-sm border border-slate-200 flex items-center justify-between gap-4">
-        <div className="space-y-0.5">
-          <div className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
-            ₹{currentBalance.toLocaleString('en-IN')}
+      {/* Hierarchical Financial Status Bar (Clean Mobile Alignment) */}
+      <div className="reference-card rounded-3xl p-5 px-6 bg-gradient-to-br from-white via-slate-50/50 to-white shadow-sm border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="space-y-1 w-full sm:w-auto">
+          <div className="flex items-center justify-between sm:justify-start gap-3 w-full">
+            <div className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
+              ₹{currentBalance.toLocaleString('en-IN')}
+            </div>
+
+            {/* Mobile Refresh & Logout Buttons */}
+            <div className="flex items-center gap-2 sm:hidden shrink-0">
+              <button
+                onClick={() => {
+                  triggerHaptic(15);
+                  triggerRefresh();
+                }}
+                className="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors border border-emerald-200 active:scale-95 shadow-2xs"
+                title="Sync live data"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              </button>
+
+              <button
+                onClick={() => {
+                  triggerHaptic(20);
+                  logout();
+                }}
+                className="flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 shadow-2xs"
+                title="Logout"
+              >
+                <LogOut className="w-3 h-3" />
+                <span>Logout</span>
+              </button>
+            </div>
           </div>
 
           <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 pt-0.5">
@@ -147,7 +175,8 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Desktop Refresh & Logout Buttons */}
+        <div className="hidden sm:flex items-center gap-3 shrink-0">
           <button
             onClick={() => {
               triggerHaptic(15);
@@ -175,12 +204,12 @@ export function AdminDashboard() {
 
       {/* Financial Summary Card */}
       <div className="reference-card p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h2 className="text-base font-bold text-[#0f172a] flex items-center gap-2">
-            <Wallet className="w-5 h-5 text-[#0f52ba]" />
-            Financial Ledger Summary
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
+          <h2 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2 truncate">
+            <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-[#0f52ba] shrink-0" />
+            <span className="truncate">Financial Ledger Summary</span>
           </h2>
-          <span className="text-xs text-slate-400 font-medium">Live Overview</span>
+          <span className="text-xs text-slate-400 font-medium shrink-0 whitespace-nowrap">Live Overview</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
@@ -201,14 +230,14 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      {/* Category Spending Analytics Card */}
+      {/* Category Spending Analytics Card (Aligned Single-Line Header) */}
       <div className="reference-card p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="text-base font-bold text-[#0f172a] flex items-center gap-2">
-            <Layers className="w-5 h-5 text-[#0f52ba]" />
-            Category Spending Breakdown
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
+          <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2 truncate">
+            <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-[#0f52ba] shrink-0" />
+            <span className="truncate">Category Spending Breakdown</span>
           </h3>
-          <span className="text-xs text-slate-400 font-medium">Budget Share</span>
+          <span className="text-xs text-slate-400 font-medium shrink-0 whitespace-nowrap">Budget Share</span>
         </div>
 
         <div className="space-y-3 pt-1">
