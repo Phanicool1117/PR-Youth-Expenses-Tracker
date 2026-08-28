@@ -1,11 +1,10 @@
-import React, { useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
+import React, { useState } from 'react';
+import { createDonationReceiptCanvas } from '../utils/donationReceiptCanvas';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { LOGO_BASE64 } from '../utils/logoBase64';
 import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export function DonationReceiptModal({ isOpen, onClose, donation }) {
-  const receiptCardRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
@@ -29,27 +28,14 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
     hour12: true,
   });
 
-  // Capture the EXACT on-screen preview card directly as a high-definition canvas
-  const generatePreviewCardCanvas = async () => {
-    if (!receiptCardRef.current) throw new Error('Receipt card element not found');
-
-    const canvas = await html2canvas(receiptCardRef.current, {
-      scale: 3, // 3x ultra HD Retina resolution
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-    });
-    return canvas;
-  };
-
-  // Handle Export / Download PNG directly from the on-screen preview
+  // Handle Export / Download PNG directly
   const handleExportReceipt = async () => {
     triggerHaptic(15);
     setIsExporting(true);
     setDownloadSuccess(false);
 
     try {
-      const canvas = await generatePreviewCardCanvas();
+      const canvas = await createDonationReceiptCanvas(donation);
       const fileName = `Donation_Receipt_${donorName.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`;
 
       canvas.toBlob((blob) => {
@@ -67,6 +53,17 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
 
           setDownloadSuccess(true);
           setTimeout(() => setDownloadSuccess(false), 4000);
+        } else {
+          // Data URL fallback
+          const dataUrl = canvas.toDataURL('image/png');
+          const a = document.createElement('a');
+          a.href = dataUrl;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setDownloadSuccess(true);
+          setTimeout(() => setDownloadSuccess(false), 4000);
         }
       }, 'image/png');
     } catch (err) {
@@ -77,14 +74,14 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
     }
   };
 
-  // Handle Native Share directly from the on-screen preview
+  // Handle Native Share to WhatsApp, Telegram, System Share Sheet, etc.
   const handleShareReceipt = async () => {
     triggerHaptic(15);
     setIsSharing(true);
     setShareSuccess(false);
 
     try {
-      const canvas = await generatePreviewCardCanvas();
+      const canvas = await createDonationReceiptCanvas(donation);
       const fileName = `Donation_Receipt_${donorName.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
 
       canvas.toBlob(async (blob) => {
@@ -96,7 +93,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         const file = new File([blob], fileName, { type: 'image/png' });
         const shareText = `*Official Donation Receipt*\nPenumuli Perantalamma Youth\n\nDonor: ${donorName}\nAmount: ₹${amount.toLocaleString('en-IN')}\nDate: ${dateFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
 
-        // Native Web Share API
+        // Check if Web Share API with files is supported
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
@@ -123,7 +120,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             console.warn('Text share failed', shareErr);
           }
         } else {
-          // Direct fallback
+          // Direct fallback: Download image and copy summary text to clipboard
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
@@ -149,7 +146,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/65 backdrop-blur-xs overflow-y-auto animate-fade-in">
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-sm sm:max-w-md overflow-hidden my-auto relative animate-scale-up">
         
-        {/* Close Button (Outside the captured receipt) */}
+        {/* Close Button */}
         <button
           onClick={() => {
             triggerHaptic(10);
@@ -160,117 +157,114 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           <X className="w-5 h-5" />
         </button>
 
-        {/* THE EXACT RECEIPT PREVIEW CARD THAT GETS DOWNLOADED & SHARED */}
-        <div ref={receiptCardRef} className="bg-white">
-          {/* Top Royal Blue Accent Stripe */}
-          <div className="h-1.5 w-full bg-[#0f52ba]" />
+        {/* Top Royal Blue Accent Stripe */}
+        <div className="h-1.5 w-full bg-[#0f52ba]" />
 
-          {/* Receipt Card Content */}
-          <div className="p-6 sm:p-7 space-y-4 text-center bg-white">
-            
-            {/* Circular Logo Emblem */}
-            <div className="flex justify-center">
-              <div className="w-16 h-16 rounded-full bg-blue-50/80 border-2 border-blue-200 flex items-center justify-center shadow-inner p-1.5">
-                <img
-                  src={LOGO_BASE64}
-                  alt="PR Youth Logo"
-                  className="w-full h-full object-contain"
-                />
-              </div>
+        {/* Receipt Card Content */}
+        <div className="p-6 sm:p-7 space-y-4 text-center bg-white">
+          
+          {/* Circular Logo Emblem */}
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-full bg-blue-50/80 border-2 border-blue-200 flex items-center justify-center shadow-inner p-1.5">
+              <img
+                src={LOGO_BASE64}
+                alt="PR Youth Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
-
-            {/* Heading & Tagline */}
-            <div className="space-y-1">
-              <h2 className="text-lg sm:text-xl font-extrabold text-[#0f172a] tracking-tight">
-                Penumuli Perantalamma Youth
-              </h2>
-              <p className="text-xs font-semibold text-slate-500">
-                Penumuli Village, Duggirala Mandal, Guntur District
-              </p>
-              <div className="pt-1 flex justify-center">
-                <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>OFFICIAL DONATION RECEIPT</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="py-0.5">
-              <div className="border-t border-dashed border-slate-200" />
-            </div>
-
-            {/* Secondary Metadata Details (Date, Paid At, Method) */}
-            <div className="space-y-2 text-xs text-left bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500 font-medium text-xs">Date</span>
-                <span className="font-bold text-[#0f172a] text-xs">{dateFormatted}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500 font-medium text-xs">Paid At</span>
-                <span className="font-bold text-[#0f172a] text-xs">{timeFormatted}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500 font-medium text-xs">Payment Method</span>
-                <span className="font-semibold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 text-xs">
-                  {paymentMethod}
-                </span>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="py-0.5">
-              <div className="border-t border-dashed border-slate-200" />
-            </div>
-
-            {/* ========================================== */}
-            {/* MAIN HERO DONATION CONTEXT (Center Aligned) */}
-            {/* ========================================== */}
-            <div className="py-2 px-1 text-center space-y-1">
-              <p className="text-base sm:text-[17px] text-slate-700 leading-relaxed font-normal text-center">
-                <span className="font-bold text-slate-900">Mr/Miss: </span>
-                <span className="font-black text-orange-600 text-lg sm:text-xl tracking-tight">
-                  {donorName}
-                </span>{' '}
-                has generously contributed an amount of{' '}
-                <span className="font-black text-emerald-700 text-lg sm:text-xl">₹{amount.toLocaleString('en-IN')}</span> towards the{' '}
-                <span className="font-bold text-slate-900">Vinayaka festival / Puja</span>, and the amount has been received with heartfelt thanks.
-              </p>
-            </div>
-
-            {/* Complementary Centered Amount Pill */}
-            <div className="flex justify-center pt-1">
-              <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-emerald-50 border border-emerald-300 shadow-2xs">
-                <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-800">
-                  Amount Received:
-                </span>
-                <span className="text-lg sm:text-xl font-black text-emerald-700 tracking-tight">
-                  ₹{amount.toLocaleString('en-IN')}
-                </span>
-              </div>
-            </div>
-
-            {/* Thanking Note */}
-            <div className="pt-2">
-              <p className="text-sm sm:text-base font-bold text-[#0f52ba]">
-                Thanking you for your contribution.
-              </p>
-            </div>
-
-            {/* Official Footer Verification Note */}
-            <div className="pt-2 pb-1 text-center space-y-0.5">
-              <p className="text-[11px] font-semibold text-slate-500">
-                Penumuli Youth Committee · Authorized Digital Receipt
-              </p>
-              <p className="text-[10px] text-slate-400">
-                May Lord Ganesha shower blessings upon you and your family.
-              </p>
-            </div>
-
           </div>
+
+          {/* Heading & Tagline */}
+          <div className="space-y-1">
+            <h2 className="text-lg sm:text-xl font-extrabold text-[#0f172a] tracking-tight">
+              Penumuli Perantalamma Youth
+            </h2>
+            <p className="text-xs font-semibold text-slate-500">
+              Penumuli Village, Duggirala Mandal, Guntur District
+            </p>
+            <div className="pt-1 flex justify-center">
+              <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <span>OFFICIAL DONATION RECEIPT</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="py-0.5">
+            <div className="border-t border-dashed border-slate-200" />
+          </div>
+
+          {/* Secondary Metadata Details (Date, Paid At, Method) */}
+          <div className="space-y-2 text-xs text-left bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 font-medium text-xs">Date</span>
+              <span className="font-bold text-[#0f172a] text-xs">{dateFormatted}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 font-medium text-xs">Paid At</span>
+              <span className="font-bold text-[#0f172a] text-xs">{timeFormatted}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 font-medium text-xs">Payment Method</span>
+              <span className="font-semibold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200 text-xs">
+                {paymentMethod}
+              </span>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="py-0.5">
+            <div className="border-t border-dashed border-slate-200" />
+          </div>
+
+          {/* ========================================== */}
+          {/* MAIN HERO DONATION CONTEXT (Center Aligned) */}
+          {/* ========================================== */}
+          <div className="py-2 px-1 text-center space-y-1">
+            <p className="text-base sm:text-[17px] text-slate-700 leading-relaxed font-normal text-center">
+              <span className="font-bold text-slate-900">Mr/Miss: </span>
+              <span className="font-black text-orange-600 text-lg sm:text-xl tracking-tight">
+                {donorName}
+              </span>{' '}
+              has generously contributed an amount of{' '}
+              <span className="font-black text-emerald-700 text-lg sm:text-xl">₹{amount.toLocaleString('en-IN')}</span> towards the{' '}
+              <span className="font-bold text-slate-900">Vinayaka festival / Puja</span>, and the amount has been received with heartfelt thanks.
+            </p>
+          </div>
+
+          {/* Complementary Centered Amount Pill */}
+          <div className="flex justify-center pt-1">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-emerald-50 border border-emerald-300 shadow-2xs">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-800">
+                Amount Received:
+              </span>
+              <span className="text-lg sm:text-xl font-black text-emerald-700 tracking-tight">
+                ₹{amount.toLocaleString('en-IN')}
+              </span>
+            </div>
+          </div>
+
+          {/* Thanking Note */}
+          <div className="pt-2">
+            <p className="text-sm sm:text-base font-bold text-[#0f52ba]">
+              Thanking you for your contribution.
+            </p>
+          </div>
+
+          {/* Official Footer Verification Note */}
+          <div className="pt-2 pb-1 text-center space-y-0.5">
+            <p className="text-[11px] font-semibold text-slate-500">
+              Penumuli Youth Committee · Authorized Digital Receipt
+            </p>
+            <p className="text-[10px] text-slate-400">
+              May Lord Ganesha shower blessings upon you and your family.
+            </p>
+          </div>
+
         </div>
 
-        {/* Action Buttons Toolbar (Outside the captured receipt card) */}
+        {/* Action Buttons Toolbar */}
         <div className="p-5 pt-1 bg-white space-y-2 border-t border-slate-100">
           {/* Share Button (Top) */}
           <button

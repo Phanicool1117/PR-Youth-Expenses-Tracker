@@ -17,11 +17,67 @@ export async function createDonationReceiptCanvas(donation) {
     hour12: true,
   });
 
-  // Scale for ultra-crisp 3x Retina output
   const scale = 3;
   const baseWidth = 440;
-  const baseHeight = 475; // Perfectly proportioned to eliminate any dead space
 
+  // 1. Measure and break lines first to calculate the exact dynamic height needed
+  const measureCanvas = document.createElement('canvas');
+  const measureCtx = measureCanvas.getContext('2d');
+
+  const maxLineWidth = baseWidth - 44;
+  const lineHeight = 24;
+
+  const tokens = [
+    { text: 'Mr/Miss: ', font: 'bold 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
+    { text: `${donorName} `, font: '900 16.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#ea580c' },
+    { text: 'has generously contributed an amount of ', font: '500 13.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
+    { text: `₹${amount.toLocaleString('en-IN')} `, font: 'bold 15px "Plus Jakarta Sans", sans-serif, Arial', color: '#047857' },
+    { text: 'towards the ', font: '500 13.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
+    { text: 'Vinayaka festival / Puja', font: 'bold 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
+    { text: ', and the amount has been received with heartfelt thanks.', font: '500 13.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
+  ];
+
+  const lines = [];
+  let currentLine = [];
+  let currentLineWidth = 0;
+
+  tokens.forEach((token) => {
+    measureCtx.font = token.font;
+    const words = token.text.split(' ');
+    words.forEach((word, wIdx) => {
+      if (!word && wIdx > 0) return;
+      const wordWithSpace = wIdx < words.length - 1 ? word + ' ' : word;
+      const wordWidth = measureCtx.measureText(wordWithSpace).width;
+
+      if (currentLineWidth + wordWidth > maxLineWidth && currentLine.length > 0) {
+        lines.push({ items: currentLine, width: currentLineWidth });
+        currentLine = [];
+        currentLineWidth = 0;
+      }
+
+      currentLine.push({ text: wordWithSpace, font: token.font, color: token.color, width: wordWidth });
+      currentLineWidth += wordWidth;
+    });
+  });
+
+  if (currentLine.length > 0) {
+    lines.push({ items: currentLine, width: currentLineWidth });
+  }
+
+  // Calculate layout coordinates
+  const headerEnd = 120;
+  const metaBoxY = 132;
+  const metaBoxH = 54;
+  const divider2Y = metaBoxY + metaBoxH + 10;
+  const statementStartY = divider2Y + 24;
+  const statementHeight = lines.length * lineHeight;
+  const pillY = statementStartY + statementHeight + 8;
+  const pillHeight = 36;
+  const thankYouY = pillY + pillHeight + 24;
+  const footerY = thankYouY + 24;
+  const baseHeight = footerY + 36; // Exact dynamic tight height with 0 dead space!
+
+  // Create real high-res canvas
   const canvas = document.createElement('canvas');
   canvas.width = baseWidth * scale;
   canvas.height = baseHeight * scale;
@@ -109,7 +165,7 @@ export async function createDonationReceiptCanvas(donation) {
   const badgeWidth = 156;
   const badgeHeight = 20;
   const badgeX = logoCenterX - badgeWidth / 2;
-  const badgeY = 102;
+  const badgeY = 100;
 
   drawRoundedRect(badgeX, badgeY, badgeWidth, badgeHeight, 10, '#ecfdf5', '#a7f3d0');
   ctx.fillStyle = '#065f46';
@@ -121,14 +177,12 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.strokeStyle = '#e2e8f0';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(25, 130);
-  ctx.lineTo(baseWidth - 25, 130);
+  ctx.moveTo(25, 126);
+  ctx.lineTo(baseWidth - 25, 126);
   ctx.stroke();
   ctx.setLineDash([]);
 
   // Secondary Metadata Grid (Date, Paid At, Method)
-  const metaBoxY = 138;
-  const metaBoxH = 54;
   drawRoundedRect(25, metaBoxY, baseWidth - 50, metaBoxH, 10, '#f8fafc', '#f1f5f9');
 
   const colLeft = 36;
@@ -155,58 +209,14 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.strokeStyle = '#e2e8f0';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(25, 202);
-  ctx.lineTo(baseWidth - 25, 202);
+  ctx.moveTo(25, divider2Y);
+  ctx.lineTo(baseWidth - 25, divider2Y);
   ctx.stroke();
   ctx.setLineDash([]);
 
   // ==========================================
-  // MAIN HERO SECTION: LARGE, GRAND, PROMINENT CENTERED TYPOGRAPHY
-  // (Fills the white space with prominent, prestigious typography!)
+  // MAIN HERO SECTION: CENTER-ALIGNED DONATION CONTEXT
   // ==========================================
-  const statementStartY = 226;
-  const maxLineWidth = baseWidth - 44;
-  const lineHeight = 26; // Generous line height filling the center space beautifully
-
-  const tokens = [
-    { text: 'Mr/Miss: ', font: 'bold 15px "Plus Jakarta Sans", sans-serif', color: '#0f172a' },
-    { text: `${donorName} `, font: '900 17px "Plus Jakarta Sans", sans-serif', color: '#ea580c' },
-    { text: 'has generously contributed an amount of ', font: '500 14px "Plus Jakarta Sans", sans-serif', color: '#334155' },
-    { text: `₹${amount.toLocaleString('en-IN')} `, font: 'bold 15.5px "Plus Jakarta Sans", sans-serif', color: '#047857' },
-    { text: 'towards the ', font: '500 14px "Plus Jakarta Sans", sans-serif', color: '#334155' },
-    { text: 'Vinayaka festival / Puja', font: 'bold 14.5px "Plus Jakarta Sans", sans-serif', color: '#0f172a' },
-    { text: ', and the amount has been received with heartfelt thanks.', font: '500 14px "Plus Jakarta Sans", sans-serif', color: '#334155' },
-  ];
-
-  // Break tokens into wrapped lines
-  const lines = [];
-  let currentLine = [];
-  let currentLineWidth = 0;
-
-  tokens.forEach((token) => {
-    ctx.font = token.font;
-    const words = token.text.split(' ');
-    words.forEach((word, wIdx) => {
-      if (!word && wIdx > 0) return;
-      const wordWithSpace = wIdx < words.length - 1 ? word + ' ' : word;
-      const wordWidth = ctx.measureText(wordWithSpace).width;
-
-      if (currentLineWidth + wordWidth > maxLineWidth && currentLine.length > 0) {
-        lines.push({ items: currentLine, width: currentLineWidth });
-        currentLine = [];
-        currentLineWidth = 0;
-      }
-
-      currentLine.push({ text: wordWithSpace, font: token.font, color: token.color, width: wordWidth });
-      currentLineWidth += wordWidth;
-    });
-  });
-
-  if (currentLine.length > 0) {
-    lines.push({ items: currentLine, width: currentLineWidth });
-  }
-
-  // Draw each line centered horizontally
   let curY = statementStartY;
   ctx.textAlign = 'left';
 
@@ -222,12 +232,10 @@ export async function createDonationReceiptCanvas(donation) {
   });
 
   // ==========================================
-  // COMPLEMENTARY AMOUNT BADGE (Immediately below the expanded hero statement)
+  // COMPLEMENTARY AMOUNT BADGE (Compact, Centered Pill)
   // ==========================================
   const pillWidth = 230;
-  const pillHeight = 36;
   const pillX = (baseWidth - pillWidth) / 2;
-  const pillY = curY + 12; // Snug, balanced gap below the text
 
   drawRoundedRect(pillX, pillY, pillWidth, pillHeight, 18, '#ecfdf5', '#a7f3d0', 1.5);
 
@@ -241,7 +249,6 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.fillText(`₹${amount.toLocaleString('en-IN')}`, logoCenterX + 48, pillY + 23);
 
   // Closing Thank You Note
-  const thankYouY = pillY + 54;
   ctx.textAlign = 'center';
   ctx.fillStyle = '#0f52ba';
   ctx.font = 'bold 13px "Plus Jakarta Sans", sans-serif, Arial';
@@ -250,10 +257,10 @@ export async function createDonationReceiptCanvas(donation) {
   // Footer Verification Note
   ctx.fillStyle = '#64748b';
   ctx.font = '600 9.5px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText('Penumuli Youth Committee · Authorized Digital Receipt', logoCenterX, thankYouY + 24);
+  ctx.fillText('Penumuli Youth Committee · Authorized Digital Receipt', logoCenterX, footerY);
   ctx.fillStyle = '#94a3b8';
   ctx.font = '400 8.5px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText('May Lord Ganesha shower blessings upon you and your family.', logoCenterX, thankYouY + 38);
+  ctx.fillText('May Lord Ganesha shower blessings upon you and your family.', logoCenterX, footerY + 14);
 
   return canvas;
 }
