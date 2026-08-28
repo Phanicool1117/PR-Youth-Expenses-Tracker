@@ -127,28 +127,28 @@ function logAudit(userId, userName, action, recordType, details) {
   }
 }
 
-function loginUser(usernameOrId, password) {
-  if (!usernameOrId || !password) {
-    return { success: false, message: "Username/ID and password are required." };
+function loginUser(memberIdInput, password) {
+  if (!memberIdInput || !password) {
+    return { success: false, message: "Member ID and password are required." };
   }
   
   var members = getSheetData("Members");
   var user = null;
-  
+  var cleanInput = String(memberIdInput).trim().toLowerCase();
+
+  // STRICT MEMBER ID MATCHING ONLY (Name login strictly rejected)
   for (var i = 0; i < members.length; i++) {
     var m = members[i];
-    var idMatch = String(m['Member ID']).toLowerCase() === String(usernameOrId).toLowerCase();
-    var nameMatch = String(m['Name']).toLowerCase() === String(usernameOrId).toLowerCase();
-    var userMatch = m['Username'] ? String(m['Username']).toLowerCase() === String(usernameOrId).toLowerCase() : false;
+    var mId = String(m['Member ID']).trim().toLowerCase();
     
-    if (idMatch || nameMatch || userMatch) {
+    if (mId === cleanInput) {
       user = m;
       break;
     }
   }
   
   if (!user) {
-    return { success: false, message: "Invalid credentials." };
+    return { success: false, message: "Invalid Member ID. Please use your official Member ID (e.g. ADM000, PRY001)." };
   }
   
   var activeVal = String(user['Active']).toLowerCase();
@@ -157,12 +157,12 @@ function loginUser(usernameOrId, password) {
     return { success: false, message: "Your account is deactivated. Please contact administrator." };
   }
   
-  var storedPass = String(user['Password'] !== undefined ? user['Password'] : user['Password Hash']);
-  if (storedPass !== String(password)) {
-    return { success: false, message: "Invalid credentials." };
+  var storedPass = String(user['Password'] !== undefined ? user['Password'] : user['Password Hash']).trim();
+  if (storedPass !== String(password).trim()) {
+    return { success: false, message: "Invalid password. Please check your password and try again." };
   }
   
-  logAudit(user['Member ID'], user['Name'], 'Login', 'Auth', 'User logged in successfully');
+  logAudit(user['Member ID'], user['Name'], 'Login', 'Auth', 'User logged in successfully via Member ID');
   
   return {
     success: true,
