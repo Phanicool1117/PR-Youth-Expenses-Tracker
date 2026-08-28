@@ -238,7 +238,7 @@ function getMemberDashboard(memberId) {
     data: {
       totalExpenses: totalExpenses,
       expenseCount: expenses.length,
-      recentActivity: activity.slice(0, 10)
+      recentActivity: activity
     }
   };
 }
@@ -373,7 +373,7 @@ function getAdminDashboard() {
         other: otherDonations
       },
       categoryBreakdown: categoryBreakdown,
-      recentActivity: activity.slice(0, 15)
+      recentActivity: activity
     }
   };
 }

@@ -175,7 +175,7 @@ export const api = {
     return { success: true, data: updated };
   },
 
-  // Get Member Dashboard Data
+  // Get Member Dashboard Data (Returns ALL member activities for 10-per-page pagination)
   async getMemberDashboard(memberId) {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
@@ -194,12 +194,12 @@ export const api = {
       success: true,
       data: {
         totalExpenses,
-        recentActivity: expenses.slice(0, 10),
+        recentActivity: expenses,
       },
     };
   },
 
-  // Get Admin Overview Data
+  // Get Admin Overview Data (Returns ALL activity entries for 10-per-page pagination)
   async getAdminDashboard() {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
@@ -231,7 +231,7 @@ export const api = {
         currentBalance,
         expenseCount: expenses.length,
         categoryBreakdown,
-        recentActivity: expenses.slice(0, 15),
+        recentActivity: expenses,
       },
     };
   },
