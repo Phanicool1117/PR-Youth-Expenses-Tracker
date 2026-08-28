@@ -172,7 +172,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             </p>
             <div className="pt-0.5 flex justify-center">
               <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                 <span>OFFICIAL DONATION RECEIPT</span>
               </span>
             </div>
@@ -207,10 +207,10 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           </div>
 
           {/* ========================================== */}
-          {/* MAIN HERO DONATION CONTEXT (Pure High-Impact Typography) */}
+          {/* MAIN HERO DONATION CONTEXT (Center Aligned) */}
           {/* ========================================== */}
-          <div className="py-1 px-1 text-left space-y-1">
-            <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-normal">
+          <div className="py-1.5 px-2 text-center space-y-1">
+            <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-normal text-center">
               <span className="font-bold text-slate-900">Mr/Miss: </span>
               <span className="font-black text-orange-600 text-base sm:text-lg tracking-tight">
                 {donorName}

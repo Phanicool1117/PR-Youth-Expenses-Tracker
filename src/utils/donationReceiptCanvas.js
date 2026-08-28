@@ -161,11 +161,10 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.setLineDash([]);
 
   // ==========================================
-  // MAIN HERO SECTION: THE DONATION CONTEXT
-  // (No artificial blue box background, pure prominent typography!)
+  // MAIN HERO SECTION: CENTER-ALIGNED DONATION CONTEXT
   // ==========================================
-  const statementStartY = 240;
-  const maxRight = baseWidth - 30;
+  const statementStartY = 238;
+  const maxLineWidth = baseWidth - 50;
   const lineHeight = 22;
 
   const tokens = [
@@ -178,28 +177,47 @@ export async function createDonationReceiptCanvas(donation) {
     { text: ', and the amount has been received with heartfelt thanks.', font: '500 13px "Plus Jakarta Sans", sans-serif', color: '#334155' },
   ];
 
-  ctx.textAlign = 'left';
-  let curX = 30;
-  let curY = statementStartY;
+  // Break tokens into wrapped lines
+  const lines = [];
+  let currentLine = [];
+  let currentLineWidth = 0;
 
   tokens.forEach((token) => {
     ctx.font = token.font;
-    ctx.fillStyle = token.color;
-
     const words = token.text.split(' ');
     words.forEach((word, wIdx) => {
       if (!word && wIdx > 0) return;
       const wordWithSpace = wIdx < words.length - 1 ? word + ' ' : word;
-      const metrics = ctx.measureText(wordWithSpace);
+      const wordWidth = ctx.measureText(wordWithSpace).width;
 
-      if (curX + metrics.width > maxRight && curX > 30) {
-        curX = 30;
-        curY += lineHeight;
+      if (currentLineWidth + wordWidth > maxLineWidth && currentLine.length > 0) {
+        lines.push({ items: currentLine, width: currentLineWidth });
+        currentLine = [];
+        currentLineWidth = 0;
       }
 
-      ctx.fillText(wordWithSpace, curX, curY);
-      curX += metrics.width;
+      currentLine.push({ text: wordWithSpace, font: token.font, color: token.color, width: wordWidth });
+      currentLineWidth += wordWidth;
     });
+  });
+
+  if (currentLine.length > 0) {
+    lines.push({ items: currentLine, width: currentLineWidth });
+  }
+
+  // Draw each line centered horizontally
+  let curY = statementStartY;
+  ctx.textAlign = 'left';
+
+  lines.forEach((line) => {
+    let curX = (baseWidth - line.width) / 2;
+    line.items.forEach((item) => {
+      ctx.font = item.font;
+      ctx.fillStyle = item.color;
+      ctx.fillText(item.text, curX, curY);
+      curX += item.width;
+    });
+    curY += lineHeight;
   });
 
   // ==========================================
