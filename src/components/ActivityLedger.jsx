@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { TransactionItem } from './TransactionItem';
 import { CustomSelect } from './ui/CustomSelect';
+import { ExportModal } from './ExportModal';
 import { triggerHaptic } from '../utils/hapticsSound';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Download } from 'lucide-react';
 
 export function ActivityLedger({
   transactions = [],
@@ -16,6 +17,7 @@ export function ActivityLedger({
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedMember, setSelectedMember] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const itemsPerPage = 10;
 
   // Filter Transactions based on Search, Category, Member
@@ -95,15 +97,31 @@ export function ActivityLedger({
 
   return (
     <div className="reference-card p-6 space-y-4">
-      {/* Header */}
+      {/* Header with Export Option */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
         <div>
           <h3 className="text-base font-bold text-[#0f172a]">{title}</h3>
           {subtitle && <p className="text-xs text-slate-500 font-medium">{subtitle}</p>}
         </div>
-        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0f52ba] border border-blue-200">
-          {totalItems} Entries
-        </span>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic(12);
+              setIsExportOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#0f52ba]/10 hover:bg-[#0f52ba]/20 text-[#0f52ba] border border-blue-200/80 transition-all active:scale-95 shadow-2xs"
+            title="Export receipts as PDF or PNG"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Export Receipts</span>
+          </button>
+
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-[#0f52ba] border border-blue-200">
+            {totalItems} Entries
+          </span>
+        </div>
       </div>
 
       {/* Filter Bar */}
@@ -186,6 +204,14 @@ export function ActivityLedger({
           </button>
         </div>
       </div>
+
+      {/* High-Definition Export Modal (PDF / PNG) */}
+      <ExportModal
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        transactions={filteredTransactions}
+        title={title}
+      />
     </div>
   );
 }

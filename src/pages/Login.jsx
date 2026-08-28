@@ -5,7 +5,7 @@ import { User, Lock, Eye, EyeOff, Info, ArrowRight, Loader2, CheckCircle2 } from
 
 export function Login() {
   const { login } = useAuth();
-  const [memberId, setMemberId] = useState('');
+  const [usernameOrId, setUsernameOrId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -16,16 +16,16 @@ export function Login() {
     e.preventDefault();
     triggerHaptic(15); // Tactile tap vibration
 
-    if (!memberId.trim() || !password) {
-      setError('Please enter your Member ID and Password.');
+    if (!usernameOrId.trim() || !password) {
+      setError('Please enter your User ID and Password.');
       return;
     }
     setError('');
     setIsSubmitting(true);
 
     try {
-      // 1. Verify credentials strictly via Member ID in Auth API
-      const res = await login(memberId.trim(), password);
+      // 1. Verify credentials via Auth API
+      const res = await login(usernameOrId.trim(), password);
       
       if (res.success) {
         // 2. Show solid green tick & play Apple chime
@@ -34,8 +34,9 @@ export function Login() {
         playSuccessSound();
 
         // 3. Keep tick visible while transitioning smoothly
+        // (AuthContext has already logged the user in, component will unmount cleanly with tick visible)
       } else {
-        setError(res.message || 'Invalid Member ID or Password.');
+        setError(res.message || 'Invalid User ID or Password.');
         setIsSubmitting(false);
       }
     } catch (err) {
@@ -79,18 +80,18 @@ export function Login() {
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4 pt-1">
-            {/* Field 1: Member ID ONLY */}
+            {/* Field 1: User ID */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-[#334155]">
-                Member ID
+                User ID
               </label>
               <div className="relative flex items-center">
                 <User className="absolute left-4 w-4 h-4 text-slate-400 pointer-events-none z-10" />
                 <input
                   type="text"
-                  value={memberId}
-                  onChange={(e) => setMemberId(e.target.value)}
-                  placeholder="Enter Member ID (e.g. ADM000, PRY001)"
+                  value={usernameOrId}
+                  onChange={(e) => setUsernameOrId(e.target.value)}
+                  placeholder="Enter User ID..."
                   className="w-full bg-[#f1f5f9] border-0 rounded-2xl py-3.5 pl-11 pr-4 text-sm font-medium text-[#0f172a] placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-[#0071e3] transition-all outline-none"
                   autoComplete="username"
                   required

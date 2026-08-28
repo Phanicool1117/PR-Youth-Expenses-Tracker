@@ -80,84 +80,81 @@ function saveLocalDonations(donations) {
 }
 
 export const api = {
-  // Strict Login Authentication (Requires MEMBER ID ONLY - Names strictly disallowed)
-  async login(memberIdInput, password) {
+  // Strict Login Authentication with Mandatory Password Checking
+  async login(usernameOrId, password) {
     const currentUrl = getGasUrl();
-    const cleanMemberId = String(memberIdInput || '').trim().toUpperCase();
+    const cleanId = usernameOrId.trim().toUpperCase();
     const cleanPass = String(password || '').trim();
 
-    if (!cleanMemberId || !cleanPass) {
-      return { success: false, message: 'Please enter Member ID and Password.' };
+    if (!cleanId || !cleanPass) {
+      return { success: false, message: 'Please enter User ID and Password.' };
     }
 
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
         const res = await fetchWithTimeout(
-          `${currentUrl}?action=login&usernameOrId=${encodeURIComponent(cleanMemberId)}&password=${encodeURIComponent(cleanPass)}`,
+          `${currentUrl}?action=login&usernameOrId=${encodeURIComponent(cleanId)}&password=${encodeURIComponent(cleanPass)}`,
           {},
           4000
         );
         const json = await res.json();
         if (json && typeof json.success === 'boolean') {
           if (json.success) return json;
-          return { success: false, message: json.message || 'Invalid Member ID or Password.' };
+          return { success: false, message: json.message || 'Invalid User ID or Password.' };
         }
       } catch (err) {
-        console.warn('Backend login endpoint unreachable, checking member ID records', err);
+        console.warn('Backend login endpoint unreachable, checking member password records', err);
       }
 
-      // Member list fallback verification with strict Member ID matching ONLY
+      // Member list fallback verification with strict password check
       try {
         const res = await fetchWithTimeout(`${currentUrl}?action=getMembers`, {}, 3500);
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
-          // STRICT MEMBER ID MATCH ONLY (Names rejected!)
           const matched = json.data.find(
-            (m) => String(m.memberId).trim().toUpperCase() === cleanMemberId
+            (m) => String(m.memberId).toUpperCase() === cleanId || String(m.name).toUpperCase() === cleanId
           );
 
-          if (!matched) {
-            return { success: false, message: 'Invalid Member ID. Please use your official Member ID (e.g. ADM000, PRY001).' };
-          }
+          if (matched) {
+            const isInactive = String(matched.status).toLowerCase() === 'inactive' || matched.active === false;
+            if (isInactive) {
+              return { success: false, message: 'This member account is marked Inactive.' };
+            }
 
-          const isInactive = String(matched.status).toLowerCase() === 'inactive' || matched.active === false;
-          if (isInactive) {
-            return { success: false, message: 'This member account is marked Inactive.' };
-          }
+            // Strict Password Checking against Google Sheets stored password or default patterns
+            const expectedPass = String(matched.password || (matched.role === 'Admin' ? 'admin123' : matched.memberId.replace('PRY', ''))).trim();
+            if (cleanPass === expectedPass || cleanPass === 'admin123' || (matched.role === 'Member' && cleanPass === matched.memberId.replace('PRY', ''))) {
+              return { success: true, user: matched };
+            }
 
-          // Strict Password Checking against Google Sheets stored password or default patterns
-          const expectedPass = String(matched.password || (matched.role === 'Admin' ? 'admin123' : matched.memberId.replace('PRY', ''))).trim();
-          if (cleanPass === expectedPass || cleanPass === 'admin123' || (matched.role === 'Member' && cleanPass === matched.memberId.replace('PRY', ''))) {
-            return { success: true, user: matched };
+            return { success: false, message: 'Invalid password. Please check your password and try again.' };
           }
-
-          return { success: false, message: 'Invalid password. Please check your password and try again.' };
         }
       } catch (err) {
         console.warn('Backend offline, falling back to local verification', err);
       }
     }
 
-    // Local Storage Fallback Verification with Strict Member ID Matching ONLY
+    // Local Storage Fallback Verification with Strict Password Check
     const localMembers = getLocalMembers();
     const matched = localMembers.find(
-      (m) => String(m.memberId).trim().toUpperCase() === cleanMemberId
+      (m) => String(m.memberId).toUpperCase() === cleanId || String(m.name).toUpperCase() === cleanId
     );
 
-    if (!matched) {
-      return { success: false, message: 'Invalid Member ID. Please use your official Member ID (e.g. ADM000, PRY001).' };
+    if (matched) {
+      if (matched.status === 'Inactive') {
+        return { success: false, message: 'This member account is marked Inactive.' };
+      }
+
+      const expectedPass = String(matched.password || (matched.role === 'Admin' ? 'admin123' : matched.memberId.replace('PRY', ''))).trim();
+      if (cleanPass === expectedPass) {
+        return { success: true, user: matched };
+      }
+
+      return { success: false, message: 'Invalid User ID or Password.' };
     }
 
-    if (matched.status === 'Inactive' || matched.active === false) {
-      return { success: false, message: 'This member account is marked Inactive.' };
-    }
-
-    const expectedPass = String(matched.password || (matched.role === 'Admin' ? 'admin123' : matched.memberId.replace('PRY', ''))).trim();
-    if (cleanPass === expectedPass) {
-      return { success: true, user: matched };
-    }
-
-    return { success: false, message: 'Invalid password. Please check your password and try again.' };
+    return { success: false, message: 'Invalid User ID or Password.' };
   },
 
   // Get Member List (Always fetches live from Google Sheets and updates storage)
