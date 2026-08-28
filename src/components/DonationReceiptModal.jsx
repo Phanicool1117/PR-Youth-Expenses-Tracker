@@ -54,7 +54,6 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           setDownloadSuccess(true);
           setTimeout(() => setDownloadSuccess(false), 4000);
         } else {
-          // Data URL fallback
           const dataUrl = canvas.toDataURL('image/png');
           const a = document.createElement('a');
           a.href = dataUrl;
@@ -120,7 +119,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             console.warn('Text share failed', shareErr);
           }
         } else {
-          // Direct fallback: Download image and copy summary text to clipboard
+          // Direct fallback
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
@@ -245,15 +244,15 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             </div>
           </div>
 
-          {/* Thanking Note */}
-          <div className="pt-2">
-            <p className="text-sm sm:text-base font-bold text-[#0f52ba]">
+          {/* Thanking Note with Generous Top & Bottom Breathing Room */}
+          <div className="py-4 sm:py-5">
+            <p className="text-base sm:text-[17px] font-bold text-[#0f52ba]">
               Thanking you for your contribution.
             </p>
           </div>
 
           {/* Official Footer Verification Note */}
-          <div className="pt-2 pb-1 text-center space-y-0.5">
+          <div className="pt-1 pb-1 text-center space-y-0.5">
             <p className="text-[11px] font-semibold text-slate-500">
               Penumuli Youth Committee · Authorized Digital Receipt
             </p>

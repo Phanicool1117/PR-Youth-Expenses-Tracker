@@ -20,7 +20,7 @@ export async function createDonationReceiptCanvas(donation) {
   // Scale for ultra-crisp 3x Retina output
   const scale = 3;
   const baseWidth = 390;
-  const baseHeight = 610; // Vertical tall card layout matching on-screen modal
+  const baseHeight = 630; // Generous height for comfortable top & bottom breathing room
 
   const canvas = document.createElement('canvas');
   canvas.width = baseWidth * scale;
@@ -183,12 +183,11 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.setLineDash([]);
 
   // ==========================================
-  // MAIN HERO SECTION: 1-to-1 Exact Match of On-Screen Modal Card
+  // MAIN HERO SECTION: 1-to-1 Match
   // ==========================================
   const statementStartY = 282;
   const lineHeight = 24;
 
-  // Multi-token lines structured identically to on-screen preview
   const lines = [
     // Line 1: Mr/Miss: [Donor Name]
     [
@@ -256,21 +255,24 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.font = '900 15px "Plus Jakarta Sans", sans-serif, Arial';
   ctx.fillText(`₹${amount.toLocaleString('en-IN')}`, centerX + 46, pillY + 23);
 
-  // Closing Thank You Note
-  const thankYouY = pillY + 54;
+  // ==========================================
+  // BREATHING ROOM: GENEROUS SPACING AROUND THANK YOU NOTE
+  // ==========================================
+  // Top breathing space = 30px below the amount pill
+  const thankYouY = pillY + pillHeight + 30;
   ctx.textAlign = 'center';
   ctx.fillStyle = '#0f52ba';
-  ctx.font = 'bold 13.5px "Plus Jakarta Sans", sans-serif, Arial';
+  ctx.font = 'bold 14px "Plus Jakarta Sans", sans-serif, Arial';
   ctx.fillText('Thanking you for your contribution.', centerX, thankYouY);
 
-  // Footer Verification Note
-  const footerY = thankYouY + 25;
+  // Bottom breathing space = 30px above the footer note
+  const footerY = thankYouY + 30;
   ctx.fillStyle = '#64748b';
   ctx.font = '600 9.5px "Plus Jakarta Sans", sans-serif, Arial';
   ctx.fillText('Penumuli Youth Committee · Authorized Digital Receipt', centerX, footerY);
   ctx.fillStyle = '#94a3b8';
   ctx.font = '400 8.5px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText('May Lord Ganesha shower blessings upon you and your family.', centerX, footerY + 14);
+  ctx.fillText('May Lord Ganesha shower blessings upon you and your family.', centerX, footerY + 15);
 
   return canvas;
 }
