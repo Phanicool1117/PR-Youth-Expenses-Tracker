@@ -24,7 +24,7 @@ export function MemberDashboard() {
   const loadDashboard = async () => {
     if (!user) return;
     try {
-      const res = await api.getMemberDashboard(user.memberId, user.name);
+      const res = await api.getMemberDashboard(user.memberId);
       if (res.success && res.data) {
         setData(res.data);
         sessionStorage.setItem(`MEMBER_DASH_${user.memberId}`, JSON.stringify(res.data));

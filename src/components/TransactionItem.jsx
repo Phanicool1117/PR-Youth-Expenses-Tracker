@@ -1,8 +1,11 @@
 import React from 'react';
-import { ShoppingBag, Flame, Lightbulb, Flag, Flower2, Heart, Music, Utensils, Tag, Calendar, User, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { ShoppingBag, Flame, Lightbulb, Flag, Flower2, Heart, Music, Utensils, Tag, Calendar, User, HandHeart } from 'lucide-react';
 
 export function TransactionItem({ transaction, showMember = false }) {
-  const isDonation = transaction.type === 'Donation' || Boolean(transaction.donorName);
+  const isDonation =
+    transaction.type === 'Donation' ||
+    transaction.type === 'Donations' ||
+    Boolean(transaction.donorName);
 
   const formatDate = (isoStr) => {
     if (!isoStr) return '';
@@ -31,7 +34,7 @@ export function TransactionItem({ transaction, showMember = false }) {
   };
 
   const { icon: CategoryIcon, bg: categoryBg } = isDonation
-    ? { icon: ArrowDownLeft, bg: 'bg-emerald-50 text-emerald-600 border-emerald-200' }
+    ? { icon: HandHeart, bg: 'bg-emerald-50 text-emerald-600 border-emerald-200' }
     : getCategoryIcon(transaction.category);
 
   const title = isDonation
@@ -52,6 +55,11 @@ export function TransactionItem({ transaction, showMember = false }) {
             {transaction.paymentMethod && (
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
                 {transaction.paymentMethod}
+              </span>
+            )}
+            {isDonation && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200 shrink-0">
+                Central Donation
               </span>
             )}
           </div>

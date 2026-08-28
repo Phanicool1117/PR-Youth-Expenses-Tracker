@@ -77,10 +77,7 @@ export const api = {
         const json = await res.json();
         if (json.success && json.data) {
           const matched = json.data.find(
-            (m) =>
-              m.memberId.toUpperCase() === cleanId ||
-              m.name.toUpperCase() === cleanId ||
-              m.memberId.toUpperCase().replace('BPR', 'PRY') === cleanId.replace('BPR', 'PRY')
+            (m) => m.memberId.toUpperCase() === cleanId || m.name.toUpperCase() === cleanId
           );
 
           if (matched) {
@@ -104,10 +101,7 @@ export const api = {
     // Local Mock Auth
     const localMembers = getLocalMembers();
     const matched = localMembers.find(
-      (m) =>
-        m.memberId.toUpperCase() === cleanId ||
-        m.name.toUpperCase() === cleanId ||
-        m.memberId.toUpperCase().replace('BPR', 'PRY') === cleanId.replace('BPR', 'PRY')
+      (m) => m.memberId.toUpperCase() === cleanId || m.name.toUpperCase() === cleanId
     );
 
     if (matched) {
@@ -181,13 +175,12 @@ export const api = {
     return { success: true, data: updated };
   },
 
-  // Get Member Dashboard Data (Returns ALL member activities matching ID or Name)
-  async getMemberDashboard(memberId, memberName) {
+  // Get Member Dashboard Data
+  async getMemberDashboard(memberId) {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const queryName = memberName ? `&memberName=${encodeURIComponent(memberName)}` : '';
-        const res = await fetch(`${currentUrl}?action=getMemberDashboard&memberId=${memberId}${queryName}`);
+        const res = await fetch(`${currentUrl}?action=getMemberDashboard&memberId=${memberId}`);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
@@ -195,31 +188,18 @@ export const api = {
       }
     }
 
-    const targetId = String(memberId || '').toLowerCase().trim();
-    const targetName = String(memberName || '').toLowerCase().trim();
-
-    const expenses = getLocalExpenses().filter((e) => {
-      const eId = String(e.memberId || '').toLowerCase().trim();
-      const eName = String(e.memberName || '').toLowerCase().trim();
-
-      const matchId = targetId && (eId === targetId || eId.replace('bpr', 'pry') === targetId.replace('bpr', 'pry'));
-      const matchName = targetName && eName === targetName;
-
-      return matchId || matchName;
-    });
-
+    const expenses = getLocalExpenses().filter((e) => e.memberId === memberId).map((e) => ({ ...e, type: 'Expenses' }));
     const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
     return {
       success: true,
       data: {
         totalExpenses,
-        expenseCount: expenses.length,
         recentActivity: expenses,
       },
     };
   },
 
-  // Get Admin Overview Data (Returns ALL activity entries for 10-per-page pagination)
+  // Get Admin Overview Data (Combines BOTH Donations AND Expenses)
   async getAdminDashboard() {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
@@ -232,8 +212,17 @@ export const api = {
       }
     }
 
-    const expenses = getLocalExpenses();
-    const donations = getLocalDonations();
+    const expenses = getLocalExpenses().map((e) => ({ ...e, type: 'Expenses' }));
+    const donations = getLocalDonations().map((d) => ({
+      ...d,
+      type: 'Donation',
+      category: 'Donation Received',
+      note: `Donor: ${d.donorName || d.name || 'Anonymous'}`,
+    }));
+
+    const combinedActivity = [...donations, ...expenses];
+    combinedActivity.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
     const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
     const totalDonations = donations.reduce((sum, d) => sum + Number(d.amount || 0), 0);
     const currentBalance = totalDonations - totalExpenses;
@@ -251,7 +240,7 @@ export const api = {
         currentBalance,
         expenseCount: expenses.length,
         categoryBreakdown,
-        recentActivity: expenses,
+        recentActivity: combinedActivity,
       },
     };
   },
