@@ -36,7 +36,7 @@ function handleRequest(e) {
         break;
         
       case 'getMemberDashboard':
-        output = getMemberDashboard(params.memberId);
+        output = getMemberDashboard(params.memberId, params.memberName);
         break;
         
       case 'addExpense':
@@ -52,7 +52,7 @@ function handleRequest(e) {
         break;
         
       case 'getMyActivity':
-        output = getMyActivity(params.memberId);
+        output = getMyActivity(params.memberId, params.memberName);
         break;
         
       case 'getAdminDashboard':
@@ -137,11 +137,11 @@ function loginUser(usernameOrId, password) {
   
   for (var i = 0; i < members.length; i++) {
     var m = members[i];
-    var idMatch = String(m['Member ID']).toLowerCase() === String(usernameOrId).toLowerCase();
-    var nameMatch = String(m['Name']).toLowerCase() === String(usernameOrId).toLowerCase();
-    var userMatch = m['Username'] ? String(m['Username']).toLowerCase() === String(usernameOrId).toLowerCase() : false;
+    var mId = String(m['Member ID'] || '').toLowerCase().trim();
+    var mName = String(m['Name'] || '').toLowerCase().trim();
+    var query = String(usernameOrId).toLowerCase().trim();
     
-    if (idMatch || nameMatch || userMatch) {
+    if (mId === query || mName === query || mId.replace('BPR', 'PRY') === query.replace('BPR', 'PRY')) {
       user = m;
       break;
     }
@@ -219,25 +219,20 @@ function toggleMemberStatus(memberId, newStatus) {
   return { success: true, message: "Member status updated to " + newStatus };
 }
 
-function getMemberDashboard(memberId) {
-  if (!memberId) return { success: false, message: "Member ID required." };
+function getMemberDashboard(memberId, memberName) {
+  if (!memberId && !memberName) return { success: false, message: "Member ID or Name required." };
   
-  var expenses = getSheetData("Expenses").filter(function(e) {
-    return String(e['Member ID']) === String(memberId);
-  });
-  
+  var activity = getMyActivity(memberId, memberName).data || [];
   var totalExpenses = 0;
-  for (var j = 0; j < expenses.length; j++) {
-    totalExpenses += Number(expenses[j]['Amount']) || 0;
+  for (var j = 0; j < activity.length; j++) {
+    totalExpenses += Number(activity[j].amount) || 0;
   }
-  
-  var activity = getMyActivity(memberId).data || [];
   
   return {
     success: true,
     data: {
       totalExpenses: totalExpenses,
-      expenseCount: expenses.length,
+      expenseCount: activity.length,
       recentActivity: activity
     }
   };
@@ -260,7 +255,6 @@ function addDonation(params) {
   
   var timestamp = new Date().toISOString();
   
-  // Append to Donations sheet
   sheet.appendRow([
     memberId,
     memberName,
@@ -307,27 +301,39 @@ function addExpense(params) {
   return { success: true, message: "Expense added successfully!" };
 }
 
-function getMyActivity(memberId) {
-  var expenses = getSheetData("Expenses").filter(function(e) {
-    return !memberId || String(e['Member ID']) === String(memberId);
+function getMyActivity(memberId, memberName) {
+  var expenses = getSheetData("Expenses");
+  var targetId = String(memberId || '').toLowerCase().trim();
+  var targetName = String(memberName || '').toLowerCase().trim();
+
+  var matchedExpenses = expenses.filter(function(e) {
+    if (!targetId && !targetName) return true; // All expenses for Admin
+
+    var eId = String(e['Member ID'] || e['MemberID'] || '').toLowerCase().trim();
+    var eName = String(e['Member Name'] || e['MemberName'] || e['Name'] || '').toLowerCase().trim();
+
+    var matchId = targetId && (eId === targetId || eId.replace('bpr', 'pry') === targetId.replace('bpr', 'pry'));
+    var matchName = targetName && (eName === targetName);
+
+    return matchId || matchName;
   }).map(function(e) {
     return {
       type: 'Expenses',
-      memberId: e['Member ID'],
-      memberName: e['Member Name'],
-      paymentMethod: e['Payment Method'],
+      memberId: e['Member ID'] || e['MemberID'] || '',
+      memberName: e['Member Name'] || e['MemberName'] || '',
+      paymentMethod: e['Payment Method'] || 'Cash',
       amount: Number(e['Amount']) || 0,
-      timestamp: e['Timestamp'],
-      category: e['Category'],
-      note: e['Note']
+      timestamp: e['Timestamp'] || new Date().toISOString(),
+      category: e['Category'] || 'Other Expenses',
+      note: e['Note'] || ''
     };
   });
   
-  expenses.sort(function(a, b) {
+  matchedExpenses.sort(function(a, b) {
     return new Date(b.timestamp) - new Date(a.timestamp);
   });
   
-  return { success: true, data: expenses };
+  return { success: true, data: matchedExpenses };
 }
 
 function getAdminDashboard() {
@@ -359,7 +365,7 @@ function getAdminDashboard() {
   }
   
   var balance = totalDonations - totalExpenses;
-  var activity = getMyActivity('').data || [];
+  var activity = getMyActivity('', '').data || [];
   
   return {
     success: true,
@@ -420,8 +426,19 @@ function getMembersSummary() {
     var mId = m['Member ID'];
     var mName = m['Name'];
     var role = m['Role'] || 'Member';
+
+    var targetId = String(mId || '').toLowerCase().trim();
+    var targetName = String(mName || '').toLowerCase().trim();
     
-    var mExpenses = expenses.filter(function(e) { return String(e['Member ID']) === String(mId); });
+    var mExpenses = expenses.filter(function(e) {
+      var eId = String(e['Member ID'] || e['MemberID'] || '').toLowerCase().trim();
+      var eName = String(e['Member Name'] || e['MemberName'] || e['Name'] || '').toLowerCase().trim();
+
+      var matchId = targetId && (eId === targetId || eId.replace('bpr', 'pry') === targetId.replace('bpr', 'pry'));
+      var matchName = targetName && (eName === targetName);
+
+      return matchId || matchName;
+    });
     
     var totalExpenses = 0;
     for (var e = 0; e < mExpenses.length; e++) {

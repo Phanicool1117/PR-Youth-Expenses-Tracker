@@ -77,7 +77,10 @@ export const api = {
         const json = await res.json();
         if (json.success && json.data) {
           const matched = json.data.find(
-            (m) => m.memberId.toUpperCase() === cleanId || m.name.toUpperCase() === cleanId
+            (m) =>
+              m.memberId.toUpperCase() === cleanId ||
+              m.name.toUpperCase() === cleanId ||
+              m.memberId.toUpperCase().replace('BPR', 'PRY') === cleanId.replace('BPR', 'PRY')
           );
 
           if (matched) {
@@ -101,7 +104,10 @@ export const api = {
     // Local Mock Auth
     const localMembers = getLocalMembers();
     const matched = localMembers.find(
-      (m) => m.memberId.toUpperCase() === cleanId || m.name.toUpperCase() === cleanId
+      (m) =>
+        m.memberId.toUpperCase() === cleanId ||
+        m.name.toUpperCase() === cleanId ||
+        m.memberId.toUpperCase().replace('BPR', 'PRY') === cleanId.replace('BPR', 'PRY')
     );
 
     if (matched) {
@@ -175,12 +181,13 @@ export const api = {
     return { success: true, data: updated };
   },
 
-  // Get Member Dashboard Data (Returns ALL member activities for 10-per-page pagination)
-  async getMemberDashboard(memberId) {
+  // Get Member Dashboard Data (Returns ALL member activities matching ID or Name)
+  async getMemberDashboard(memberId, memberName) {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetch(`${currentUrl}?action=getMemberDashboard&memberId=${memberId}`);
+        const queryName = memberName ? `&memberName=${encodeURIComponent(memberName)}` : '';
+        const res = await fetch(`${currentUrl}?action=getMemberDashboard&memberId=${memberId}${queryName}`);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
@@ -188,12 +195,25 @@ export const api = {
       }
     }
 
-    const expenses = getLocalExpenses().filter((e) => e.memberId === memberId);
+    const targetId = String(memberId || '').toLowerCase().trim();
+    const targetName = String(memberName || '').toLowerCase().trim();
+
+    const expenses = getLocalExpenses().filter((e) => {
+      const eId = String(e.memberId || '').toLowerCase().trim();
+      const eName = String(e.memberName || '').toLowerCase().trim();
+
+      const matchId = targetId && (eId === targetId || eId.replace('bpr', 'pry') === targetId.replace('bpr', 'pry'));
+      const matchName = targetName && eName === targetName;
+
+      return matchId || matchName;
+    });
+
     const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
     return {
       success: true,
       data: {
         totalExpenses,
+        expenseCount: expenses.length,
         recentActivity: expenses,
       },
     };
