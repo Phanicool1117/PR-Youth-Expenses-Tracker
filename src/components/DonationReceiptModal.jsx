@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createDonationReceiptCanvas } from '../utils/donationReceiptCanvas';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { LOGO_BASE64 } from '../utils/logoBase64';
@@ -10,31 +10,43 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
 
-  // Mobile Hardware / Gesture Back Button Handling (Closes ONLY the popup instead of exiting app)
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  // Mobile Hardware / Gesture Back Button Handling (Safe & persistent, never auto-closes)
   useEffect(() => {
     if (!isOpen) return;
 
-    let isPushed = false;
     try {
-      window.history.pushState({ modal: 'donationReceipt' }, '');
-      isPushed = true;
+      window.history.pushState({ modalOpen: 'donationReceipt' }, '');
     } catch (e) {
       console.warn('History push failed', e);
     }
 
     const handlePopState = () => {
-      onClose();
+      if (onCloseRef.current) {
+        onCloseRef.current();
+      }
     };
 
     window.addEventListener('popstate', handlePopState);
 
     return () => {
       window.removeEventListener('popstate', handlePopState);
-      if (isPushed && window.history.state?.modal === 'donationReceipt') {
-        window.history.back();
-      }
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
+
+  const handleClose = () => {
+    triggerHaptic(10);
+    if (window.history.state?.modalOpen === 'donationReceipt') {
+      window.history.back();
+    }
+    if (onClose) {
+      onClose();
+    }
+  };
 
   if (!isOpen || !donation) return null;
 
@@ -168,15 +180,17 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/65 backdrop-blur-xs overflow-y-auto animate-fade-in">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/65 backdrop-blur-xs overflow-y-auto animate-fade-in"
+    >
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-sm sm:max-w-md overflow-hidden my-auto relative animate-scale-up">
         
         {/* Close Button */}
         <button
-          onClick={() => {
-            triggerHaptic(10);
-            onClose();
-          }}
+          onClick={handleClose}
           className="p-2 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10 cursor-pointer absolute top-3.5 right-3.5"
         >
           <X className="w-5 h-5" />
