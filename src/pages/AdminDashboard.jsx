@@ -389,13 +389,13 @@ export function AdminDashboard() {
         )}
       </div>
 
-      {/* Section 1: Dedicated Donation Transactions Ledger */}
+      {/* Section 1: Dedicated Donation Transactions Ledger with Category Filter */}
       <ActivityLedger
         transactions={donationsOnlyList}
         showMember={false}
-        showCategory={false}
+        showCategory={true}
         title="Donation Transactions"
-        categories={['Donation Received']}
+        categories={['Chanda', 'Laddu Auction']}
         members={members}
       />
 

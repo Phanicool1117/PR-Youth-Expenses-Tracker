@@ -7,7 +7,7 @@ import { CustomSelect } from '../components/ui/CustomSelect';
 import { Toast } from '../components/ui/Toast';
 import { Navbar } from '../components/Navbar';
 import {
-  HeartHandshake,
+  HandCoins,
   User,
   Loader2,
   CheckCircle2,
@@ -15,23 +15,48 @@ import {
   QrCode,
   Smartphone,
   Building2,
-  Flame,
   Award,
   Sparkles,
-  FileText
+  FileText,
+  CircleDot
 } from 'lucide-react';
 
+// Custom Lucide-styled Auspicious Golden Laddu Icon SVG
+export function LadduIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="8.5" fill="#f59e0b" fillOpacity="0.25" stroke="#d97706" />
+      <circle cx="9.5" cy="9.5" r="1.1" fill="#d97706" />
+      <circle cx="14.5" cy="10" r="1.1" fill="#d97706" />
+      <circle cx="11.5" cy="14" r="1.1" fill="#d97706" />
+      <circle cx="15" cy="14" r="0.9" fill="#d97706" />
+      <circle cx="8.5" cy="13.5" r="0.9" fill="#d97706" />
+    </svg>
+  );
+}
+
 export function AdminDonations() {
-  const { user, triggerRefresh, donationSubTab, setDonationSubTab } = useAuth();
+  const { user, triggerRefresh } = useAuth();
   
-  // Chanda State
+  // In-Page Sub-Section Toggle State ('chanda' | 'laddu')
+  const [activeSection, setActiveSection] = useState('chanda');
+
+  // Chanda Form State
   const [donorName, setDonorName] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [paymentMode, setPaymentMode] = useState('Cash');
   const [notes, setNotes] = useState('');
 
-  // Laddu State
+  // Laddu Form State
   const [ladduWinnerName, setLadduWinnerName] = useState('');
   const [ladduAmount, setLadduAmount] = useState('');
   const [ladduDate, setLadduDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -43,7 +68,7 @@ export function AdminDonations() {
   const [isSuccessState, setIsSuccessState] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
-  const isLaddu = donationSubTab === 'laddu';
+  const isLaddu = activeSection === 'laddu';
 
   const paymentModeOptions = [
     { value: 'Cash', label: 'Cash', icon: Banknote },
@@ -194,37 +219,37 @@ export function AdminDonations() {
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight flex items-center justify-center gap-2">
           {isLaddu ? (
             <>
-              <Flame className="w-6 h-6 text-amber-500 shrink-0" />
+              <LadduIcon className="w-7 h-7 text-amber-600 shrink-0" />
               <span>Laddu Auction Portal</span>
             </>
           ) : (
             <>
-              <HeartHandshake className="w-6 h-6 text-emerald-600 shrink-0" />
+              <HandCoins className="w-7 h-7 text-emerald-600 shrink-0" />
               <span>Donations & Chanda</span>
             </>
           )}
         </h1>
       </div>
 
-      {/* Segmented Navigation Tab Bar */}
+      {/* Primary Top Tab Bar */}
       <Navbar />
 
-      {/* Sub-Tabs Selector Pill (Chanda vs Laddu) */}
+      {/* In-Page Direct Section Toggle Pill (Chanda Portal vs Laddu Auction) */}
       <div className="flex items-center justify-center">
-        <div className="bg-slate-200/80 p-1.5 rounded-2xl flex items-center gap-1.5 shadow-inner border border-slate-300/60 max-w-sm w-full">
+        <div className="bg-slate-200/90 p-1.5 rounded-2xl flex items-center gap-1.5 shadow-inner border border-slate-300/60 max-w-sm w-full">
           <button
             type="button"
             onClick={() => {
               triggerHaptic(12);
-              setDonationSubTab('chanda');
+              setActiveSection('chanda');
             }}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer select-none ${
+            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer select-none ${
               !isLaddu
-                ? 'bg-white text-emerald-700 shadow-sm'
+                ? 'bg-white text-emerald-700 shadow-md ring-1 ring-black/5 scale-[1.01]'
                 : 'text-slate-600 hover:text-[#0f172a]'
             }`}
           >
-            <HeartHandshake className="w-4 h-4 text-emerald-600" />
+            <HandCoins className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>Chanda Portal</span>
           </button>
 
@@ -232,15 +257,15 @@ export function AdminDonations() {
             type="button"
             onClick={() => {
               triggerHaptic(12);
-              setDonationSubTab('laddu');
+              setActiveSection('laddu');
             }}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer select-none ${
+            className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer select-none ${
               isLaddu
-                ? 'bg-white text-amber-700 shadow-sm'
+                ? 'bg-white text-amber-700 shadow-md ring-1 ring-black/5 scale-[1.01]'
                 : 'text-slate-600 hover:text-[#0f172a]'
             }`}
           >
-            <Flame className="w-4 h-4 text-amber-500" />
+            <LadduIcon className="w-4 h-4 text-amber-600 shrink-0" />
             <span>Laddu Auction</span>
           </button>
         </div>
@@ -280,20 +305,22 @@ export function AdminDonations() {
               </div>
             </div>
 
-            {/* Donation Amount Field */}
+            {/* Donation Amount Field (Perfect Center Baseline Alignment) */}
             <div>
               <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
                 Donation Amount (₹) <span className="text-rose-500">*</span>
               </label>
-              <div className="apple-input-wrapper">
-                <span className="apple-input-icon text-emerald-600 font-extrabold text-lg">₹</span>
+              <div className="relative flex items-center bg-[#f1f5f9] rounded-2xl px-4 py-2.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0071e3] transition-all border border-slate-200/50">
+                <span className="text-xl sm:text-2xl font-extrabold text-emerald-600 select-none mr-2 leading-none shrink-0">
+                  ₹
+                </span>
                 <input
                   type="number"
                   inputMode="numeric"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0"
-                  className="apple-input apple-input-with-icon text-2xl font-extrabold text-[#0f172a] py-3 tracking-tight"
+                  className="w-full bg-transparent border-0 text-xl sm:text-2xl font-extrabold text-[#0f172a] placeholder:text-slate-300 focus:outline-none tracking-tight py-0.5"
                   required
                 />
               </div>
@@ -364,8 +391,8 @@ export function AdminDonations() {
                 </>
               ) : (
                 <>
-                  <HeartHandshake className="w-5 h-5" />
-                  <span>Record Chanda Donation (+ ₹{Number(amount || 0).toLocaleString('en-IN')})</span>
+                  <HandCoins className="w-5 h-5" />
+                  <span>Record Chanda Donation</span>
                 </>
               )}
             </button>
@@ -418,7 +445,7 @@ export function AdminDonations() {
             {/* 2. Winner Devotee Name */}
             <div>
               <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
-                Winner Name (Laddu Prasadam Devotee) <span className="text-rose-500">*</span>
+                Winner Name (Laddu Devotee) <span className="text-rose-500">*</span>
               </label>
               <div className="apple-input-wrapper">
                 <Award className="apple-input-icon text-amber-500" />
@@ -433,20 +460,22 @@ export function AdminDonations() {
               </div>
             </div>
 
-            {/* 3. Winning / Auction Amount */}
+            {/* 3. Winning / Auction Amount (Perfect Center Baseline Alignment) */}
             <div>
               <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
                 Auction Winning Amount (₹) <span className="text-rose-500">*</span>
               </label>
-              <div className="apple-input-wrapper">
-                <span className="apple-input-icon text-amber-600 font-extrabold text-lg">₹</span>
+              <div className="relative flex items-center bg-[#f1f5f9] rounded-2xl px-4 py-2.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-amber-500 transition-all border border-slate-200/50">
+                <span className="text-xl sm:text-2xl font-extrabold text-amber-600 select-none mr-2 leading-none shrink-0">
+                  ₹
+                </span>
                 <input
                   type="number"
                   inputMode="numeric"
                   value={ladduAmount}
                   onChange={(e) => setLadduAmount(e.target.value)}
                   placeholder="0"
-                  className="apple-input apple-input-with-icon text-2xl font-extrabold text-[#0f172a] py-3 tracking-tight"
+                  className="w-full bg-transparent border-0 text-xl sm:text-2xl font-extrabold text-[#0f172a] placeholder:text-slate-300 focus:outline-none tracking-tight py-0.5"
                   required
                 />
               </div>
@@ -513,12 +542,12 @@ export function AdminDonations() {
               ) : isSuccessState ? (
                 <>
                   <CheckCircle2 className="w-5 h-5" />
-                  <span>Laddu Prasadam Winner Recorded!</span>
+                  <span>Laddu Winner Recorded!</span>
                 </>
               ) : (
                 <>
-                  <Flame className="w-5 h-5" />
-                  <span>Record Laddu Winner (+ ₹{Number(ladduAmount || 0).toLocaleString('en-IN')})</span>
+                  <LadduIcon className="w-5 h-5 text-white" />
+                  <span>Record Laddu Winner</span>
                 </>
               )}
             </button>

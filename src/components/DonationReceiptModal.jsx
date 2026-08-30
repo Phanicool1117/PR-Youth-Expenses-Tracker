@@ -3,7 +3,8 @@ import { createDonationReceiptCanvas } from '../utils/donationReceiptCanvas';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { LOGO_BASE64 } from '../utils/logoBase64';
 import { formatCurrency, formatDate, formatTime } from '../utils/formatters';
-import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck, Flame, Award } from 'lucide-react';
+import { LadduIcon } from './ui/LadduIcon';
+import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck, Award } from 'lucide-react';
 
 export function DonationReceiptModal({ isOpen, onClose, donation }) {
   const [isExporting, setIsExporting] = useState(false);
@@ -228,7 +229,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             <div className="pt-0.5 flex justify-center">
               {isLaddu ? (
                 <span className="inline-flex items-center gap-1 text-[9.5px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300">
-                  <Flame className="w-3 h-3 text-amber-600" />
+                  <LadduIcon className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                   <span>SRI VINAYAKA LADDU PRASADAM AUCTION RECEIPT</span>
                 </span>
               ) : (

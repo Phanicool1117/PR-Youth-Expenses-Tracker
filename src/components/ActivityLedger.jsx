@@ -40,7 +40,10 @@ export function ActivityLedger({
         !showCategory ||
         selectedCategory === 'All' ||
         tx.category === selectedCategory ||
-        tx.type === selectedCategory;
+        tx.type === selectedCategory ||
+        tx.subType === selectedCategory ||
+        (selectedCategory === 'Chanda' && (tx.subType === 'Chanda' || (!tx.subType && tx.category === 'Donation Received'))) ||
+        (selectedCategory === 'Laddu Auction' && (tx.subType === 'Laddu' || tx.category === 'Laddu Prasadam Auction' || String(tx.note || '').toLowerCase().includes('laddu')));
 
       const matchMember =
         !showMember ||
@@ -63,6 +66,14 @@ export function ActivityLedger({
 
   // Dynamically compute categoryOptions combining categories prop + transaction categories
   const categoryOptions = useMemo(() => {
+    if (categories && (categories.includes('Chanda') || categories.includes('Laddu Auction'))) {
+      return [
+        { value: 'All', label: 'All Categories' },
+        { value: 'Chanda', label: 'Chanda' },
+        { value: 'Laddu Auction', label: 'Laddu Auction' },
+      ];
+    }
+
     const set = new Set();
     if (Array.isArray(categories)) {
       categories.forEach((c) => c && set.add(String(c)));

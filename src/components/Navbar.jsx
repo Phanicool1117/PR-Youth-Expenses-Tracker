@@ -1,10 +1,10 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ShadcnTabs } from './ui/ShadcnTabs';
-import { LayoutDashboard, PlusCircle, Users, HeartHandshake, Flame } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Users } from 'lucide-react';
 
 export function Navbar() {
-  const { user, activeTab, setActiveTab, donationSubTab, setDonationSubTab } = useAuth();
+  const { user, activeTab, setActiveTab } = useAuth();
 
   if (!user) return null;
 
@@ -16,18 +16,10 @@ export function Navbar() {
     { id: 'add-expense', label: 'Add', icon: PlusCircle },
   ];
 
-  // Admin Tabs: Overview, Donations (with Chanda & Laddu sub-options), Members
+  // Admin Tabs: Overview, Donations, Members
   const adminTabs = [
     { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
-    {
-      id: 'donations',
-      label: 'Donations',
-      icon: PlusCircle,
-      subTabs: [
-        { id: 'chanda', label: 'Chanda', icon: HeartHandshake },
-        { id: 'laddu', label: 'Laddu Auction', icon: Flame },
-      ],
-    },
+    { id: 'donations', label: 'Donations', icon: PlusCircle },
     { id: 'members', label: 'Members', icon: Users },
   ];
 
@@ -38,13 +30,7 @@ export function Navbar() {
       <ShadcnTabs
         tabs={currentTabs}
         activeTab={activeTab}
-        donationSubTab={donationSubTab}
-        onSelectTab={(tabId, subTabId) => {
-          setActiveTab(tabId);
-          if (subTabId) {
-            setDonationSubTab(subTabId);
-          }
-        }}
+        onSelectTab={(tabId) => setActiveTab(tabId)}
       />
     </div>
   );

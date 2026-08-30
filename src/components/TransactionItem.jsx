@@ -3,10 +3,11 @@ import { DonationReceiptModal } from './DonationReceiptModal';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { getCategoryIconAndColor } from '../utils/categoryIcons';
 import { formatCurrency, formatDate, formatDateTime, formatTime } from '../utils/formatters';
+import { LadduIcon } from './ui/LadduIcon';
 import {
   Calendar,
   User,
-  HandHeart,
+  HandCoins,
   Receipt,
   ChevronDown,
   Clock,
@@ -14,7 +15,6 @@ import {
   FileText,
   ShoppingBag,
   Tag,
-  Flame,
 } from 'lucide-react';
 
 export function TransactionItem({ transaction, showMember = false, members = [] }) {
@@ -56,8 +56,8 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
   // Use the same unified Category Icon & Color mapping used in the member's category picker
   const itemStyle = isDonation
     ? isLaddu
-      ? { icon: Flame, color: 'bg-amber-50 text-amber-600 border-amber-300' }
-      : { icon: HandHeart, color: 'bg-emerald-50 text-emerald-600 border-emerald-300' }
+      ? { icon: LadduIcon, color: 'bg-amber-50 text-amber-600 border-amber-300' }
+      : { icon: HandCoins, color: 'bg-emerald-50 text-emerald-600 border-emerald-300' }
     : getCategoryIconAndColor(transaction.category);
 
   const CategoryIcon = itemStyle?.icon || ShoppingBag;
@@ -112,7 +112,7 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
                   )}
                   {isLaddu ? (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 shrink-0 flex items-center gap-1 group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                      <Flame className="w-3 h-3 text-amber-600 group-hover:text-white" />
+                      <LadduIcon className="w-3 h-3 text-amber-600 group-hover:text-white" />
                       <span>Laddu Winner</span>
                     </span>
                   ) : (
