@@ -11,7 +11,7 @@ import {
   Clock,
   CreditCard,
   FileText,
-  Tag,
+  ShoppingBag,
 } from 'lucide-react';
 
 export function TransactionItem({ transaction, showMember = false, members = [] }) {
@@ -79,9 +79,12 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
   }, [members, transaction.memberId, transaction.memberName]);
 
   // Use the same unified Category Icon & Color mapping used in the member's category picker
-  const { icon: CategoryIcon, color: categoryBg } = isDonation
+  const itemStyle = isDonation
     ? { icon: HandHeart, color: 'bg-emerald-50 text-emerald-600 border-emerald-300' }
     : getCategoryIconAndColor(transaction.category);
+
+  const CategoryIcon = itemStyle?.icon || ShoppingBag;
+  const categoryBg = itemStyle?.color || 'bg-slate-100 text-slate-700 border-slate-300';
 
   const title = isDonation
     ? `Donation from ${transaction.donorName || 'Sponsor'}`

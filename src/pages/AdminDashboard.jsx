@@ -218,20 +218,21 @@ export function AdminDashboard() {
     return map;
   }, [categories, categoryBreakdown]);
 
-  // Sorted categories by amount descending
+  // Sorted categories by amount descending with 100% null-safety
   const sortedCategories = useMemo(() => {
-    const entries = Object.entries(mergedCategoryBreakdown).map(([cat, amt]) => {
+    const entries = Object.entries(mergedCategoryBreakdown || {}).map(([cat, amt]) => {
       const numericAmt = Number(amt) || 0;
       const pct = totalExpenses > 0 ? Math.round((numericAmt / totalExpenses) * 100) : 0;
-      return { cat, amt: numericAmt, pct, color: getCategoryColor(cat) };
+      const colorObj = getCategoryColor(cat) || { bg: '#0f52ba', light: '#eff6ff', text: '#1e40af' };
+      return { cat: String(cat || 'General'), amt: numericAmt, pct, color: colorObj };
     });
     entries.sort((a, b) => b.amt - a.amt);
     return entries;
   }, [mergedCategoryBreakdown, totalExpenses]);
 
   // Active (amt > 0) vs Inactive (amt === 0) categories
-  const activeCategories = sortedCategories.filter((c) => c.amt > 0);
-  const inactiveCategories = sortedCategories.filter((c) => c.amt === 0);
+  const activeCategories = sortedCategories.filter((c) => c && c.amt > 0);
+  const inactiveCategories = sortedCategories.filter((c) => c && c.amt === 0);
 
   // Visible items based on showAllCategories toggle
   const visibleCategories = showAllCategories

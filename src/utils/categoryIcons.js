@@ -1,6 +1,6 @@
 import {
   Tag, Flame, Lightbulb, Flag, Flower2, Heart, Music, Utensils, ShoppingBag, Droplets,
-  Car, Bus, Fuel, Sparkles, Zap, Image, Volume2, Mic, Coffee, Armchair, Building, ShieldCheck,
+  Car, Bus, Fuel, Sparkles, Zap, Volume2, Mic, Coffee, Armchair, Building, ShieldCheck,
   Trash2, HandHeart, Home, Apple, Carrot, Box, Gift, Briefcase, Receipt, Coins, Ticket, Package,
   Wallet, CreditCard, Bookmark, Compass
 } from 'lucide-react';
@@ -23,7 +23,7 @@ const FALLBACK_PALETTE = [
 export function getCategoryIconAndColor(catName) {
   const clean = String(catName || '').toLowerCase().trim();
 
-  // 1. Direct Semantic Keyword Matching (100% Uniform across Member & Admin tabs)
+  // 1. Direct Semantic Keyword Matching
   if (clean.includes('water') || clean.includes('cool') || clean.includes('drink')) {
     return { icon: Droplets, color: 'bg-cyan-50 text-cyan-600 border-cyan-300' };
   }
@@ -76,5 +76,5 @@ export function getCategoryIconAndColor(catName) {
     hash = clean.charCodeAt(i) + ((hash << 5) - hash);
   }
   const index = Math.abs(hash) % FALLBACK_PALETTE.length;
-  return FALLBACK_PALETTE[index];
+  return FALLBACK_PALETTE[index] || { icon: ShoppingBag, color: 'bg-slate-100 text-slate-700 border-slate-300' };
 }
