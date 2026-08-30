@@ -1,22 +1,14 @@
 import React from 'react';
+import { LADDU_BASE64 } from '../../utils/ladduBase64';
 
-// Clean Minimal Circle Icon with Light Orange Fill
-export function LadduIcon({ className = "w-5 h-5" }) {
+// Exact 1:1 Replicative Laddu Icon from User Reference
+export function LadduIcon({ className = "w-5 h-5", alt = "Laddu" }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="8.5"
-        fill="#ffedd5"
-        stroke="#f97316"
-        strokeWidth="2.2"
-      />
-    </svg>
+    <img
+      src={LADDU_BASE64 || "/laddu.png"}
+      alt={alt}
+      className={`inline-block object-contain select-none shrink-0 drop-shadow-xs ${className}`}
+      draggable={false}
+    />
   );
 }
