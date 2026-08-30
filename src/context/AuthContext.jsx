@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
 
   const [gasUrlState, setGasUrlState] = useState(() => getGasUrl());
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [donationSubTab, setDonationSubTab] = useState('chanda'); // 'chanda' | 'laddu'
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState(new Date());
@@ -155,6 +156,8 @@ export function AuthProvider({ children }) {
         logout,
         activeTab,
         setActiveTab,
+        donationSubTab,
+        setDonationSubTab,
         gasUrl: gasUrlState,
         updateGasUrl,
         isLoading,

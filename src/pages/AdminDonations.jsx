@@ -6,27 +6,61 @@ import { CustomDatePicker } from '../components/ui/CustomDatePicker';
 import { CustomSelect } from '../components/ui/CustomSelect';
 import { Toast } from '../components/ui/Toast';
 import { Navbar } from '../components/Navbar';
-import { HeartHandshake, User, Loader2, CheckCircle2, Banknote, QrCode, Smartphone, Building2 } from 'lucide-react';
+import {
+  HeartHandshake,
+  User,
+  Loader2,
+  CheckCircle2,
+  Banknote,
+  QrCode,
+  Smartphone,
+  Building2,
+  Flame,
+  Award,
+  Sparkles,
+  FileText
+} from 'lucide-react';
 
 export function AdminDonations() {
-  const { user, triggerRefresh } = useAuth();
+  const { user, triggerRefresh, donationSubTab, setDonationSubTab } = useAuth();
+  
+  // Chanda State
   const [donorName, setDonorName] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [paymentMode, setPaymentMode] = useState('Cash');
   const [notes, setNotes] = useState('');
+
+  // Laddu State
+  const [ladduWinnerName, setLadduWinnerName] = useState('');
+  const [ladduAmount, setLadduAmount] = useState('');
+  const [ladduDate, setLadduDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [ladduPaymentMode, setLadduPaymentMode] = useState('Cash');
+  const [ladduNotes, setLadduNotes] = useState('Sri Vinayaka 2026 Laddu Auction Winner');
+  const [gender, setGender] = useState('Male'); // 'Male' | 'Female'
+
   const [submitting, setSubmitting] = useState(false);
   const [isSuccessState, setIsSuccessState] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
-  const handleSubmit = async (e) => {
+  const isLaddu = donationSubTab === 'laddu';
+
+  const paymentModeOptions = [
+    { value: 'Cash', label: 'Cash', icon: Banknote },
+    { value: 'QR Code', label: 'QR Code', icon: QrCode },
+    { value: 'UPI Transfer', label: 'UPI Transfer', icon: Smartphone },
+    { value: 'Bank Deposit', label: 'Bank Deposit', icon: Building2 },
+  ];
+
+  // Submit Handler for Chanda (General Donations)
+  const handleChandaSubmit = async (e) => {
     e.preventDefault();
     triggerHaptic(15);
 
     const numericAmount = Number(amount);
 
     if (!donorName.trim()) {
-      setToastMessage({ type: 'error', text: 'Please enter donor name.' });
+      setToastMessage({ type: 'error', text: 'Please enter the donor’s name.' });
       return;
     }
 
@@ -40,17 +74,16 @@ export function AdminDonations() {
 
     try {
       const payload = {
-        memberId: user?.memberId || 'ADM000',
-        memberName: user?.name || 'Admin',
+        memberId: user.memberId,
+        memberName: user.name,
         donorName: donorName.trim(),
-        name: donorName.trim(),
-        donor: donorName.trim(),
         amount: numericAmount,
-        date: date || new Date().toISOString().split('T')[0],
         paymentMethod: paymentMode,
-        paymentMode: paymentMode,
+        date,
         notes: notes.trim(),
-        note: notes.trim(),
+        subType: 'Chanda',
+        gender: 'General',
+        titlePrefix: 'Mr/Miss:',
       };
 
       const res = await api.addDonation(payload);
@@ -62,7 +95,7 @@ export function AdminDonations() {
 
         setToastMessage({
           type: 'success',
-          text: `₹${numericAmount.toLocaleString('en-IN')} donation from "${donorName.trim()}" logged!`,
+          text: `₹${numericAmount.toLocaleString('en-IN')} Chanda donation from "${donorName.trim()}" logged!`,
         });
         setDonorName('');
         setAmount('');
@@ -73,10 +106,7 @@ export function AdminDonations() {
           setIsSuccessState(false);
         }, 1000);
       } else {
-        setToastMessage({
-          type: 'error',
-          text: res.message || 'Failed to record donation. Check required fields.',
-        });
+        setToastMessage({ type: 'error', text: res.message || 'Failed to record donation.' });
       }
     } catch (err) {
       setToastMessage({ type: 'error', text: 'An unexpected error occurred. Please try again.' });
@@ -85,12 +115,68 @@ export function AdminDonations() {
     }
   };
 
-  const paymentModeOptions = [
-    { value: 'Cash', label: 'Cash', icon: Banknote },
-    { value: 'QR Code', label: 'QR Code', icon: QrCode },
-    { value: 'UPI Transfer', label: 'UPI Transfer', icon: Smartphone },
-    { value: 'Bank Deposit', label: 'Bank Deposit', icon: Building2 },
-  ];
+  // Submit Handler for Laddu Auction
+  const handleLadduSubmit = async (e) => {
+    e.preventDefault();
+    triggerHaptic(15);
+
+    const numericAmount = Number(ladduAmount);
+
+    if (!ladduWinnerName.trim()) {
+      setToastMessage({ type: 'error', text: 'Please enter the Laddu auction winner name.' });
+      return;
+    }
+
+    if (!numericAmount || numericAmount <= 0) {
+      setToastMessage({ type: 'error', text: 'Please enter a valid auction winning amount.' });
+      return;
+    }
+
+    setSubmitting(true);
+    setToastMessage(null);
+
+    try {
+      const titlePrefix = gender === 'Female' ? 'Ms.' : 'Mr.';
+      const payload = {
+        memberId: user.memberId,
+        memberName: user.name,
+        donorName: ladduWinnerName.trim(),
+        amount: numericAmount,
+        paymentMethod: ladduPaymentMode,
+        date: ladduDate,
+        notes: ladduNotes.trim(),
+        subType: 'Laddu',
+        gender: gender,
+        titlePrefix: titlePrefix,
+      };
+
+      const res = await api.addDonation(payload);
+
+      if (res.success) {
+        setIsSuccessState(true);
+        triggerHaptic([30, 50, 30]);
+        playSuccessSound();
+
+        setToastMessage({
+          type: 'success',
+          text: `🎉 ₹${numericAmount.toLocaleString('en-IN')} Laddu Auction Winner "${titlePrefix} ${ladduWinnerName.trim()}" recorded!`,
+        });
+        setLadduWinnerName('');
+        setLadduAmount('');
+        triggerRefresh();
+
+        setTimeout(() => {
+          setIsSuccessState(false);
+        }, 1000);
+      } else {
+        setToastMessage({ type: 'error', text: res.message || 'Failed to record Laddu winner.' });
+      }
+    } catch (err) {
+      setToastMessage({ type: 'error', text: 'An unexpected error occurred. Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="centered-container py-6 sm:py-10 space-y-6">
@@ -103,16 +189,62 @@ export function AdminDonations() {
         />
       </div>
 
-      {/* Clean Centered Title (No underline, no tagline) */}
+      {/* Clean Centered Title */}
       <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight flex items-center justify-center gap-2">
-          <HeartHandshake className="w-6 h-6 text-emerald-600 shrink-0" />
-          <span>Donations Portal</span>
+          {isLaddu ? (
+            <>
+              <Flame className="w-6 h-6 text-amber-500 shrink-0" />
+              <span>Laddu Auction Portal</span>
+            </>
+          ) : (
+            <>
+              <HeartHandshake className="w-6 h-6 text-emerald-600 shrink-0" />
+              <span>Donations & Chanda</span>
+            </>
+          )}
         </h1>
       </div>
 
       {/* Segmented Navigation Tab Bar */}
       <Navbar />
+
+      {/* Sub-Tabs Selector Pill (Chanda vs Laddu) */}
+      <div className="flex items-center justify-center">
+        <div className="bg-slate-200/80 p-1.5 rounded-2xl flex items-center gap-1.5 shadow-inner border border-slate-300/60 max-w-sm w-full">
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic(12);
+              setDonationSubTab('chanda');
+            }}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer select-none ${
+              !isLaddu
+                ? 'bg-white text-emerald-700 shadow-sm'
+                : 'text-slate-600 hover:text-[#0f172a]'
+            }`}
+          >
+            <HeartHandshake className="w-4 h-4 text-emerald-600" />
+            <span>Chanda Portal</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic(12);
+              setDonationSubTab('laddu');
+            }}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer select-none ${
+              isLaddu
+                ? 'bg-white text-amber-700 shadow-sm'
+                : 'text-slate-600 hover:text-[#0f172a]'
+            }`}
+          >
+            <Flame className="w-4 h-4 text-amber-500" />
+            <span>Laddu Auction</span>
+          </button>
+        </div>
+      </div>
 
       {/* Form Card */}
       <div className="reference-card p-6 space-y-5">
@@ -121,108 +253,277 @@ export function AdminDonations() {
             message={toastMessage.text}
             type={toastMessage.type}
             onClose={() => setToastMessage(null)}
-            autoHideDuration={1200}
+            autoHideDuration={1500}
           />
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Donor Name Field */}
-          <div>
-            <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
-              Donor Name <span className="text-rose-500">*</span>
-            </label>
-            <div className="apple-input-wrapper">
-              <User className="apple-input-icon text-emerald-600" />
-              <input
-                type="text"
-                value={donorName}
-                onChange={(e) => setDonorName(e.target.value)}
-                placeholder="e.g. Ramesh Varma or Manav"
-                className="apple-input apple-input-with-icon font-semibold text-xs py-3 text-[#0f172a]"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Amount Field */}
-          <div>
-            <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
-              Donation Amount (₹) <span className="text-rose-500">*</span>
-            </label>
-            <div className="apple-input-wrapper">
-              <span className="apple-currency-prefix text-emerald-600">₹</span>
-              <input
-                type="number"
-                step="any"
-                min="1"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0"
-                className="apple-input apple-input-with-icon text-2xl font-extrabold text-[#0f172a] py-3 tracking-tight"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Date & Payment Mode Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* ========================================================================= */}
+        {/* 1. CHANDA (GENERAL DONATIONS) FORM                                        */}
+        {/* ========================================================================= */}
+        {!isLaddu ? (
+          <form onSubmit={handleChandaSubmit} className="space-y-5 animate-fade-in">
+            {/* Donor Name Field */}
             <div>
               <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
-                Date Received <span className="text-rose-500">*</span>
+                Donor Name <span className="text-rose-500">*</span>
               </label>
-              <CustomDatePicker
-                value={date}
-                onChange={(isoDate) => setDate(isoDate)}
-              />
+              <div className="apple-input-wrapper">
+                <User className="apple-input-icon text-emerald-600" />
+                <input
+                  type="text"
+                  value={donorName}
+                  onChange={(e) => setDonorName(e.target.value)}
+                  placeholder="e.g. Ramesh Varma or Suresh"
+                  className="apple-input apple-input-with-icon font-semibold text-xs py-3"
+                  required
+                />
+              </div>
             </div>
 
+            {/* Donation Amount Field */}
             <div>
               <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
-                Mode of Payment
+                Donation Amount (₹) <span className="text-rose-500">*</span>
               </label>
-              <CustomSelect
-                value={paymentMode}
-                onChange={(val) => setPaymentMode(val)}
-                options={paymentModeOptions}
-              />
+              <div className="apple-input-wrapper">
+                <span className="apple-input-icon text-emerald-600 font-extrabold text-lg">₹</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0"
+                  className="apple-input apple-input-with-icon text-2xl font-extrabold text-[#0f172a] py-3 tracking-tight"
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Optional Notes */}
-          <div>
-            <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
-              Reference Notes (Optional)
-            </label>
-            <input
-              type="text"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Sent via QR Code on banner"
-              className="apple-input text-xs py-3"
-            />
-          </div>
+            {/* Date & Payment Mode Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
+                  Date Received <span className="text-rose-500">*</span>
+                </label>
+                <CustomDatePicker
+                  value={date}
+                  onChange={(isoDate) => setDate(isoDate)}
+                />
+              </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={submitting}
-            className={`w-full py-3.5 rounded-2xl text-sm font-bold shadow-md transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.98] ${
-              isSuccessState
-                ? 'bg-emerald-600 text-white'
-                : submitting
-                ? 'bg-emerald-700 text-white cursor-wait'
-                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-            }`}
-          >
-            {submitting ? (
-              <Loader2 className="w-5 h-5 animate-spin text-white" />
-            ) : isSuccessState ? (
-              <CheckCircle2 className="w-6 h-6 text-white" />
-            ) : (
-              <span>Record Central Donation</span>
-            )}
-          </button>
-        </form>
+              <div>
+                <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
+                  Mode of Payment
+                </label>
+                <CustomSelect
+                  value={paymentMode}
+                  onChange={(val) => setPaymentMode(val)}
+                  options={paymentModeOptions}
+                />
+              </div>
+            </div>
+
+            {/* Optional Notes */}
+            <div>
+              <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
+                Reference Notes (Optional)
+              </label>
+              <div className="apple-input-wrapper">
+                <FileText className="apple-input-icon text-slate-400" />
+                <input
+                  type="text"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="e.g. Sent via QR Code on banner"
+                  className="apple-input apple-input-with-icon text-xs py-3"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button with Tactile State */}
+            <button
+              type="submit"
+              disabled={submitting || isSuccessState}
+              className={`w-full py-4 rounded-2xl shadow-md transition-all duration-300 font-bold text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] ${
+                isSuccessState
+                  ? 'bg-emerald-600 text-white scale-[1.01] shadow-emerald-500/25'
+                  : submitting
+                  ? 'bg-emerald-600 text-white cursor-wait'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20'
+              }`}
+            >
+              {submitting && !isSuccessState ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Logging Donation...</span>
+                </>
+              ) : isSuccessState ? (
+                <>
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span>Chanda Donation Recorded!</span>
+                </>
+              ) : (
+                <>
+                  <HeartHandshake className="w-5 h-5" />
+                  <span>Record Chanda Donation (+ ₹{Number(amount || 0).toLocaleString('en-IN')})</span>
+                </>
+              )}
+            </button>
+          </form>
+        ) : (
+          /* ========================================================================= */
+          /* 2. LADDU AUCTION PRASADAM FORM                                            */
+          /* ========================================================================= */
+          <form onSubmit={handleLadduSubmit} className="space-y-5 animate-fade-in">
+            {/* 1. GENDER SELECTION (Mr. vs Ms.) */}
+            <div>
+              <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-2">
+                Winner Title / Gender <span className="text-rose-500">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic(12);
+                    setGender('Male');
+                  }}
+                  className={`p-3 rounded-2xl border transition-all flex items-center justify-center gap-2.5 font-extrabold text-xs cursor-pointer select-none ${
+                    gender === 'Male'
+                      ? 'bg-blue-50 border-[#0f52ba] text-[#0f52ba] shadow-sm ring-2 ring-[#0f52ba]/20'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="text-base">👨</span>
+                  <span>Male (Mr.)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerHaptic(12);
+                    setGender('Female');
+                  }}
+                  className={`p-3 rounded-2xl border transition-all flex items-center justify-center gap-2.5 font-extrabold text-xs cursor-pointer select-none ${
+                    gender === 'Female'
+                      ? 'bg-pink-50 border-pink-500 text-pink-700 shadow-sm ring-2 ring-pink-500/20'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="text-base">👩</span>
+                  <span>Female (Ms.)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Winner Devotee Name */}
+            <div>
+              <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
+                Winner Name (Laddu Prasadam Devotee) <span className="text-rose-500">*</span>
+              </label>
+              <div className="apple-input-wrapper">
+                <Award className="apple-input-icon text-amber-500" />
+                <input
+                  type="text"
+                  value={ladduWinnerName}
+                  onChange={(e) => setLadduWinnerName(e.target.value)}
+                  placeholder="e.g. Prasad Varma / Lakshmi Devi"
+                  className="apple-input apple-input-with-icon font-semibold text-xs py-3"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* 3. Winning / Auction Amount */}
+            <div>
+              <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
+                Auction Winning Amount (₹) <span className="text-rose-500">*</span>
+              </label>
+              <div className="apple-input-wrapper">
+                <span className="apple-input-icon text-amber-600 font-extrabold text-lg">₹</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  value={ladduAmount}
+                  onChange={(e) => setLadduAmount(e.target.value)}
+                  placeholder="0"
+                  className="apple-input apple-input-with-icon text-2xl font-extrabold text-[#0f172a] py-3 tracking-tight"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* 4. Date & Mode of Payment */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
+                  Date of Auction <span className="text-rose-500">*</span>
+                </label>
+                <CustomDatePicker
+                  value={ladduDate}
+                  onChange={(isoDate) => setLadduDate(isoDate)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
+                  Mode of Payment
+                </label>
+                <CustomSelect
+                  value={ladduPaymentMode}
+                  onChange={(val) => setLadduPaymentMode(val)}
+                  options={paymentModeOptions}
+                />
+              </div>
+            </div>
+
+            {/* 5. Reference Notes */}
+            <div>
+              <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
+                Reference Notes
+              </label>
+              <div className="apple-input-wrapper">
+                <Sparkles className="apple-input-icon text-amber-500" />
+                <input
+                  type="text"
+                  value={ladduNotes}
+                  onChange={(e) => setLadduNotes(e.target.value)}
+                  placeholder="e.g. Sri Vinayaka 2026 Laddu Auction Winner"
+                  className="apple-input apple-input-with-icon text-xs py-3"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button for Laddu Auction */}
+            <button
+              type="submit"
+              disabled={submitting || isSuccessState}
+              className={`w-full py-4 rounded-2xl shadow-md transition-all duration-300 font-bold text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] ${
+                isSuccessState
+                  ? 'bg-amber-600 text-white scale-[1.01] shadow-amber-500/25'
+                  : submitting
+                  ? 'bg-amber-600 text-white cursor-wait'
+                  : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-amber-500/25'
+              }`}
+            >
+              {submitting && !isSuccessState ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Recording Laddu Winner...</span>
+                </>
+              ) : isSuccessState ? (
+                <>
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span>Laddu Prasadam Winner Recorded!</span>
+                </>
+              ) : (
+                <>
+                  <Flame className="w-5 h-5" />
+                  <span>Record Laddu Winner (+ ₹{Number(ladduAmount || 0).toLocaleString('en-IN')})</span>
+                </>
+              )}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

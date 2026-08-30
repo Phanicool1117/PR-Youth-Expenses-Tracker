@@ -271,8 +271,11 @@ export const api = {
     const donations = getLocalDonations().map((d) => ({
       ...d,
       type: 'Donation',
-      category: 'Donation Received',
-      note: `Donor: ${d.donorName || d.name || 'Anonymous'}`,
+      subType: d.subType || 'Chanda',
+      gender: d.gender || 'Male',
+      titlePrefix: d.subType === 'Laddu' ? (d.gender === 'Female' ? 'Ms.' : 'Mr.') : (d.titlePrefix || 'Mr/Miss:'),
+      category: d.subType === 'Laddu' ? 'Laddu Prasadam Auction' : 'Donation Received',
+      note: d.notes || d.note || `Donor: ${d.donorName || d.name || 'Anonymous'}`,
     }));
     return { success: true, data: donations };
   },

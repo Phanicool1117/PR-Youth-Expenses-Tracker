@@ -141,7 +141,7 @@ export function AdminDashboard() {
     recentActivity = [],
   } = data || {};
 
-  // 1. Separate Pure Donations Ledger
+  // 1. Separate Pure Donations Ledger (Chanda & Laddu Auction)
   const donationsOnlyList = useMemo(() => {
     const map = new Map();
 
@@ -149,11 +149,15 @@ export function AdminDashboard() {
       donationsList.forEach((d) => {
         const donor = d.donorName || d.name || 'Anonymous Donor';
         const key = `DON_${d.timestamp || ''}_${d.amount || 0}_${donor}`;
+        const isLaddu = d.subType === 'Laddu' || String(d.notes || d.note || '').toLowerCase().includes('laddu');
         map.set(key, {
           ...d,
           id: d.id || key,
           type: 'Donation',
-          category: 'Donation Received',
+          subType: isLaddu ? 'Laddu' : (d.subType || 'Chanda'),
+          gender: d.gender || 'Male',
+          titlePrefix: isLaddu ? (d.gender === 'Female' ? 'Ms.' : 'Mr.') : (d.titlePrefix || 'Mr/Miss:'),
+          category: isLaddu ? 'Laddu Prasadam Auction' : 'Donation Received',
           donorName: donor,
         });
       });
@@ -165,11 +169,15 @@ export function AdminDashboard() {
         if (isDonation) {
           const donor = tx.donorName || tx.name || 'Anonymous Donor';
           const key = `DON_${tx.timestamp || ''}_${tx.amount || 0}_${donor}`;
+          const isLaddu = tx.subType === 'Laddu' || String(tx.notes || tx.note || '').toLowerCase().includes('laddu');
           map.set(key, {
             ...tx,
             id: tx.id || key,
             type: 'Donation',
-            category: 'Donation Received',
+            subType: isLaddu ? 'Laddu' : (tx.subType || 'Chanda'),
+            gender: tx.gender || 'Male',
+            titlePrefix: isLaddu ? (tx.gender === 'Female' ? 'Ms.' : 'Mr.') : (tx.titlePrefix || 'Mr/Miss:'),
+            category: isLaddu ? 'Laddu Prasadam Auction' : 'Donation Received',
             donorName: donor,
           });
         }

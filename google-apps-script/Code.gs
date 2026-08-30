@@ -250,6 +250,10 @@ function addDonation(params) {
   var amount = Number(params.amount);
   var paymentMethod = params.paymentMethod || params.paymentMode || 'Cash';
   var date = params.date || new Date().toISOString();
+  var subType = params.subType || 'Chanda'; // 'Chanda' | 'Laddu'
+  var gender = params.gender || 'General'; // 'Male' | 'Female' | 'General'
+  var notes = params.notes || params.note || '';
+  var titlePrefix = params.titlePrefix || (gender === 'Female' ? 'Ms.' : (gender === 'Male' ? 'Mr.' : 'Mr/Miss:'));
   
   if (!donorName || !amount || isNaN(amount) || amount <= 0) {
     return { success: false, message: "Invalid donation entry. Check required fields and amount." };
@@ -260,19 +264,22 @@ function addDonation(params) {
   
   var timestamp = new Date().toISOString();
   
-  // Append to Donations sheet
+  // Append to Donations sheet: Member ID, Member Name, Donor Name, Payment Method, Amount, Timestamp, Type, Gender, Notes
   sheet.appendRow([
     memberId,
     memberName,
     donorName,
     paymentMethod,
     amount,
-    timestamp
+    timestamp,
+    subType,
+    gender,
+    notes
   ]);
   
-  logAudit(memberId, memberName, 'Add Donation (Admin)', 'Donation', 'Donor: ' + donorName + ' | Amount: ₹' + amount + ' | Method: ' + paymentMethod);
+  logAudit(memberId, memberName, 'Add ' + subType + ' (Admin)', 'Donation', 'Donor/Winner: ' + donorName + ' (' + titlePrefix + ') | Amount: ₹' + amount + ' | Method: ' + paymentMethod + ' | Type: ' + subType);
   
-  return { success: true, message: "Central donation recorded successfully!" };
+  return { success: true, message: subType + " recorded successfully!" };
 }
 
 function addExpense(params) {
@@ -397,13 +404,25 @@ function getAdminDashboard() {
 
 function getAllDonations() {
   var rows = getSheetData("Donations").map(function(d) {
+    var subType = d['Type'] || d['Sub Type'] || d['Donation Type'] || 'Chanda';
+    var gender = d['Gender'] || 'Male';
+    var notes = d['Notes'] || d['Note'] || '';
+    var titlePrefix = subType === 'Laddu' ? (gender === 'Female' ? 'Ms.' : 'Mr.') : 'Mr/Miss:';
+
     return {
       memberId: d['Member ID'],
       memberName: d['Member Name'],
       donorName: d['Donor Name'],
       paymentMethod: d['Payment Method'],
       amount: Number(d['Amount']) || 0,
-      timestamp: d['Timestamp']
+      timestamp: d['Timestamp'],
+      subType: subType,
+      gender: gender,
+      titlePrefix: titlePrefix,
+      notes: notes,
+      note: notes || ('Donor: ' + (d['Donor Name'] || 'Anonymous')),
+      category: subType === 'Laddu' ? 'Laddu Prasadam Auction' : 'Donation Received',
+      type: 'Donation'
     };
   });
   rows.sort(function(a, b) { return new Date(b.timestamp) - new Date(a.timestamp); });

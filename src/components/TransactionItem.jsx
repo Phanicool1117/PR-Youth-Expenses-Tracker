@@ -14,6 +14,7 @@ import {
   FileText,
   ShoppingBag,
   Tag,
+  Flame,
 } from 'lucide-react';
 
 export function TransactionItem({ transaction, showMember = false, members = [] }) {
@@ -46,16 +47,26 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
     return transaction.memberName || 'Member';
   }, [members, transaction.memberId, transaction.memberName]);
 
+  const isLaddu = isDonation && (
+    transaction.subType === 'Laddu' ||
+    transaction.category === 'Laddu Prasadam Auction' ||
+    String(transaction.note || '').toLowerCase().includes('laddu')
+  );
+
   // Use the same unified Category Icon & Color mapping used in the member's category picker
   const itemStyle = isDonation
-    ? { icon: HandHeart, color: 'bg-emerald-50 text-emerald-600 border-emerald-300' }
+    ? isLaddu
+      ? { icon: Flame, color: 'bg-amber-50 text-amber-600 border-amber-300' }
+      : { icon: HandHeart, color: 'bg-emerald-50 text-emerald-600 border-emerald-300' }
     : getCategoryIconAndColor(transaction.category);
 
   const CategoryIcon = itemStyle?.icon || ShoppingBag;
   const categoryBg = itemStyle?.color || 'bg-slate-100 text-slate-700 border-slate-300';
 
   const title = isDonation
-    ? `Donation from ${transaction.donorName || 'Sponsor'}`
+    ? isLaddu
+      ? `Laddu Prasadam - ${transaction.titlePrefix ? `${transaction.titlePrefix} ` : ''}${transaction.donorName || 'Winner'}`
+      : `Donation from ${transaction.donorName || 'Sponsor'}`
     : transaction.category || 'Expense Entry';
 
   const handleCardClick = () => {
@@ -73,7 +84,9 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
         onClick={handleCardClick}
         className={`apple-card transition-all bg-white border border-slate-200/80 rounded-2xl shadow-2xs overflow-hidden cursor-pointer select-none ${
           isDonation
-            ? 'hover:border-emerald-400 hover:shadow-sm active:scale-[0.99] group'
+            ? isLaddu
+              ? 'hover:border-amber-400 hover:shadow-sm active:scale-[0.99] group'
+              : 'hover:border-emerald-400 hover:shadow-sm active:scale-[0.99] group'
             : isExpanded
             ? 'border-blue-300 ring-1 ring-blue-100 shadow-xs'
             : 'hover:border-[#0f52ba]/40 hover:shadow-2xs active:scale-[0.99]'
@@ -97,10 +110,17 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
                       {transaction.paymentMethod}
                     </span>
                   )}
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200 shrink-0 flex items-center gap-1 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                    <Receipt className="w-3 h-3" />
-                    <span>Receipt</span>
-                  </span>
+                  {isLaddu ? (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 shrink-0 flex items-center gap-1 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                      <Flame className="w-3 h-3 text-amber-600 group-hover:text-white" />
+                      <span>Laddu Winner</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200 shrink-0 flex items-center gap-1 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                      <Receipt className="w-3 h-3" />
+                      <span>Receipt</span>
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-3 text-xs text-slate-500 truncate">
@@ -114,7 +134,7 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
             </div>
 
             <div className="text-right shrink-0">
-              <span className="text-base sm:text-lg font-extrabold text-emerald-600 tracking-tight">
+              <span className={`text-base sm:text-lg font-extrabold tracking-tight ${isLaddu ? 'text-amber-700' : 'text-emerald-600'}`}>
                 + ₹{amountFormatted}
               </span>
             </div>

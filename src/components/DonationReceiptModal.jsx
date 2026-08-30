@@ -3,7 +3,7 @@ import { createDonationReceiptCanvas } from '../utils/donationReceiptCanvas';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { LOGO_BASE64 } from '../utils/logoBase64';
 import { formatCurrency, formatDate, formatTime } from '../utils/formatters';
-import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck, Flame, Award } from 'lucide-react';
 
 export function DonationReceiptModal({ isOpen, onClose, donation }) {
   const [isExporting, setIsExporting] = useState(false);
@@ -51,9 +51,18 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
 
   if (!isOpen || !donation) return null;
 
-  const donorName = donation.donorName || donation.name || 'Anonymous Donor';
+  const donorName = donation.donorName || donation.name || 'Devotee';
   const amount = Number(donation.amount || 0);
   const paymentMethod = donation.paymentMethod || 'UPI / Cash';
+  const isLaddu = donation.subType === 'Laddu' || String(donation.note || '').toLowerCase().includes('laddu');
+  const gender = donation.gender || 'Male';
+
+  // Dynamic prefix based on gender for Laddu or general default
+  const titlePrefix = isLaddu
+    ? gender === 'Female'
+      ? 'Ms.'
+      : 'Mr.'
+    : donation.titlePrefix || 'Mr/Miss:';
 
   const dateFormatted = formatDate(donation.timestamp);
   const timeFormatted = formatTime(donation.timestamp);
@@ -67,7 +76,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
 
     try {
       const canvas = await createDonationReceiptCanvas(donation);
-      const fileName = `Donation_Receipt_${donorName.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`;
+      const fileName = `${isLaddu ? 'Laddu_Auction_Receipt' : 'Donation_Receipt'}_${donorName.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.png`;
 
       canvas.toBlob((blob) => {
         if (blob) {
@@ -112,7 +121,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
 
     try {
       const canvas = await createDonationReceiptCanvas(donation);
-      const fileName = `Donation_Receipt_${donorName.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+      const fileName = `${isLaddu ? 'Laddu_Receipt' : 'Donation_Receipt'}_${donorName.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
 
       canvas.toBlob(async (blob) => {
         if (!blob) {
@@ -121,12 +130,14 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         }
 
         const file = new File([blob], fileName, { type: 'image/png' });
-        const shareText = `*Official Donation Receipt*\nPenumuli Perantalamma Youth\n\nDonor: ${donorName}\nAmount: ₹${amountFormatted}\nDate: ${dateFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
+        const shareText = isLaddu
+          ? `*Sri Vinayaka Laddu Prasadam Auction Receipt*\nPenumuli Perantalamma Youth\n\nWinner: ${titlePrefix} ${donorName}\nWinning Amount: ₹${amountFormatted}\nDate: ${dateFormatted}\n\nHearty congratulations and divine blessings for winning the Holy Sri Vinayaka Laddu Prasadam! 🪔🙏`
+          : `*Official Donation Receipt*\nPenumuli Perantalamma Youth\n\nDonor: ${donorName}\nAmount: ₹${amountFormatted}\nDate: ${dateFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
-              title: 'Penumuli Perantalamma Youth - Donation Receipt',
+              title: isLaddu ? 'Sri Vinayaka Laddu Auction Receipt' : 'Penumuli Perantalamma Youth - Donation Receipt',
               text: shareText,
               files: [file],
             });
@@ -140,7 +151,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         } else if (navigator.share) {
           try {
             await navigator.share({
-              title: 'Penumuli Perantalamma Youth - Donation Receipt',
+              title: isLaddu ? 'Sri Vinayaka Laddu Auction Receipt' : 'Penumuli Perantalamma Youth - Donation Receipt',
               text: shareText,
             });
             setShareSuccess(true);
@@ -187,15 +198,17 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           <X className="w-4 h-4" />
         </button>
 
-        {/* Top Royal Blue Accent Stripe */}
-        <div className="h-1.5 w-full bg-[#0f52ba]" />
+        {/* Top Accent Stripe */}
+        <div className={`h-1.5 w-full ${isLaddu ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-[#0f52ba]'}`} />
 
         {/* Receipt Card Content (Compact & Zero-Scroll Fit) */}
         <div className="p-4 sm:p-5 space-y-2 text-center bg-white">
           
           {/* Circular Logo Emblem */}
           <div className="flex justify-center">
-            <div className="w-12 h-12 rounded-full bg-blue-50/80 border border-blue-200 flex items-center justify-center shadow-inner p-1">
+            <div className={`w-12 h-12 rounded-full border flex items-center justify-center shadow-inner p-1 ${
+              isLaddu ? 'bg-amber-50 border-amber-200' : 'bg-blue-50/80 border-blue-200'
+            }`}>
               <img
                 src={LOGO_BASE64}
                 alt="PR Youth Logo"
@@ -213,10 +226,17 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               Penumuli Village, Duggirala Mandal, Guntur District
             </p>
             <div className="pt-0.5 flex justify-center">
-              <span className="inline-flex items-center gap-1 text-[9.5px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                <span>OFFICIAL DONATION RECEIPT</span>
-              </span>
+              {isLaddu ? (
+                <span className="inline-flex items-center gap-1 text-[9.5px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300">
+                  <Flame className="w-3 h-3 text-amber-600" />
+                  <span>SRI VINAYAKA LADDU PRASADAM AUCTION RECEIPT</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[9.5px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                  <span>OFFICIAL DONATION RECEIPT</span>
+                </span>
+              )}
             </div>
           </div>
 
@@ -252,24 +272,42 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           {/* MAIN HERO DONATION CONTEXT (Center Aligned) */}
           {/* ========================================== */}
           <div className="py-1 px-1 text-center">
-            <p className="text-[13px] sm:text-sm text-slate-700 leading-snug font-normal text-center">
-              <span className="font-bold text-slate-900">Mr/Miss: </span>
-              <span className="font-black text-orange-600 text-sm sm:text-base tracking-tight">
-                {donorName}
-              </span>{' '}
-              has generously contributed an amount of{' '}
-              <span className="font-black text-emerald-700 text-sm sm:text-base">₹{amountFormatted}</span> towards the{' '}
-              <span className="font-bold text-slate-900">Vinayaka festival / Puja</span>, and the amount has been received with heartfelt thanks.
-            </p>
+            {isLaddu ? (
+              <p className="text-[13px] sm:text-sm text-slate-700 leading-snug font-normal text-center">
+                <span className="font-bold text-slate-900">{titlePrefix} </span>
+                <span className="font-black text-amber-700 text-sm sm:text-base tracking-tight">
+                  {donorName}
+                </span>{' '}
+                has successfully won the Holy{' '}
+                <span className="font-bold text-slate-900">Sri Vinayaka Laddu Prasadam</span> at the auction with an auspicious winning amount of{' '}
+                <span className="font-black text-emerald-700 text-sm sm:text-base">₹{amountFormatted}</span>, received with heartfelt devotional blessings.
+              </p>
+            ) : (
+              <p className="text-[13px] sm:text-sm text-slate-700 leading-snug font-normal text-center">
+                <span className="font-bold text-slate-900">{titlePrefix} </span>
+                <span className="font-black text-orange-600 text-sm sm:text-base tracking-tight">
+                  {donorName}
+                </span>{' '}
+                has generously contributed an amount of{' '}
+                <span className="font-black text-emerald-700 text-sm sm:text-base">₹{amountFormatted}</span> towards the{' '}
+                <span className="font-bold text-slate-900">Vinayaka festival / Puja</span>, and the amount has been received with heartfelt thanks.
+              </p>
+            )}
           </div>
 
           {/* Complementary Centered Amount Pill */}
           <div className="flex justify-center pt-0.5">
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-300 shadow-2xs">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
-                Amount Received:
+            <div className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border shadow-2xs ${
+              isLaddu ? 'bg-amber-50 border-amber-300' : 'bg-emerald-50 border-emerald-300'
+            }`}>
+              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
+                isLaddu ? 'text-amber-800' : 'text-emerald-800'
+              }`}>
+                {isLaddu ? 'Winning Amount:' : 'Amount Received:'}
               </span>
-              <span className="text-sm sm:text-base font-black text-emerald-700 tracking-tight">
+              <span className={`text-sm sm:text-base font-black tracking-tight ${
+                isLaddu ? 'text-amber-800' : 'text-emerald-700'
+              }`}>
                 ₹{amountFormatted}
               </span>
             </div>
@@ -277,8 +315,8 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
 
           {/* Thanking Note */}
           <div className="py-1">
-            <p className="text-xs sm:text-sm font-bold text-[#0f52ba]">
-              Thanking you for your contribution.
+            <p className={`text-xs sm:text-sm font-bold ${isLaddu ? 'text-amber-700' : 'text-[#0f52ba]'}`}>
+              {isLaddu ? 'Devotional blessings for your auspicious contribution.' : 'Thanking you for your contribution.'}
             </p>
           </div>
 
@@ -319,7 +357,9 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           <button
             onClick={handleExportReceipt}
             disabled={isExporting || isSharing}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#0f52ba] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
+            className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow transition-all active:scale-98 disabled:opacity-50 cursor-pointer ${
+              isLaddu ? 'bg-amber-600 hover:bg-amber-700' : 'bg-[#0f52ba] hover:bg-blue-700'
+            }`}
           >
             {isExporting ? (
               <>
