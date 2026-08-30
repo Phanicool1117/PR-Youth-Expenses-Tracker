@@ -251,7 +251,7 @@ function addDonation(params) {
   var paymentMethod = params.paymentMethod || params.paymentMode || 'Cash';
   var date = params.date || new Date().toISOString();
   var subType = params.subType || 'Chanda'; // 'Chanda' | 'Laddu'
-  var gender = params.gender || 'General'; // 'Male' | 'Female' | 'General'
+  var gender = params.gender || (subType === 'Laddu' ? 'Male' : 'General'); // 'Male' | 'Female' | 'General'
   var notes = params.notes || params.note || '';
   var titlePrefix = params.titlePrefix || (gender === 'Female' ? 'Ms.' : (gender === 'Male' ? 'Mr.' : 'Mr/Miss:'));
   
@@ -260,11 +260,46 @@ function addDonation(params) {
   }
   
   var sheet = getSpreadsheet().getSheetByName("Donations");
-  if (!sheet) return { success: false, message: "Donations sheet not found." };
+  if (!sheet) {
+    sheet = getSpreadsheet().insertSheet("Donations");
+    sheet.appendRow([
+      "Member ID",
+      "Member Name",
+      "Donor Name",
+      "Payment Method",
+      "Amount",
+      "Timestamp",
+      "Type",
+      "Gender",
+      "Notes"
+    ]);
+  } else {
+    // If the sheet already exists, auto-ensure columns G (Type), H (Gender), I (Notes) exist in Header Row 1
+    var lastCol = Math.max(sheet.getLastColumn(), 9);
+    var headerRange = sheet.getRange(1, 1, 1, lastCol);
+    var headers = headerRange.getValues()[0];
+    if (!headers[0] || String(headers[0]).trim() === '') {
+      sheet.getRange(1, 1, 1, 9).setValues([[
+        "Member ID",
+        "Member Name",
+        "Donor Name",
+        "Payment Method",
+        "Amount",
+        "Timestamp",
+        "Type",
+        "Gender",
+        "Notes"
+      ]]);
+    } else {
+      if (!headers[6] || String(headers[6]).trim() === '') sheet.getRange(1, 7).setValue("Type");
+      if (!headers[7] || String(headers[7]).trim() === '') sheet.getRange(1, 8).setValue("Gender");
+      if (!headers[8] || String(headers[8]).trim() === '') sheet.getRange(1, 9).setValue("Notes");
+    }
+  }
   
   var timestamp = new Date().toISOString();
   
-  // Append to Donations sheet: Member ID, Member Name, Donor Name, Payment Method, Amount, Timestamp, Type, Gender, Notes
+  // Append to Donations sheet: Column A to I (Member ID, Member Name, Donor Name, Payment Method, Amount, Timestamp, Type, Gender, Notes)
   sheet.appendRow([
     memberId,
     memberName,
@@ -333,6 +368,11 @@ function getMyActivity(memberId) {
   var donations = getSheetData("Donations").filter(function(d) {
     return !memberId || String(d['Member ID']) === String(memberId);
   }).map(function(d) {
+    var subType = d['Type'] || d['Sub Type'] || d['Donation Type'] || 'Chanda';
+    var gender = d['Gender'] || 'Male';
+    var notes = d['Notes'] || d['Note'] || '';
+    var titlePrefix = subType === 'Laddu' ? (gender === 'Female' ? 'Ms.' : 'Mr.') : 'Mr/Miss:';
+
     return {
       type: 'Donation',
       memberId: d['Member ID'],
@@ -341,8 +381,12 @@ function getMyActivity(memberId) {
       paymentMethod: d['Payment Method'],
       amount: Number(d['Amount']) || 0,
       timestamp: d['Timestamp'],
-      category: 'Donation Received',
-      note: 'Donor: ' + (d['Donor Name'] || 'Anonymous')
+      subType: subType,
+      gender: gender,
+      titlePrefix: titlePrefix,
+      notes: notes,
+      category: subType === 'Laddu' ? 'Laddu Prasadam Auction' : 'Donation Received',
+      note: notes || ('Donor: ' + (d['Donor Name'] || 'Anonymous'))
     };
   });
 
