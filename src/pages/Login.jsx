@@ -121,30 +121,6 @@ export function Login() {
           {/* ========================================================================= */}
           {isAdminMode ? (
             <div className="space-y-4 pt-1 animate-fade-in">
-              <div className="flex items-center justify-between bg-rose-50 border border-rose-200/80 p-3 rounded-2xl">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-xs">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-rose-950">Executive Admin Access</h3>
-                    <p className="text-[10.5px] font-medium text-rose-600">Password Authentication Only</p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic(10);
-                    setIsAdminMode(false);
-                    setError('');
-                  }}
-                  className="text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer py-1 px-2 rounded-lg hover:bg-rose-100/60 transition-colors"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Member</span>
-                </button>
-              </div>
 
               <form onSubmit={handleAdminSubmit} className="space-y-4 pt-1">
                 {/* Admin Password Input */}
