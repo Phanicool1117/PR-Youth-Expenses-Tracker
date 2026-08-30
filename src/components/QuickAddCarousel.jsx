@@ -21,18 +21,18 @@ export function QuickAddCarousel({ selectedCategory, onSelectCategory, categorie
   const activeCategoriesList = categories.length > 0 ? categories : defaultCategoriesList;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       <div className="flex items-center justify-between">
         <label className="block text-xs font-bold text-[#1d1d1f] uppercase tracking-wider">
           Select Category <span className="text-rose-500">*</span>
         </label>
-        <span className="text-[11px] font-medium text-slate-400 hidden sm:inline">
-          Scroll horizontally →
+        <span className="text-[11px] font-medium text-slate-400">
+          Swipe horizontally →
         </span>
       </div>
 
-      {/* Ultra-Compact Horizontal Swipe Carousel */}
-      <div className="flex gap-2 overflow-x-auto pb-1.5 pt-0.5 scrollbar-none snap-x snap-mandatory scroll-smooth -mx-1 px-1">
+      {/* Horizontal Swipe Carousel with Prominent Selected State */}
+      <div className="flex items-center gap-2.5 overflow-x-auto py-2 px-1 scrollbar-none snap-x snap-mandatory scroll-smooth -mx-1">
         {activeCategoriesList.map((catName) => {
           const isSelected = selectedCategory === catName;
           const { icon: Icon, color } = getCategoryIconAndColor(catName);
@@ -45,29 +45,34 @@ export function QuickAddCarousel({ selectedCategory, onSelectCategory, categorie
                 triggerHaptic(12);
                 onSelectCategory(catName);
               }}
-              className={`py-2 px-3 sm:py-2.5 sm:px-3.5 rounded-2xl border transition-all flex items-center gap-2 shrink-0 snap-start text-left cursor-pointer group select-none ${
+              className={`py-3 px-4 rounded-2xl border transition-all duration-200 flex items-center gap-2.5 shrink-0 snap-start text-left cursor-pointer select-none ${
                 isSelected
-                  ? 'bg-blue-50/90 border-[#0f52ba] shadow-sm ring-2 ring-[#0f52ba]/20 text-[#0f52ba]'
-                  : 'bg-white border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/60 text-[#0f172a] active:scale-95'
+                  ? 'bg-blue-50/95 border-[#0f52ba] shadow-md ring-2 ring-[#0f52ba]/25 text-[#0f52ba] scale-[1.04] z-10'
+                  : 'bg-white border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/70 text-[#0f172a] active:scale-95'
               }`}
             >
+              {/* Category Icon */}
               <div
-                className={`w-7 h-7 rounded-xl border flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 shadow-2xs ${color}`}
+                className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center shrink-0 transition-transform ${
+                  isSelected ? 'scale-105 shadow-xs' : 'shadow-2xs'
+                } ${color}`}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-4 h-4" />
               </div>
 
+              {/* Category Title */}
               <span
-                className={`text-xs font-bold whitespace-nowrap ${
-                  isSelected ? 'text-[#0f52ba]' : 'text-[#0f172a]'
+                className={`text-xs sm:text-[13px] whitespace-nowrap ${
+                  isSelected ? 'font-black text-[#0f52ba]' : 'font-bold text-[#0f172a]'
                 }`}
               >
                 {catName}
               </span>
 
+              {/* Animated Selected Check Badge */}
               {isSelected && (
-                <div className="w-4 h-4 rounded-full bg-[#0f52ba] text-white flex items-center justify-center shrink-0 shadow-2xs ml-0.5">
-                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                <div className="w-5 h-5 rounded-full bg-[#0f52ba] text-white flex items-center justify-center shrink-0 shadow-2xs ml-0.5 animate-scale-up">
+                  <Check className="w-3 h-3 stroke-[3]" />
                 </div>
               )}
             </button>
