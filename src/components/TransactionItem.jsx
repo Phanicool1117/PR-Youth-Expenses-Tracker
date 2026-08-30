@@ -13,6 +13,7 @@ import {
   CreditCard,
   FileText,
   ShoppingBag,
+  Tag,
 } from 'lucide-react';
 
 export function TransactionItem({ transaction, showMember = false, members = [] }) {
