@@ -6,29 +6,6 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import './index.css'
 
-// Ensure clean direct browser rendering without Service Worker or stale cache lockups
-if (typeof window !== 'undefined') {
-  if ('serviceWorker' in navigator) {
-    try {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        for (let registration of registrations) {
-          registration.unregister();
-        }
-      }).catch(() => {});
-    } catch (e) {}
-  }
-
-  if ('caches' in window) {
-    try {
-      caches.keys().then((names) => {
-        for (let name of names) {
-          caches.delete(name);
-        }
-      }).catch(() => {});
-    } catch (e) {}
-  }
-}
-
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -49,20 +26,18 @@ class ErrorBoundary extends React.Component {
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 text-center">
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-md max-w-sm w-full space-y-4">
             <h2 className="text-lg font-bold text-slate-800">Something went wrong</h2>
-            <p className="text-xs text-slate-500">Please tap below to refresh the page.</p>
+            <p className="text-xs text-slate-500">Please click below to reload the app.</p>
             <button
               onClick={() => {
-                if (typeof window !== 'undefined') {
-                  try {
-                    sessionStorage.clear();
-                    localStorage.removeItem('PR_YOUTH_USER');
-                  } catch (e) {}
-                  window.location.reload();
-                }
+                try {
+                  sessionStorage.clear();
+                  localStorage.removeItem('PR_YOUTH_USER');
+                } catch (e) {}
+                window.location.reload();
               }}
               className="w-full py-3 px-4 rounded-2xl bg-[#0f52ba] text-white font-bold text-sm shadow-sm active:scale-95 cursor-pointer"
             >
-              Refresh Application
+              Reload Application
             </button>
           </div>
         </div>
