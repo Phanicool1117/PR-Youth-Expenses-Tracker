@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createDonationReceiptCanvas } from '../utils/donationReceiptCanvas';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { LOGO_BASE64 } from '../utils/logoBase64';
+import { formatCurrency, formatDate, formatTime } from '../utils/formatters';
 import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export function DonationReceiptModal({ isOpen, onClose, donation }) {
@@ -54,17 +55,9 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
   const amount = Number(donation.amount || 0);
   const paymentMethod = donation.paymentMethod || 'UPI / Cash';
 
-  const txDate = donation.timestamp ? new Date(donation.timestamp) : new Date();
-  const dateFormatted = txDate.toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-  const timeFormatted = txDate.toLocaleTimeString('en-IN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
+  const dateFormatted = formatDate(donation.timestamp);
+  const timeFormatted = formatTime(donation.timestamp);
+  const amountFormatted = formatCurrency(amount);
 
   // Handle Export / Download PNG directly
   const handleExportReceipt = async () => {
@@ -128,7 +121,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         }
 
         const file = new File([blob], fileName, { type: 'image/png' });
-        const shareText = `*Official Donation Receipt*\nPenumuli Perantalamma Youth\n\nDonor: ${donorName}\nAmount: ₹${amount.toLocaleString('en-IN')}\nDate: ${dateFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
+        const shareText = `*Official Donation Receipt*\nPenumuli Perantalamma Youth\n\nDonor: ${donorName}\nAmount: ₹${amountFormatted}\nDate: ${dateFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
@@ -265,7 +258,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
                 {donorName}
               </span>{' '}
               has generously contributed an amount of{' '}
-              <span className="font-black text-emerald-700 text-sm sm:text-base">₹{amount.toLocaleString('en-IN')}</span> towards the{' '}
+              <span className="font-black text-emerald-700 text-sm sm:text-base">₹{amountFormatted}</span> towards the{' '}
               <span className="font-bold text-slate-900">Vinayaka festival / Puja</span>, and the amount has been received with heartfelt thanks.
             </p>
           </div>
@@ -277,7 +270,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
                 Amount Received:
               </span>
               <span className="text-sm sm:text-base font-black text-emerald-700 tracking-tight">
-                ₹{amount.toLocaleString('en-IN')}
+                ₹{amountFormatted}
               </span>
             </div>
           </div>

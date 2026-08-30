@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { DonationReceiptModal } from './DonationReceiptModal';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { getCategoryIconAndColor } from '../utils/categoryIcons';
+import { formatCurrency, formatDate, formatDateTime, formatTime } from '../utils/formatters';
 import {
   Calendar,
   User,
@@ -25,44 +26,10 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
     transaction.type === 'Donations' ||
     Boolean(transaction.donorName);
 
-  const formatDate = (isoStr) => {
-    if (!isoStr) return '';
-    try {
-      const d = new Date(isoStr);
-      if (isNaN(d.getTime())) return '';
-      return d.toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    } catch (e) {
-      return '';
-    }
-  };
-
-  const getValidDate = () => {
-    try {
-      if (transaction.timestamp) {
-        const d = new Date(transaction.timestamp);
-        if (!isNaN(d.getTime())) return d;
-      }
-    } catch (e) {}
-    return new Date();
-  };
-
-  const txDate = getValidDate();
-  const dateFormatted = txDate.toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-  const timeFormatted = txDate.toLocaleTimeString('en-IN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
+  const dateFormatted = formatDate(transaction.timestamp);
+  const dateTimeFormatted = formatDateTime(transaction.timestamp);
+  const timeFormatted = formatTime(transaction.timestamp);
+  const amountFormatted = formatCurrency(transaction.amount);
 
   // Resolve live Member Name from Google Sheets Members tab by matching Member ID
   const resolvedMemberName = useMemo(() => {
@@ -139,7 +106,7 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
                   {transaction.note && <span className="truncate max-w-[160px] sm:max-w-xs">{transaction.note}</span>}
                   <span className="flex items-center gap-1 shrink-0">
                     <Calendar className="w-3 h-3 text-slate-400" />
-                    {formatDate(transaction.timestamp)}
+                    {dateTimeFormatted}
                   </span>
                 </div>
               </div>
@@ -147,7 +114,7 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
 
             <div className="text-right shrink-0">
               <span className="text-base sm:text-lg font-extrabold text-emerald-600 tracking-tight">
-                + ₹{(Number(transaction.amount) || 0).toLocaleString('en-IN')}
+                + ₹{amountFormatted}
               </span>
             </div>
           </div>
@@ -170,7 +137,7 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
 
             <div className="flex items-center gap-2.5 shrink-0">
               <span className="text-base sm:text-lg font-extrabold text-rose-600 tracking-tight">
-                - ₹{(Number(transaction.amount) || 0).toLocaleString('en-IN')}
+                - ₹{amountFormatted}
               </span>
 
               <div
