@@ -6,6 +6,7 @@ import { CustomDatePicker } from '../components/ui/CustomDatePicker';
 import { CustomSelect } from '../components/ui/CustomSelect';
 import { Toast } from '../components/ui/Toast';
 import { Navbar } from '../components/Navbar';
+import { LadduIcon } from '../components/ui/LadduIcon';
 import {
   HandCoins,
   User,
@@ -18,30 +19,7 @@ import {
   Award,
   Sparkles,
   FileText,
-  CircleDot
 } from 'lucide-react';
-
-// Custom Lucide-styled Auspicious Golden Laddu Icon SVG
-export function LadduIcon({ className = "w-5 h-5" }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="8.5" fill="#f59e0b" fillOpacity="0.25" stroke="#d97706" />
-      <circle cx="9.5" cy="9.5" r="1.1" fill="#d97706" />
-      <circle cx="14.5" cy="10" r="1.1" fill="#d97706" />
-      <circle cx="11.5" cy="14" r="1.1" fill="#d97706" />
-      <circle cx="15" cy="14" r="0.9" fill="#d97706" />
-      <circle cx="8.5" cy="13.5" r="0.9" fill="#d97706" />
-    </svg>
-  );
-}
 
 export function AdminDonations() {
   const { user, triggerRefresh } = useAuth();
@@ -219,7 +197,7 @@ export function AdminDonations() {
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight flex items-center justify-center gap-2">
           {isLaddu ? (
             <>
-              <LadduIcon className="w-7 h-7 text-amber-600 shrink-0" />
+              <LadduIcon className="w-7 h-7 shrink-0" />
               <span>Laddu Auction Portal</span>
             </>
           ) : (
@@ -265,7 +243,7 @@ export function AdminDonations() {
                 : 'text-slate-600 hover:text-[#0f172a]'
             }`}
           >
-            <LadduIcon className="w-4 h-4 text-amber-600 shrink-0" />
+            <LadduIcon className="w-4 h-4 shrink-0" />
             <span>Laddu Auction</span>
           </button>
         </div>
@@ -367,7 +345,7 @@ export function AdminDonations() {
               </div>
             </div>
 
-            {/* Submit Button with Tactile State */}
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={submitting || isSuccessState}
@@ -390,10 +368,7 @@ export function AdminDonations() {
                   <span>Chanda Donation Recorded!</span>
                 </>
               ) : (
-                <>
-                  <HandCoins className="w-5 h-5" />
-                  <span>Record Chanda Donation</span>
-                </>
+                <span>Record Chanda Donation</span>
               )}
             </button>
           </form>
@@ -402,7 +377,7 @@ export function AdminDonations() {
           /* 2. LADDU AUCTION PRASADAM FORM                                            */
           /* ========================================================================= */
           <form onSubmit={handleLadduSubmit} className="space-y-5 animate-fade-in">
-            {/* 1. GENDER SELECTION (Mr. vs Ms.) */}
+            {/* 1. GENDER SELECTION (Mr. vs Ms.) - Clean Text Without Emojis */}
             <div>
               <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-2">
                 Winner Title / Gender <span className="text-rose-500">*</span>
@@ -414,13 +389,12 @@ export function AdminDonations() {
                     triggerHaptic(12);
                     setGender('Male');
                   }}
-                  className={`p-3 rounded-2xl border transition-all flex items-center justify-center gap-2.5 font-extrabold text-xs cursor-pointer select-none ${
+                  className={`py-3 px-4 rounded-2xl border transition-all flex items-center justify-center font-extrabold text-xs cursor-pointer select-none ${
                     gender === 'Male'
                       ? 'bg-blue-50 border-[#0f52ba] text-[#0f52ba] shadow-sm ring-2 ring-[#0f52ba]/20'
                       : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  <span className="text-base">👨</span>
                   <span>Male (Mr.)</span>
                 </button>
 
@@ -430,13 +404,12 @@ export function AdminDonations() {
                     triggerHaptic(12);
                     setGender('Female');
                   }}
-                  className={`p-3 rounded-2xl border transition-all flex items-center justify-center gap-2.5 font-extrabold text-xs cursor-pointer select-none ${
+                  className={`py-3 px-4 rounded-2xl border transition-all flex items-center justify-center font-extrabold text-xs cursor-pointer select-none ${
                     gender === 'Female'
                       ? 'bg-pink-50 border-pink-500 text-pink-700 shadow-sm ring-2 ring-pink-500/20'
                       : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  <span className="text-base">👩</span>
                   <span>Female (Ms.)</span>
                 </button>
               </div>
@@ -522,7 +495,7 @@ export function AdminDonations() {
               </div>
             </div>
 
-            {/* Submit Button for Laddu Auction */}
+            {/* Submit Button for Laddu Auction - Clean Text Without Inner Icon */}
             <button
               type="submit"
               disabled={submitting || isSuccessState}
@@ -545,10 +518,7 @@ export function AdminDonations() {
                   <span>Laddu Winner Recorded!</span>
                 </>
               ) : (
-                <>
-                  <LadduIcon className="w-5 h-5 text-white" />
-                  <span>Record Laddu Winner</span>
-                </>
+                <span>Record Laddu Winner</span>
               )}
             </button>
           </form>

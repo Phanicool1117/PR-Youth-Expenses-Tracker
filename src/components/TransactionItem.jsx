@@ -56,7 +56,7 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
   // Use the same unified Category Icon & Color mapping used in the member's category picker
   const itemStyle = isDonation
     ? isLaddu
-      ? { icon: LadduIcon, color: 'bg-amber-50 text-amber-600 border-amber-300' }
+      ? { icon: LadduIcon, color: 'bg-orange-50 text-orange-600 border-orange-300' }
       : { icon: HandCoins, color: 'bg-emerald-50 text-emerald-600 border-emerald-300' }
     : getCategoryIconAndColor(transaction.category);
 
@@ -85,7 +85,7 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
         className={`apple-card transition-all bg-white border border-slate-200/80 rounded-2xl shadow-2xs overflow-hidden cursor-pointer select-none ${
           isDonation
             ? isLaddu
-              ? 'hover:border-amber-400 hover:shadow-sm active:scale-[0.99] group'
+              ? 'hover:border-orange-400 hover:shadow-sm active:scale-[0.99] group'
               : 'hover:border-emerald-400 hover:shadow-sm active:scale-[0.99] group'
             : isExpanded
             ? 'border-blue-300 ring-1 ring-blue-100 shadow-xs'
@@ -111,13 +111,13 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
                     </span>
                   )}
                   {isLaddu ? (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 shrink-0 flex items-center gap-1 group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                      <LadduIcon className="w-3 h-3 text-amber-600 group-hover:text-white" />
-                      <span>Laddu Winner</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 shrink-0 flex items-center gap-1 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                      <LadduIcon className="w-3 h-3 text-orange-600 group-hover:text-white shrink-0" />
+                      <span>Laddu Receipt</span>
                     </span>
                   ) : (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200 shrink-0 flex items-center gap-1 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                      <Receipt className="w-3 h-3" />
+                      <Receipt className="w-3 h-3 text-emerald-600 group-hover:text-white shrink-0" />
                       <span>Receipt</span>
                     </span>
                   )}
@@ -134,7 +134,7 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
             </div>
 
             <div className="text-right shrink-0">
-              <span className={`text-base sm:text-lg font-extrabold tracking-tight ${isLaddu ? 'text-amber-700' : 'text-emerald-600'}`}>
+              <span className={`text-base sm:text-lg font-extrabold tracking-tight ${isLaddu ? 'text-orange-600' : 'text-emerald-600'}`}>
                 + ₹{amountFormatted}
               </span>
             </div>
