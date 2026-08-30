@@ -118,8 +118,8 @@ export function AdminDashboard() {
     recentActivity = [],
   } = data || {};
 
-  // Combined audit ledger combining ALL donations and expenses with guaranteed deduplication & stability
-  const combinedAuditLedger = useMemo(() => {
+  // 1. Separate Pure Donations Ledger
+  const donationsOnlyList = useMemo(() => {
     const map = new Map();
 
     if (Array.isArray(donationsList)) {
@@ -139,25 +139,48 @@ export function AdminDashboard() {
     if (Array.isArray(recentActivity)) {
       recentActivity.forEach((tx) => {
         const isDonation = tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName);
-        const donor = tx.donorName || (isDonation ? tx.name || 'Anonymous Donor' : undefined);
-        const key = isDonation
-          ? `DON_${tx.timestamp || ''}_${tx.amount || 0}_${donor}`
-          : `EXP_${tx.timestamp || ''}_${tx.amount || 0}_${tx.category || ''}_${tx.memberId || ''}`;
-
-        map.set(key, {
-          ...tx,
-          id: tx.id || key,
-          type: isDonation ? 'Donation' : (tx.type || 'Expenses'),
-          donorName: donor,
-          category: isDonation ? 'Donation Received' : (tx.category || 'General Expense'),
-        });
+        if (isDonation) {
+          const donor = tx.donorName || tx.name || 'Anonymous Donor';
+          const key = `DON_${tx.timestamp || ''}_${tx.amount || 0}_${donor}`;
+          map.set(key, {
+            ...tx,
+            id: tx.id || key,
+            type: 'Donation',
+            category: 'Donation Received',
+            donorName: donor,
+          });
+        }
       });
     }
 
-    const merged = Array.from(map.values());
-    merged.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
-    return merged;
+    const list = Array.from(map.values());
+    list.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+    return list;
   }, [donationsList, recentActivity]);
+
+  // 2. Separate Pure Committee Financial Expenses Ledger
+  const expensesOnlyList = useMemo(() => {
+    const map = new Map();
+
+    if (Array.isArray(recentActivity)) {
+      recentActivity.forEach((tx) => {
+        const isDonation = tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName);
+        if (!isDonation) {
+          const key = `EXP_${tx.timestamp || ''}_${tx.amount || 0}_${tx.category || ''}_${tx.memberId || ''}`;
+          map.set(key, {
+            ...tx,
+            id: tx.id || key,
+            type: tx.type || 'Expenses',
+            category: tx.category || 'General Expense',
+          });
+        }
+      });
+    }
+
+    const list = Array.from(map.values());
+    list.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+    return list;
+  }, [recentActivity]);
 
   const mergedCategoryBreakdown = {};
   if (categories && categories.length > 0) {
@@ -290,7 +313,16 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      {/* Category Spending Analytics Card */}
+      {/* Section 1: Dedicated Donation Transactions Ledger (Under Financial Ledger Summary) */}
+      <ActivityLedger
+        transactions={donationsOnlyList}
+        showMember={false}
+        title="Donation Transactions"
+        categories={['Donation Received']}
+        members={members}
+      />
+
+      {/* Section 2: Category Spending Analytics Card */}
       <div className="reference-card p-6 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
           <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2 truncate">
@@ -327,11 +359,11 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      {/* Single Unified Committee Financial Audit Activity Ledger */}
+      {/* Section 3: Dedicated Committee Financial Expenses Ledger */}
       <ActivityLedger
-        transactions={combinedAuditLedger}
+        transactions={expensesOnlyList}
         showMember={true}
-        title="Committee Financial Audit Activity"
+        title="Committee Financial Expenses"
         categories={categories}
         members={members}
       />

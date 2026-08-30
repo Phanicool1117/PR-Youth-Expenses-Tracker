@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ShadcnTabs } from './ui/ShadcnTabs';
-import { LayoutDashboard, PlusCircle, CreditCard, Users } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Users } from 'lucide-react';
 
 export function Navbar() {
   const { user, activeTab, setActiveTab } = useAuth();
@@ -10,18 +10,17 @@ export function Navbar() {
 
   const isAdmin = user.role === 'Admin';
 
-  // Member Tabs: Home & Add (Activity is integrated into Home!)
+  // Member Tabs: Home & Add
   const memberTabs = [
     { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
-    { id: 'add-expense', label: 'Add', icon: CreditCard },
+    { id: 'add-expense', label: 'Add', icon: PlusCircle },
   ];
 
-  // Admin Tabs: Overview, Donations, Members, Expenses
+  // Admin Tabs: Overview, Donations, Members
   const adminTabs = [
     { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
     { id: 'donations', label: 'Donations', icon: PlusCircle },
     { id: 'members', label: 'Members', icon: Users },
-    { id: 'expenses', label: 'Expenses', icon: CreditCard },
   ];
 
   const currentTabs = isAdmin ? adminTabs : memberTabs;
