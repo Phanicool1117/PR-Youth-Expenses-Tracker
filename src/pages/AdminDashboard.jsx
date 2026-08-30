@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { safeStorage } from '../utils/safeStorage';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { ActivityLedger } from '../components/ActivityLedger';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
@@ -11,25 +12,47 @@ export function AdminDashboard() {
   const { logout, refreshTrigger, triggerRefresh, isSyncing } = useAuth();
   
   const [data, setData] = useState(() => {
-    const cached = sessionStorage.getItem('ADMIN_DASH_DATA');
-    return cached ? JSON.parse(cached) : {
-      totalDonations: 0,
-      totalExpenses: 0,
-      currentBalance: 0,
-      expenseCount: 0,
-      categoryBreakdown: {},
-      recentActivity: [],
-    };
+    try {
+      const cached = safeStorage.getSessionItem('ADMIN_DASH_DATA');
+      return cached ? JSON.parse(cached) : {
+        totalDonations: 0,
+        totalExpenses: 0,
+        currentBalance: 0,
+        expenseCount: 0,
+        categoryBreakdown: {},
+        recentActivity: [],
+      };
+    } catch (e) {
+      return {
+        totalDonations: 0,
+        totalExpenses: 0,
+        currentBalance: 0,
+        expenseCount: 0,
+        categoryBreakdown: {},
+        recentActivity: [],
+      };
+    }
   });
+
   const [members, setMembers] = useState(() => {
-    const cached = sessionStorage.getItem('ADMIN_MEMBERS_DATA');
-    return cached ? JSON.parse(cached) : [];
+    try {
+      const cached = safeStorage.getSessionItem('ADMIN_MEMBERS_DATA');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
   });
+
   const [categories, setCategories] = useState([]);
   const [donationsList, setDonationsList] = useState(() => {
-    const cached = sessionStorage.getItem('ADMIN_DONATIONS_DATA');
-    return cached ? JSON.parse(cached) : [];
+    try {
+      const cached = safeStorage.getSessionItem('ADMIN_DONATIONS_DATA');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
   });
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -45,9 +68,7 @@ export function AdminDashboard() {
         api.getAllDonations(),
       ]);
 
-      // Guarded updates: only update if response is genuine and contains data
       if (dashRes.success && dashRes.data) {
-        // Do not overwrite existing non-zero state with empty fallback values
         setData((prev) => {
           const isFreshEmpty =
             dashRes.data.totalDonations === 0 &&
@@ -58,16 +79,16 @@ export function AdminDashboard() {
             prev && (prev.totalDonations > 0 || prev.totalExpenses > 0 || (prev.recentActivity && prev.recentActivity.length > 0));
 
           if (isFreshEmpty && prevHasData) {
-            return prev; // keep existing valid data
+            return prev;
           }
-          sessionStorage.setItem('ADMIN_DASH_DATA', JSON.stringify(dashRes.data));
+          safeStorage.setSessionItem('ADMIN_DASH_DATA', JSON.stringify(dashRes.data));
           return dashRes.data;
         });
       }
 
       if (memRes.success && Array.isArray(memRes.data) && memRes.data.length > 0) {
         setMembers(memRes.data);
-        sessionStorage.setItem('ADMIN_MEMBERS_DATA', JSON.stringify(memRes.data));
+        safeStorage.setSessionItem('ADMIN_MEMBERS_DATA', JSON.stringify(memRes.data));
       }
 
       if (catRes.success && Array.isArray(catRes.data) && catRes.data.length > 0) {
@@ -76,7 +97,7 @@ export function AdminDashboard() {
 
       if (donRes.success && Array.isArray(donRes.data) && donRes.data.length > 0) {
         setDonationsList(donRes.data);
-        sessionStorage.setItem('ADMIN_DONATIONS_DATA', JSON.stringify(donRes.data));
+        safeStorage.setSessionItem('ADMIN_DONATIONS_DATA', JSON.stringify(donRes.data));
       }
     } catch (err) {
       console.error('Failed to load executive admin dashboard', err);
@@ -93,7 +114,6 @@ export function AdminDashboard() {
     totalDonations = 0,
     totalExpenses = 0,
     currentBalance = 0,
-    expenseCount = 0,
     categoryBreakdown = {},
     recentActivity = [],
   } = data || {};
@@ -102,7 +122,6 @@ export function AdminDashboard() {
   const combinedAuditLedger = useMemo(() => {
     const map = new Map();
 
-    // 1. Ingest all donations from donationsList
     if (Array.isArray(donationsList)) {
       donationsList.forEach((d) => {
         const donor = d.donorName || d.name || 'Anonymous Donor';
@@ -117,7 +136,6 @@ export function AdminDashboard() {
       });
     }
 
-    // 2. Ingest all transactions from recentActivity
     if (Array.isArray(recentActivity)) {
       recentActivity.forEach((tx) => {
         const isDonation = tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName);
@@ -141,7 +159,6 @@ export function AdminDashboard() {
     return merged;
   }, [donationsList, recentActivity]);
 
-  // Build complete dynamic category breakdown combining active Google Sheet categories + logged expenses
   const mergedCategoryBreakdown = {};
   if (categories && categories.length > 0) {
     categories.forEach((cat) => {

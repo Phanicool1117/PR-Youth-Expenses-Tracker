@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api, getGasUrl, setGasUrl } from '../services/api';
+import { safeStorage } from '../utils/safeStorage';
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const saved = localStorage.getItem('PR_YOUTH_USER');
+      const saved = safeStorage.getItem('PR_YOUTH_USER');
       return saved ? JSON.parse(saved) : null;
     } catch (e) {
       console.warn('Failed to parse saved user credentials', e);
@@ -24,13 +25,13 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (user) {
       try {
-        localStorage.setItem('PR_YOUTH_USER', JSON.stringify(user));
+        safeStorage.setItem('PR_YOUTH_USER', JSON.stringify(user));
       } catch (e) {
         console.warn('Failed to save user credentials', e);
       }
     } else {
-      localStorage.removeItem('PR_YOUTH_USER');
-      sessionStorage.clear();
+      safeStorage.removeItem('PR_YOUTH_USER');
+      safeStorage.clearSession();
     }
   }, [user]);
 
@@ -57,8 +58,8 @@ export function AuthProvider({ children }) {
           if (isInactive) {
             console.warn(`User ${user.memberId} has been deactivated in Google Sheets. Evicting session.`);
             setUser(null);
-            sessionStorage.clear();
-            localStorage.removeItem('PR_YOUTH_USER');
+            safeStorage.clearSession();
+            safeStorage.removeItem('PR_YOUTH_USER');
             alert('Your account has been marked Inactive by administrator. You have been logged out.');
           }
         }
@@ -77,13 +78,13 @@ export function AuthProvider({ children }) {
     setTimeout(() => setIsSyncing(false), 1200);
   }, [checkMemberDeactivation]);
 
-  // Live Auto-Sync Every 10 Seconds (Syncs with Google Sheets continuously)
+  // Live Auto-Sync Every 10 Seconds
   useEffect(() => {
     if (!user) return;
 
     const timer = setInterval(() => {
       triggerRefresh();
-    }, 10000); // Exactly 10 seconds
+    }, 10000);
 
     return () => clearInterval(timer);
   }, [user, triggerRefresh]);
@@ -113,11 +114,11 @@ export function AuthProvider({ children }) {
           categoryBreakdown: {},
           recentActivity: [],
         };
-        if (!sessionStorage.getItem('ADMIN_DASH_DATA')) {
-          sessionStorage.setItem('ADMIN_DASH_DATA', JSON.stringify(baseline));
+        if (!safeStorage.getSessionItem('ADMIN_DASH_DATA')) {
+          safeStorage.setSessionItem('ADMIN_DASH_DATA', JSON.stringify(baseline));
         }
-        if (!sessionStorage.getItem(`MEMBER_DASH_${res.user.memberId}`)) {
-          sessionStorage.setItem(`MEMBER_DASH_${res.user.memberId}`, JSON.stringify(baseline));
+        if (!safeStorage.getSessionItem(`MEMBER_DASH_${res.user.memberId}`)) {
+          safeStorage.setSessionItem(`MEMBER_DASH_${res.user.memberId}`, JSON.stringify(baseline));
         }
 
         setUser(res.user);
@@ -136,8 +137,8 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null);
     setActiveTab('dashboard');
-    sessionStorage.clear();
-    localStorage.removeItem('PR_YOUTH_USER');
+    safeStorage.clearSession();
+    safeStorage.removeItem('PR_YOUTH_USER');
   };
 
   const updateGasUrl = (url) => {

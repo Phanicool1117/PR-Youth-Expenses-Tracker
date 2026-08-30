@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { safeStorage } from '../utils/safeStorage';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { ActivityLedger } from '../components/ActivityLedger';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
@@ -10,8 +11,12 @@ import { RefreshCw, LogOut } from 'lucide-react';
 export function MemberDashboard() {
   const { user, logout, refreshTrigger, triggerRefresh, isSyncing } = useAuth();
   const [data, setData] = useState(() => {
-    const cached = sessionStorage.getItem(`MEMBER_DASH_${user?.memberId}`);
-    return cached ? JSON.parse(cached) : null;
+    try {
+      const cached = safeStorage.getSessionItem(`MEMBER_DASH_${user?.memberId}`);
+      return cached ? JSON.parse(cached) : null;
+    } catch (e) {
+      return null;
+    }
   });
   const [loading, setLoading] = useState(!data);
   const [categories, setCategories] = useState([]);
@@ -27,7 +32,7 @@ export function MemberDashboard() {
       const res = await api.getMemberDashboard(user.memberId);
       if (res.success && res.data) {
         setData(res.data);
-        sessionStorage.setItem(`MEMBER_DASH_${user.memberId}`, JSON.stringify(res.data));
+        safeStorage.setSessionItem(`MEMBER_DASH_${user.memberId}`, JSON.stringify(res.data));
       }
     } catch (err) {
       console.error('Failed to load member dashboard', err);
@@ -48,11 +53,13 @@ export function MemberDashboard() {
   };
 
   if (loading && !data) {
-    return <LoadingSpinner text="Loading Member Portal..." />;
+    return <LoadingSpinner text="Loading Member Dashboard..." />;
   }
 
-  const totalSpent = data?.totalExpenses || 0;
-  const recentActivity = data?.recentActivity || [];
+  const {
+    totalExpenses: totalSpent = 0,
+    recentActivity = [],
+  } = data || {};
 
   return (
     <div className="centered-container py-6 sm:py-10 space-y-6">
@@ -68,7 +75,7 @@ export function MemberDashboard() {
       {/* Greeting Section */}
       <div className="text-center">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
-          Hi, {user.name}
+          Hi, {user?.name || 'Member'}
         </h1>
       </div>
 
@@ -88,17 +95,17 @@ export function MemberDashboard() {
           </div>
 
           <div className="text-[11px] font-medium text-slate-500 pt-0.5">
-            Logged by {user.name} ({user.memberId})
+            Member ID: {user?.memberId} · {user?.role || 'Member'}
           </div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => {
               triggerHaptic(15);
               triggerRefresh();
             }}
-            className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors border border-emerald-200 active:scale-95 shadow-2xs"
+            className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors border border-emerald-200 active:scale-95 shadow-2xs cursor-pointer"
             title="Sync live data"
           >
             <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
@@ -109,7 +116,7 @@ export function MemberDashboard() {
               triggerHaptic(20);
               logout();
             }}
-            className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-2.5 rounded-xl transition-all active:scale-95 shadow-2xs"
+            className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-2.5 rounded-xl transition-all active:scale-95 shadow-2xs cursor-pointer"
             title="Logout"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -118,11 +125,12 @@ export function MemberDashboard() {
         </div>
       </div>
 
-      {/* Activity Ledger */}
+      {/* Out-of-Pocket Expense Activity Feed */}
       <ActivityLedger
         transactions={recentActivity}
         showMember={false}
-        title="My Activity History"
+        title="My Expense Activity"
+        subtitle="Your recorded out-of-pocket festival expenses."
         categories={categories}
       />
     </div>
