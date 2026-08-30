@@ -1,16 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { DonationReceiptModal } from './DonationReceiptModal';
 import { triggerHaptic } from '../utils/hapticsSound';
+import { getCategoryIconAndColor } from '../utils/categoryIcons';
 import {
-  ShoppingBag,
-  Flame,
-  Lightbulb,
-  Flag,
-  Flower2,
-  Heart,
-  Music,
-  Utensils,
-  Tag,
   Calendar,
   User,
   HandHeart,
@@ -19,6 +11,7 @@ import {
   Clock,
   CreditCard,
   FileText,
+  Tag,
 } from 'lucide-react';
 
 export function TransactionItem({ transaction, showMember = false, members = [] }) {
@@ -85,23 +78,10 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
     return transaction.memberName || 'Member';
   }, [members, transaction.memberId, transaction.memberName]);
 
-  // Category Icon & Color Palette
-  const getCategoryIcon = (category) => {
-    const cat = String(category || '').toLowerCase();
-    if (cat.includes('travel')) return { icon: Tag, bg: 'bg-blue-50 text-blue-600 border-blue-200' };
-    if (cat.includes('crackers')) return { icon: Flame, bg: 'bg-amber-50 text-amber-600 border-amber-200' };
-    if (cat.includes('lights')) return { icon: Lightbulb, bg: 'bg-yellow-50 text-yellow-600 border-yellow-200' };
-    if (cat.includes('banner')) return { icon: Flag, bg: 'bg-purple-50 text-purple-600 border-purple-200' };
-    if (cat.includes('decoration')) return { icon: Flower2, bg: 'bg-pink-50 text-pink-600 border-pink-200' };
-    if (cat.includes('pooja')) return { icon: Heart, bg: 'bg-rose-50 text-rose-600 border-rose-200' };
-    if (cat.includes('dj')) return { icon: Music, bg: 'bg-indigo-50 text-indigo-600 border-indigo-200' };
-    if (cat.includes('prasadam')) return { icon: Utensils, bg: 'bg-emerald-50 text-emerald-600 border-emerald-200' };
-    return { icon: ShoppingBag, bg: 'bg-slate-100 text-slate-700 border-slate-200' };
-  };
-
-  const { icon: CategoryIcon, bg: categoryBg } = isDonation
-    ? { icon: HandHeart, bg: 'bg-emerald-50 text-emerald-600 border-emerald-200' }
-    : getCategoryIcon(transaction.category);
+  // Use the same unified Category Icon & Color mapping used in the member's category picker
+  const { icon: CategoryIcon, color: categoryBg } = isDonation
+    ? { icon: HandHeart, color: 'bg-emerald-50 text-emerald-600 border-emerald-300' }
+    : getCategoryIconAndColor(transaction.category);
 
   const title = isDonation
     ? `Donation from ${transaction.donorName || 'Sponsor'}`
@@ -170,7 +150,7 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
           </div>
         ) : (
           /* ========================================================================= */
-          /* 2. EXPENSES: Ultra-Clean Minimal Row (Logo, Category, Amount & Chevron)  */
+          /* 2. EXPENSES: Ultra-Clean Minimal Row (Uniform Logo, Category & Amount)   */
           /* ========================================================================= */
           <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3.5 min-w-0">
