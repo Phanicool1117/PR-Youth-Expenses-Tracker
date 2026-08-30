@@ -102,9 +102,12 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
                 <CategoryIcon className="w-5 h-5" />
               </div>
 
-              <div className="space-y-0.5 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="font-bold text-sm text-[#0f172a] truncate">{title}</h4>
+              <div className="space-y-1 min-w-0">
+                {/* Line 1: Title (Donor or Laddu Winner Name) */}
+                <h4 className="font-bold text-sm text-[#0f172a] truncate">{title}</h4>
+
+                {/* Line 2: Payment Method and Receipt Badges */}
+                <div className="flex items-center gap-1.5 flex-wrap">
                   {transaction.paymentMethod && (
                     <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
                       {transaction.paymentMethod}
@@ -123,7 +126,8 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
                   )}
                 </div>
 
-                <div className="flex items-center gap-3 text-xs text-slate-500 truncate">
+                {/* Line 3: Note & Date/Time */}
+                <div className="flex items-center gap-3 text-xs text-slate-500 truncate pt-0.5">
                   {transaction.note && <span className="truncate max-w-[160px] sm:max-w-xs">{transaction.note}</span>}
                   <span className="flex items-center gap-1 shrink-0">
                     <Calendar className="w-3 h-3 text-slate-400" />
