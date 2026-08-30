@@ -25,6 +25,8 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  if (!transaction) return null;
+
   const isDonation =
     transaction.type === 'Donation' ||
     transaction.type === 'Donations' ||
@@ -32,17 +34,32 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
 
   const formatDate = (isoStr) => {
     if (!isoStr) return '';
-    const d = new Date(isoStr);
-    return d.toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    try {
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (e) {
+      return '';
+    }
   };
 
-  const txDate = transaction.timestamp ? new Date(transaction.timestamp) : new Date();
+  const getValidDate = () => {
+    try {
+      if (transaction.timestamp) {
+        const d = new Date(transaction.timestamp);
+        if (!isNaN(d.getTime())) return d;
+      }
+    } catch (e) {}
+    return new Date();
+  };
+
+  const txDate = getValidDate();
   const dateFormatted = txDate.toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'short',
@@ -56,11 +73,12 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
 
   // Resolve live Member Name from Google Sheets Members tab by matching Member ID
   const resolvedMemberName = useMemo(() => {
-    if (members && members.length > 0 && transaction.memberId) {
+    if (Array.isArray(members) && members.length > 0 && transaction.memberId) {
       const match = members.find(
         (m) =>
-          String(m.memberId || '').toUpperCase() === String(transaction.memberId).toUpperCase() ||
-          String(m.name || '').toUpperCase() === String(transaction.memberName || '').toUpperCase()
+          m &&
+          (String(m.memberId || '').toUpperCase() === String(transaction.memberId).toUpperCase() ||
+           String(m.name || '').toUpperCase() === String(transaction.memberName || '').toUpperCase())
       );
       if (match && match.name) return match.name;
     }
@@ -69,7 +87,7 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
 
   // Category Icon & Color Palette
   const getCategoryIcon = (category) => {
-    const cat = (category || '').toLowerCase();
+    const cat = String(category || '').toLowerCase();
     if (cat.includes('travel')) return { icon: Tag, bg: 'bg-blue-50 text-blue-600 border-blue-200' };
     if (cat.includes('crackers')) return { icon: Flame, bg: 'bg-amber-50 text-amber-600 border-amber-200' };
     if (cat.includes('lights')) return { icon: Lightbulb, bg: 'bg-yellow-50 text-yellow-600 border-yellow-200' };
