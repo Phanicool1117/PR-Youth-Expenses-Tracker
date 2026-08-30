@@ -19,7 +19,6 @@ import {
   Clock,
   CreditCard,
   FileText,
-  ShieldCheck,
 } from 'lucide-react';
 
 export function TransactionItem({ transaction, showMember = false, members = [] }) {
@@ -95,7 +94,6 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
     if (isDonation) {
       setIsReceiptModalOpen(true);
     } else {
-      // Toggle compact inline dropdown for expenses
       setIsExpanded((prev) => !prev);
     }
   };
@@ -114,46 +112,35 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
       >
         {/* Main Row View */}
         <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
-          {/* Category Icon & Info */}
+          
+          {/* Left: Category Icon Logo & Clean Category Title */}
           <div className="flex items-center gap-3.5 min-w-0">
             <div className={`w-11 h-11 rounded-2xl border flex items-center justify-center shrink-0 shadow-2xs ${categoryBg}`}>
               <CategoryIcon className="w-5 h-5" />
             </div>
 
-            <div className="space-y-0.5 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h4 className="font-bold text-sm text-[#0f172a] truncate">{title}</h4>
-                {transaction.paymentMethod && (
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0">
-                    {transaction.paymentMethod}
+            <div className="min-w-0">
+              <h4 className="font-bold text-sm sm:text-base text-[#0f172a] truncate">
+                {title}
+              </h4>
+
+              {/* Sub-info only for Donations */}
+              {isDonation && (
+                <div className="flex items-center gap-2 pt-0.5 text-xs text-slate-500 truncate">
+                  <span className="flex items-center gap-1 shrink-0">
+                    <Calendar className="w-3 h-3 text-slate-400" />
+                    {formatDate(transaction.timestamp)}
                   </span>
-                )}
-                {isDonation && (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200 shrink-0 flex items-center gap-1 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                     <Receipt className="w-3 h-3" />
                     <span>Receipt</span>
                   </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-3 text-xs text-slate-500 truncate">
-                {transaction.note && <span className="truncate max-w-[160px] sm:max-w-xs">{transaction.note}</span>}
-                <span className="flex items-center gap-1 shrink-0">
-                  <Calendar className="w-3 h-3 text-slate-400" />
-                  {formatDate(transaction.timestamp)}
-                </span>
-              </div>
-
-              {showMember && (transaction.memberId || transaction.memberName) && !isDonation && (
-                <div className="text-[11px] font-semibold text-[#0f52ba] flex items-center gap-1">
-                  <User className="w-3 h-3" />
-                  <span>{resolvedMemberName} ({transaction.memberId || 'ID'})</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Amount Display & Chevron Dropdown Indicator */}
+          {/* Right: Amount Display & Chevron Dropdown Indicator for Expenses */}
           <div className="flex items-center gap-2.5 shrink-0">
             <span
               className={`text-base sm:text-lg font-extrabold tracking-tight ${
