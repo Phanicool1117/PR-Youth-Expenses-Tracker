@@ -7,7 +7,7 @@ import { CustomDatePicker } from '../components/ui/CustomDatePicker';
 import { CustomSelect } from '../components/ui/CustomSelect';
 import { Toast } from '../components/ui/Toast';
 import { Navbar } from '../components/Navbar';
-import { PlusCircle, FileText, User, CheckCircle2, Loader2 } from 'lucide-react';
+import { PlusCircle, FileText, User, CheckCircle2, Loader2, Banknote, QrCode, Smartphone, Building2, CreditCard } from 'lucide-react';
 
 export function AddExpense() {
   const { user, triggerRefresh } = useAuth();
@@ -98,9 +98,11 @@ export function AddExpense() {
   };
 
   const paymentMethodOptions = [
-    { value: 'Cash', label: 'Cash' },
-    { value: 'UPI', label: 'UPI' },
-    { value: 'Card', label: 'Card' },
+    { value: 'Cash', label: 'Cash', icon: Banknote },
+    { value: 'UPI', label: 'UPI / Online', icon: Smartphone },
+    { value: 'QR Code', label: 'QR Code', icon: QrCode },
+    { value: 'Bank Transfer', label: 'Bank Transfer', icon: Building2 },
+    { value: 'Card', label: 'Card Payment', icon: CreditCard },
   ];
 
   return (

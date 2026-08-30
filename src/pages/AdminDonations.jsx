@@ -6,7 +6,7 @@ import { CustomDatePicker } from '../components/ui/CustomDatePicker';
 import { CustomSelect } from '../components/ui/CustomSelect';
 import { Toast } from '../components/ui/Toast';
 import { Navbar } from '../components/Navbar';
-import { HeartHandshake, User, Loader2, CheckCircle2 } from 'lucide-react';
+import { HeartHandshake, User, Loader2, CheckCircle2, Banknote, QrCode, Smartphone, Building2 } from 'lucide-react';
 
 export function AdminDonations() {
   const { user, triggerRefresh } = useAuth();
@@ -86,10 +86,10 @@ export function AdminDonations() {
   };
 
   const paymentModeOptions = [
-    { value: 'Cash', label: 'Cash' },
-    { value: 'QR Code', label: 'QR Code' },
-    { value: 'UPI Transfer', label: 'UPI Transfer' },
-    { value: 'Bank Deposit', label: 'Bank Deposit' },
+    { value: 'Cash', label: 'Cash', icon: Banknote },
+    { value: 'QR Code', label: 'QR Code', icon: QrCode },
+    { value: 'UPI Transfer', label: 'UPI Transfer', icon: Smartphone },
+    { value: 'Bank Deposit', label: 'Bank Deposit', icon: Building2 },
   ];
 
   return (
