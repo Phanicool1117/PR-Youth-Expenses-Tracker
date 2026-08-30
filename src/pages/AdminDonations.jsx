@@ -197,7 +197,7 @@ export function AdminDonations() {
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight flex items-center justify-center gap-2">
           {isLaddu ? (
             <>
-              <LadduIcon className="w-7 h-7 shrink-0" />
+              <LadduIcon className="w-7 h-7 text-amber-600 shrink-0" />
               <span>Laddu Auction Portal</span>
             </>
           ) : (
