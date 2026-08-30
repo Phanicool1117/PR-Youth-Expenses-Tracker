@@ -302,7 +302,7 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        {/* Collapsible Dropdown: Financial Ledger Summary (With Pastel Themed Boxes) */}
+        {/* Collapsible Dropdown: Financial Ledger Summary */}
         {isSummaryExpanded && (
           <div className="p-5 px-6 border-t border-slate-100 bg-slate-50/70 space-y-3 animate-fade-in">
             <div className="flex items-center justify-between gap-2">
@@ -314,19 +314,16 @@ export function AdminDashboard() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-center">
-              {/* Box 1: Total Donations (Pastel Emerald Fill) */}
-              <div className="p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200 shadow-2xs">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-2xs">
                 <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Total Donations</span>
                 <span className="text-lg font-extrabold text-emerald-700">+ ₹{totalDonations.toLocaleString('en-IN')}</span>
               </div>
 
-              {/* Box 2: Total Expenses (Pastel Amber Fill) */}
-              <div className="p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200 shadow-2xs">
+              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 shadow-2xs">
                 <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">Total Expenses</span>
                 <span className="text-lg font-extrabold text-amber-700">- ₹{totalExpenses.toLocaleString('en-IN')}</span>
               </div>
 
-              {/* Box 3: Net Balance (Pastel Royal Blue Fill) */}
               <div className="p-3.5 rounded-2xl bg-[#edf4fc] border border-[#bfdbfe] shadow-2xs">
                 <span className="text-[10px] font-extrabold text-[#1e40af] uppercase tracking-wider block">Net Balance</span>
                 <span className="text-lg font-extrabold text-[#1d4ed8]">₹{currentBalance.toLocaleString('en-IN')}</span>
