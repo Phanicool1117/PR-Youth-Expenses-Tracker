@@ -8,6 +8,7 @@ import { Search, Filter, Download } from 'lucide-react';
 export function ActivityLedger({
   transactions = [],
   showMember = false,
+  showCategory = true,
   title = "Recent Activity",
   subtitle,
   categories = [],
@@ -36,18 +37,20 @@ export function ActivityLedger({
         (tx.note && String(tx.note).toLowerCase().includes(searchLower));
 
       const matchCategory =
+        !showCategory ||
         selectedCategory === 'All' ||
         tx.category === selectedCategory ||
         tx.type === selectedCategory;
 
       const matchMember =
+        !showMember ||
         selectedMember === 'All' ||
         tx.memberId === selectedMember ||
         tx.memberName === selectedMember;
 
       return matchSearch && matchCategory && matchMember;
     });
-  }, [transactions, searchTerm, selectedCategory, selectedMember]);
+  }, [transactions, searchTerm, selectedCategory, selectedMember, showCategory, showMember]);
 
   React.useEffect(() => {
     setCurrentPage(1);
@@ -91,26 +94,35 @@ export function ActivityLedger({
     ];
   }, [categories, transactions]);
 
+  // Exclude Admin from Members dropdown since Admin doesn't log expenses
   const memberOptions = useMemo(() => {
     if (!Array.isArray(members)) return [{ value: 'All', label: 'All Members' }];
     return [
       { value: 'All', label: 'All Members' },
-      ...members.filter(Boolean).map((m) => ({
-        value: m.memberId || m.name || 'Member',
-        label: `${m.name || 'Member'} (${m.memberId || 'ID'})`,
-      })),
+      ...members
+        .filter(Boolean)
+        .filter((m) => {
+          const id = String(m.memberId || '').toUpperCase();
+          const name = String(m.name || '').toLowerCase();
+          const role = String(m.role || '').toLowerCase();
+          return id !== 'ADM000' && name !== 'admin' && role !== 'admin';
+        })
+        .map((m) => ({
+          value: m.memberId || m.name || 'Member',
+          label: `${m.name || 'Member'} (${m.memberId || 'ID'})`,
+        })),
     ];
   }, [members]);
 
   return (
     <div className="reference-card p-6 space-y-4">
-      {/* Header with Export Option */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-        <div>
-          <h3 className="text-base sm:text-lg font-bold text-[#0f172a] tracking-tight">
+      {/* Header with Side-by-Side Export Option on all screen sizes */}
+      <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3 sm:pb-4">
+        <div className="min-w-0">
+          <h3 className="text-base sm:text-lg font-bold text-[#0f172a] tracking-tight truncate">
             {title}
           </h3>
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="text-xs text-slate-500 font-medium truncate">
             {subtitle || `Showing ${totalItems} recorded ${totalItems === 1 ? 'transaction' : 'transactions'}`}
           </p>
         </div>
@@ -120,17 +132,26 @@ export function ActivityLedger({
             triggerHaptic(12);
             setIsExportOpen(true);
           }}
-          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0f172a] text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs border border-slate-200 self-start sm:self-auto"
+          className="flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0f172a] text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-2xs border border-slate-200 shrink-0"
         >
           <Download className="w-3.5 h-3.5 text-[#0f52ba]" />
-          <span>Export Receipts</span>
+          <span className="sm:hidden">Export</span>
+          <span className="hidden sm:inline">Export Receipts</span>
         </button>
       </div>
 
       {/* Search & Filter Controls */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
         {/* Search Field */}
-        <div className={`relative ${showMember ? 'sm:col-span-6' : 'sm:col-span-7'}`}>
+        <div
+          className={`relative ${
+            showCategory && showMember
+              ? 'sm:col-span-6'
+              : showCategory || showMember
+              ? 'sm:col-span-7 md:col-span-8'
+              : 'sm:col-span-12'
+          }`}
+        >
           <Search className="apple-input-icon" />
           <input
             type="text"
@@ -141,20 +162,22 @@ export function ActivityLedger({
           />
         </div>
 
-        {/* Category Filter */}
-        <div className={showMember ? 'sm:col-span-3' : 'sm:col-span-5'}>
-          <CustomSelect
-            options={categoryOptions}
-            value={selectedCategory}
-            onChange={setSelectedCategory}
-            icon={Filter}
-            placeholder="All Categories"
-          />
-        </div>
+        {/* Category Filter (Shown only if showCategory is true) */}
+        {showCategory && (
+          <div className={showMember ? 'sm:col-span-3' : 'sm:col-span-5 md:col-span-4'}>
+            <CustomSelect
+              options={categoryOptions}
+              value={selectedCategory}
+              onChange={setSelectedCategory}
+              icon={Filter}
+              placeholder="All Categories"
+            />
+          </div>
+        )}
 
-        {/* Member Filter (Admin only) */}
+        {/* Member Filter (Shown only if showMember is true) */}
         {showMember && (
-          <div className="sm:col-span-3">
+          <div className={showCategory ? 'sm:col-span-3' : 'sm:col-span-5 md:col-span-4'}>
             <CustomSelect
               options={memberOptions}
               value={selectedMember}
@@ -180,7 +203,7 @@ export function ActivityLedger({
         ) : (
           <div className="p-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
             <p className="text-xs font-medium text-slate-500">
-              {searchTerm || selectedCategory !== 'All' || selectedMember !== 'All'
+              {searchTerm || (showCategory && selectedCategory !== 'All') || (showMember && selectedMember !== 'All')
                 ? 'No transactions found matching your search criteria.'
                 : 'No transactions recorded yet.'}
             </p>

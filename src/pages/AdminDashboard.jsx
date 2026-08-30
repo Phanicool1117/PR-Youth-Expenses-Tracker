@@ -337,6 +337,7 @@ export function AdminDashboard() {
       <ActivityLedger
         transactions={donationsOnlyList}
         showMember={false}
+        showCategory={false}
         title="Donation Transactions"
         categories={['Donation Received']}
         members={members}
