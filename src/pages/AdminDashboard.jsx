@@ -6,11 +6,33 @@ import { triggerHaptic } from '../utils/hapticsSound';
 import { ActivityLedger } from '../components/ActivityLedger';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Navbar } from '../components/Navbar';
-import { Layers, RefreshCw, Wallet, LogOut, ChevronDown } from 'lucide-react';
+import { Layers, RefreshCw, Wallet, LogOut, ChevronDown, ChevronUp } from 'lucide-react';
+
+const CATEGORY_COLORS = {
+  decoration: { bg: '#ec4899', light: '#fdf2f8', text: '#be185d' },
+  pooja: { bg: '#f43f5e', light: '#fff1f2', text: '#be123c' },
+  crackers: { bg: '#f59e0b', light: '#fffbeb', text: '#b45309' },
+  lights: { bg: '#eab308', light: '#fefce8', text: '#a16207' },
+  travel: { bg: '#3b82f6', light: '#eff6ff', text: '#1d4ed8' },
+  banner: { bg: '#a855f7', light: '#faf5ff', text: '#7e22ce' },
+  dj: { bg: '#6366f1', light: '#eef2ff', text: '#4338ca' },
+  prasadam: { bg: '#10b981', light: '#ecfdf5', text: '#047857' },
+  water: { bg: '#06b6d4', light: '#ecfeff', text: '#0e7490' },
+  other: { bg: '#64748b', light: '#f8fafc', text: '#334155' },
+};
+
+const getCategoryColor = (catName) => {
+  const c = String(catName || '').toLowerCase();
+  for (const [key, val] of Object.entries(CATEGORY_COLORS)) {
+    if (c.includes(key)) return val;
+  }
+  return { bg: '#0f52ba', light: '#eff6ff', text: '#1e40af' };
+};
 
 export function AdminDashboard() {
   const { logout, refreshTrigger, triggerRefresh, isSyncing } = useAuth();
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
+  const [showAllCategories, setShowAllCategories] = useState(false);
   
   const [data, setData] = useState(() => {
     try {
@@ -183,15 +205,40 @@ export function AdminDashboard() {
     return list;
   }, [recentActivity]);
 
-  const mergedCategoryBreakdown = {};
-  if (categories && categories.length > 0) {
-    categories.forEach((cat) => {
-      mergedCategoryBreakdown[cat] = categoryBreakdown[cat] || 0;
+  const mergedCategoryBreakdown = useMemo(() => {
+    const map = {};
+    if (categories && categories.length > 0) {
+      categories.forEach((cat) => {
+        map[cat] = categoryBreakdown[cat] || 0;
+      });
+    }
+    Object.keys(categoryBreakdown).forEach((cat) => {
+      map[cat] = categoryBreakdown[cat];
     });
-  }
-  Object.keys(categoryBreakdown).forEach((cat) => {
-    mergedCategoryBreakdown[cat] = categoryBreakdown[cat];
-  });
+    return map;
+  }, [categories, categoryBreakdown]);
+
+  // Sorted categories by amount descending
+  const sortedCategories = useMemo(() => {
+    const entries = Object.entries(mergedCategoryBreakdown).map(([cat, amt]) => {
+      const numericAmt = Number(amt) || 0;
+      const pct = totalExpenses > 0 ? Math.round((numericAmt / totalExpenses) * 100) : 0;
+      return { cat, amt: numericAmt, pct, color: getCategoryColor(cat) };
+    });
+    entries.sort((a, b) => b.amt - a.amt);
+    return entries;
+  }, [mergedCategoryBreakdown, totalExpenses]);
+
+  // Active (amt > 0) vs Inactive (amt === 0) categories
+  const activeCategories = sortedCategories.filter((c) => c.amt > 0);
+  const inactiveCategories = sortedCategories.filter((c) => c.amt === 0);
+
+  // Visible items based on showAllCategories toggle
+  const visibleCategories = showAllCategories
+    ? sortedCategories
+    : activeCategories.length > 0
+    ? activeCategories
+    : sortedCategories.slice(0, 4);
 
   return (
     <div className="centered-container py-6 sm:py-10 space-y-6">
@@ -343,39 +390,83 @@ export function AdminDashboard() {
         members={members}
       />
 
-      {/* Section 2: Category Spending Analytics Card */}
-      <div className="reference-card p-6 space-y-4">
+      {/* Section 2: Compact Category Spending Analytics Card */}
+      <div className="reference-card p-5 sm:p-6 space-y-3.5">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
           <h3 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2 truncate">
             <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-[#0f52ba] shrink-0" />
             <span className="truncate">Category Spending Breakdown</span>
           </h3>
-          <span className="text-xs text-slate-400 font-medium shrink-0 whitespace-nowrap">Budget Share</span>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {sortedCategories.length > 4 && (
+              <button
+                onClick={() => {
+                  triggerHaptic(10);
+                  setShowAllCategories((prev) => !prev);
+                }}
+                className="text-xs font-bold text-[#0f52ba] hover:text-blue-700 transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                <span>{showAllCategories ? 'Show Active Only' : `View All (${sortedCategories.length})`}</span>
+                {showAllCategories ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
+            )}
+            <span className="text-xs text-slate-400 font-medium hidden sm:inline">Budget Share</span>
+          </div>
         </div>
 
-        <div className="space-y-3 pt-1">
-          {Object.keys(mergedCategoryBreakdown).length > 0 ? (
-            Object.entries(mergedCategoryBreakdown).map(([cat, amt]) => {
-              const pct = totalExpenses > 0 ? Math.round((amt / totalExpenses) * 100) : 0;
-              return (
-                <div key={cat} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs font-semibold">
-                    <span className="text-[#0f172a]">{cat}</span>
-                    <span className="text-slate-600">
-                      ₹{amt.toLocaleString('en-IN')} ({pct}%)
-                    </span>
-                  </div>
-                  <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                    <div
-                      className="h-full bg-[#0f52ba] rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, Math.max(4, pct))}%` }}
-                    />
-                  </div>
+        {/* 1. Multi-Segment Proportional Distribution Bar */}
+        {totalExpenses > 0 && activeCategories.length > 0 && (
+          <div className="space-y-1.5">
+            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden flex border border-slate-200 shadow-2xs">
+              {activeCategories.map((item) => (
+                <div
+                  key={item.cat}
+                  style={{
+                    width: `${Math.max(2, item.pct)}%`,
+                    backgroundColor: item.color.bg,
+                  }}
+                  className="h-full transition-all duration-500 first:rounded-l-full last:rounded-r-full"
+                  title={`${item.cat}: ₹${item.amt.toLocaleString('en-IN')} (${item.pct}%)`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 2. Compact 2-Column Grid of Category Pills */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+          {visibleCategories.length > 0 ? (
+            visibleCategories.map((item) => (
+              <div
+                key={item.cat}
+                className="p-2 px-3 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:bg-white transition-all flex items-center justify-between gap-2 text-xs shadow-2xs"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: item.color.bg }}
+                  />
+                  <span className="font-bold text-[#0f172a] truncate">{item.cat}</span>
                 </div>
-              );
-            })
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="font-extrabold text-slate-800">
+                    ₹{item.amt.toLocaleString('en-IN')}
+                  </span>
+                  {item.pct > 0 && (
+                    <span
+                      className="text-[10px] font-bold px-1.5 py-0.2 rounded-md"
+                      style={{ backgroundColor: item.color.light, color: item.color.text }}
+                    >
+                      {item.pct}%
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))
           ) : (
-            <p className="text-xs text-slate-400 text-center py-4">No categories found.</p>
+            <p className="text-xs text-slate-400 text-center py-2 col-span-2">No categories recorded.</p>
           )}
         </div>
       </div>
