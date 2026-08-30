@@ -1,12 +1,14 @@
 // API Service for Google Apps Script Web App Integration
+import { safeStorage } from '../utils/safeStorage';
+
 let GAS_URL = import.meta.env.VITE_GAS_URL || 'https://script.google.com/macros/s/AKfycbwYP8fBmn_0wEt-m3LkpkKBveDmFeES9Ka8ZA3IcxbiPlEojDTIlcEwLslkgsbcfRLXrw/exec';
 
 export function getGasUrl() {
-  return localStorage.getItem('PR_YOUTH_GAS_URL') || GAS_URL;
+  return safeStorage.getItem('PR_YOUTH_GAS_URL') || GAS_URL;
 }
 
 export function setGasUrl(url) {
-  localStorage.setItem('PR_YOUTH_GAS_URL', url);
+  safeStorage.setItem('PR_YOUTH_GAS_URL', url);
   GAS_URL = url;
 }
 
@@ -54,32 +56,40 @@ const DEFAULT_CATEGORIES = [
 ];
 
 function getLocalMembers() {
-  const saved = localStorage.getItem(LOCAL_STORAGE_MEMBERS_KEY);
-  if (saved) return JSON.parse(saved);
-  localStorage.setItem(LOCAL_STORAGE_MEMBERS_KEY, JSON.stringify(DEFAULT_MEMBERS));
+  const saved = safeStorage.getItem(LOCAL_STORAGE_MEMBERS_KEY);
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) {}
+  }
+  safeStorage.setItem(LOCAL_STORAGE_MEMBERS_KEY, JSON.stringify(DEFAULT_MEMBERS));
   return DEFAULT_MEMBERS;
 }
 
 function saveLocalMembers(members) {
-  localStorage.setItem(LOCAL_STORAGE_MEMBERS_KEY, JSON.stringify(members));
+  safeStorage.setItem(LOCAL_STORAGE_MEMBERS_KEY, JSON.stringify(members));
 }
 
 function getLocalExpenses() {
-  const saved = localStorage.getItem(LOCAL_STORAGE_EXPENSES_KEY);
-  return saved ? JSON.parse(saved) : [];
+  const saved = safeStorage.getItem(LOCAL_STORAGE_EXPENSES_KEY);
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) {}
+  }
+  return [];
 }
 
 function saveLocalExpenses(expenses) {
-  localStorage.setItem(LOCAL_STORAGE_EXPENSES_KEY, JSON.stringify(expenses));
+  safeStorage.setItem(LOCAL_STORAGE_EXPENSES_KEY, JSON.stringify(expenses));
 }
 
 function getLocalDonations() {
-  const saved = localStorage.getItem(LOCAL_STORAGE_DONATIONS_KEY);
-  return saved ? JSON.parse(saved) : [];
+  const saved = safeStorage.getItem(LOCAL_STORAGE_DONATIONS_KEY);
+  if (saved) {
+    try { return JSON.parse(saved); } catch (e) {}
+  }
+  return [];
 }
 
 function saveLocalDonations(donations) {
-  localStorage.setItem(LOCAL_STORAGE_DONATIONS_KEY, JSON.stringify(donations));
+  safeStorage.setItem(LOCAL_STORAGE_DONATIONS_KEY, JSON.stringify(donations));
 }
 
 export const api = {
@@ -98,85 +108,128 @@ export const api = {
         const res = await fetchWithTimeout(
           `${currentUrl}?action=login&usernameOrId=${encodeURIComponent(cleanId)}&password=${encodeURIComponent(cleanPass)}`,
           {},
-          4000
+          9000
         );
         const json = await res.json();
-        if (json && typeof json.success === 'boolean') {
-          if (json.success) return json;
-          return { success: false, message: json.message || 'Invalid User ID or Password.' };
-        }
+        if (json.success) return json;
+        return { success: false, message: json.message || 'Invalid User ID or Password.' };
       } catch (err) {
-        console.warn('Backend login endpoint unreachable, checking member password records', err);
-      }
-
-      // Member list fallback verification with strict password check
-      try {
-        const res = await fetchWithTimeout(`${currentUrl}?action=getMembers`, {}, 3500);
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-          const matched = json.data.find(
-            (m) => String(m.memberId).toUpperCase() === cleanId || String(m.name).toUpperCase() === cleanId
-          );
-
-          if (matched) {
-            const isInactive = String(matched.status).toLowerCase() === 'inactive' || matched.active === false;
-            if (isInactive) {
-              return { success: false, message: 'This member account is marked Inactive.' };
-            }
-
-            // Strict Password Checking against Google Sheets stored password or default patterns
-            const expectedPass = String(matched.password || (matched.role === 'Admin' ? 'admin123' : matched.memberId.replace('PRY', ''))).trim();
-            if (cleanPass === expectedPass || cleanPass === 'admin123' || (matched.role === 'Member' && cleanPass === matched.memberId.replace('PRY', ''))) {
-              return { success: true, user: matched };
-            }
-
-            return { success: false, message: 'Invalid password. Please check your password and try again.' };
-          }
-        }
-      } catch (err) {
-        console.warn('Backend offline, falling back to local verification', err);
+        console.warn('Backend login connection failed, checking local credentials', err);
       }
     }
 
-    // Local Storage Fallback Verification with Strict Password Check
-    const localMembers = getLocalMembers();
-    const matched = localMembers.find(
-      (m) => String(m.memberId).toUpperCase() === cleanId || String(m.name).toUpperCase() === cleanId
+    // Local Verification Fallback
+    const members = getLocalMembers();
+    const user = members.find(
+      (m) =>
+        m.memberId.toUpperCase() === cleanId &&
+        String(m.password || '').trim() === cleanPass
     );
 
-    if (matched) {
-      if (matched.status === 'Inactive') {
-        return { success: false, message: 'This member account is marked Inactive.' };
+    if (user) {
+      const statusStr = String(user.status || '').toLowerCase();
+      const activeVal = String(user.active).toLowerCase();
+      const isInactive =
+        statusStr === 'inactive' ||
+        activeVal === 'false' ||
+        activeVal === '0' ||
+        user.active === false;
+
+      if (isInactive) {
+        return {
+          success: false,
+          message: 'Your account is marked Inactive. Please contact the administrator.',
+        };
       }
 
-      const expectedPass = String(matched.password || (matched.role === 'Admin' ? 'admin123' : matched.memberId.replace('PRY', ''))).trim();
-      if (cleanPass === expectedPass) {
-        return { success: true, user: matched };
-      }
-
-      return { success: false, message: 'Invalid User ID or Password.' };
+      return {
+        success: true,
+        data: {
+          memberId: user.memberId,
+          name: user.name,
+          role: user.role || 'Member',
+          status: 'Active',
+          active: true,
+        },
+      };
     }
 
-    return { success: false, message: 'Invalid User ID or Password.' };
+    return {
+      success: false,
+      message: 'Invalid User ID or Password.',
+    };
   },
 
-  // Get Member List (Always fetches live from Google Sheets and updates storage)
-  async getMembers() {
+  // Get Admin Executive Dashboard Data
+  async getAdminDashboard() {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetchWithTimeout(`${currentUrl}?action=getMembers`, {}, 4000);
+        const res = await fetchWithTimeout(`${currentUrl}?action=getAdminDashboard`, {}, 9000);
         const json = await res.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          saveLocalMembers(json.data);
-          sessionStorage.setItem('ADMIN_MEMBERS_DATA', JSON.stringify(json.data));
+        if (json.success && json.data) {
           return json;
         }
       } catch (err) {
-        console.warn('Backend fetch failed, using local members', err);
+        console.warn('Backend fetch failed, calculating local metrics', err);
       }
     }
-    return { success: true, data: getLocalMembers() };
+
+    const expenses = getLocalExpenses();
+    const donations = getLocalDonations();
+
+    const totalDonations = donations.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+    const totalExpenses = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+    const currentBalance = totalDonations - totalExpenses;
+
+    const categoryBreakdown = {};
+    expenses.forEach((e) => {
+      categoryBreakdown[e.category] = (categoryBreakdown[e.category] || 0) + (Number(e.amount) || 0);
+    });
+
+    const recentActivity = [...donations, ...expenses]
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 10);
+
+    return {
+      success: true,
+      data: {
+        totalDonations,
+        totalExpenses,
+        currentBalance,
+        expenseCount: expenses.length,
+        categoryBreakdown,
+        recentActivity,
+      },
+    };
+  },
+
+  // Get Member Dashboard Data
+  async getMemberDashboard(memberId) {
+    const currentUrl = getGasUrl();
+    if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
+      try {
+        const res = await fetchWithTimeout(`${currentUrl}?action=getMemberDashboard&memberId=${encodeURIComponent(memberId)}`, {}, 9000);
+        const json = await res.json();
+        if (json.success && json.data) {
+          return json;
+        }
+      } catch (err) {
+        console.warn('Backend fetch failed, calculating local member metrics', err);
+      }
+    }
+
+    const allExpenses = getLocalExpenses();
+    const memberExpenses = allExpenses.filter((e) => e.memberId === memberId);
+    const totalSpent = memberExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+    return {
+      success: true,
+      data: {
+        totalExpenses: totalSpent,
+        recentActivity: memberExpenses.slice(0, 10),
+      },
+    };
   },
 
   // Get Dynamic Categories List from Google Sheets
@@ -184,10 +237,10 @@ export const api = {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetchWithTimeout(`${currentUrl}?action=getCategories`, {}, 4000);
+        const res = await fetchWithTimeout(`${currentUrl}?action=getCategories`, {}, 5000);
         const json = await res.json();
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          localStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(json.data));
+          safeStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(json.data));
           return json;
         }
       } catch (err) {
@@ -195,8 +248,11 @@ export const api = {
       }
     }
 
-    const savedCats = localStorage.getItem(LOCAL_STORAGE_CATEGORIES_KEY);
-    const categories = savedCats ? JSON.parse(savedCats) : DEFAULT_CATEGORIES;
+    const savedCats = safeStorage.getItem(LOCAL_STORAGE_CATEGORIES_KEY);
+    let categories = DEFAULT_CATEGORIES;
+    if (savedCats) {
+      try { categories = JSON.parse(savedCats); } catch (e) {}
+    }
     return { success: true, data: categories };
   },
 
@@ -205,7 +261,7 @@ export const api = {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetchWithTimeout(`${currentUrl}?action=getAllDonations`, {}, 4000);
+        const res = await fetchWithTimeout(`${currentUrl}?action=getAllDonations`, {}, 5000);
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) return json;
       } catch (err) {
@@ -221,99 +277,139 @@ export const api = {
     return { success: true, data: donations };
   },
 
-  // Toggle Member Status (Active <-> Inactive)
-  async toggleMemberStatus(memberId, newStatus) {
+  // Get All Expenses
+  async getAllExpenses() {
+    const currentUrl = getGasUrl();
+    if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
+      try {
+        const res = await fetchWithTimeout(`${currentUrl}?action=getAllExpenses`, {}, 5000);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) return json;
+      } catch (err) {
+        console.warn('Backend fetch failed, using local expenses', err);
+      }
+    }
+    return { success: true, data: getLocalExpenses() };
+  },
+
+  // Get All Members
+  async getMembers() {
+    const currentUrl = getGasUrl();
+    if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
+      try {
+        const res = await fetchWithTimeout(`${currentUrl}?action=getMembers`, {}, 5000);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          saveLocalMembers(json.data);
+          return json;
+        }
+      } catch (err) {
+        console.warn('Backend fetch failed, using local members', err);
+      }
+    }
+    return { success: true, data: getLocalMembers() };
+  },
+
+  // Add Member
+  async addMember(payload) {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
         const res = await fetchWithTimeout(currentUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'toggleMemberStatus', memberId, status: newStatus }),
-        }, 5000);
+          body: JSON.stringify({ action: 'addMember', ...payload }),
+        }, 8000);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
-        console.warn('Backend update failed, updating local storage', err);
+        console.warn('Backend post failed, using local storage', err);
       }
     }
 
-    const localMembers = getLocalMembers();
-    const updated = localMembers.map((m) =>
-      m.memberId === memberId ? { ...m, status: newStatus } : m
-    );
-    saveLocalMembers(updated);
-    return { success: true, data: updated };
+    const members = getLocalMembers();
+    const cleanId = payload.memberId.toUpperCase();
+
+    if (members.some((m) => m.memberId.toUpperCase() === cleanId)) {
+      return { success: false, message: 'Member ID already exists.' };
+    }
+
+    const newMember = {
+      memberId: cleanId,
+      name: payload.name.trim(),
+      password: payload.password.trim(),
+      role: 'Member',
+      status: 'Active',
+      active: true,
+    };
+
+    members.push(newMember);
+    saveLocalMembers(members);
+    return { success: true, data: newMember };
   },
 
-  // Get Member Dashboard Data
-  async getMemberDashboard(memberId) {
+  // Update Member Status
+  async updateMemberStatus(memberId, status) {
+    const currentUrl = getGasUrl();
+    const isActivating = status.toLowerCase() === 'active';
+
+    if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
+      try {
+        const res = await fetchWithTimeout(currentUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'updateMemberStatus',
+            memberId,
+            status,
+            active: isActivating,
+          }),
+        }, 8000);
+        const json = await res.json();
+        if (json.success) return json;
+      } catch (err) {
+        console.warn('Backend post failed, updating local storage', err);
+      }
+    }
+
+    const members = getLocalMembers();
+    const idx = members.findIndex((m) => m.memberId.toUpperCase() === memberId.toUpperCase());
+    if (idx !== -1) {
+      members[idx].status = status;
+      members[idx].active = isActivating;
+      saveLocalMembers(members);
+      return { success: true, data: members[idx] };
+    }
+
+    return { success: false, message: 'Member not found.' };
+  },
+
+  // Reset Member Password
+  async resetPassword(memberId, newPassword) {
     const currentUrl = getGasUrl();
     if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
       try {
-        const res = await fetchWithTimeout(`${currentUrl}?action=getMemberDashboard&memberId=${memberId}`, {}, 4500);
+        const res = await fetchWithTimeout(currentUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'resetPassword', memberId, newPassword }),
+        }, 8000);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
-        console.warn('Backend fetch failed, calculating local member dashboard', err);
+        console.warn('Backend post failed, updating local storage', err);
       }
     }
 
-    const expenses = getLocalExpenses().filter((e) => e.memberId === memberId).map((e) => ({ ...e, type: 'Expenses' }));
-    const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
-    return {
-      success: true,
-      data: {
-        totalExpenses,
-        recentActivity: expenses,
-      },
-    };
-  },
-
-  // Get Admin Overview Data (Combines BOTH Donations AND Expenses)
-  async getAdminDashboard() {
-    const currentUrl = getGasUrl();
-    if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
-      try {
-        const res = await fetchWithTimeout(`${currentUrl}?action=getAdminDashboard`, {}, 4500);
-        const json = await res.json();
-        if (json.success) return json;
-      } catch (err) {
-        console.warn('Backend fetch failed, calculating local admin dashboard', err);
-      }
+    const members = getLocalMembers();
+    const idx = members.findIndex((m) => m.memberId.toUpperCase() === memberId.toUpperCase());
+    if (idx !== -1) {
+      members[idx].password = newPassword.trim();
+      saveLocalMembers(members);
+      return { success: true };
     }
 
-    const expenses = getLocalExpenses().map((e) => ({ ...e, type: 'Expenses' }));
-    const donations = getLocalDonations().map((d) => ({
-      ...d,
-      type: 'Donation',
-      category: 'Donation Received',
-      note: `Donor: ${d.donorName || d.name || 'Anonymous'}`,
-    }));
-
-    const combinedActivity = [...donations, ...expenses];
-    combinedActivity.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-    const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
-    const totalDonations = donations.reduce((sum, d) => sum + Number(d.amount || 0), 0);
-    const currentBalance = totalDonations - totalExpenses;
-
-    const categoryBreakdown = {};
-    expenses.forEach((e) => {
-      categoryBreakdown[e.category] = (categoryBreakdown[e.category] || 0) + Number(e.amount || 0);
-    });
-
-    return {
-      success: true,
-      data: {
-        totalDonations,
-        totalExpenses,
-        currentBalance,
-        expenseCount: expenses.length,
-        categoryBreakdown,
-        recentActivity: combinedActivity,
-      },
-    };
+    return { success: false, message: 'Member not found.' };
   },
 
   // Submit Out-of-Pocket Expense
@@ -325,11 +421,11 @@ export const api = {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'addExpense', ...payload }),
-        }, 5000);
+        }, 8000);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
-        console.warn('Backend post failed, using local storage', err);
+        console.warn('Backend post failed, saving locally', err);
       }
     }
 
@@ -343,10 +439,14 @@ export const api = {
     saveLocalExpenses(expenses);
 
     // Ensure category is added to local categories if missing
-    const savedCats = JSON.parse(localStorage.getItem(LOCAL_STORAGE_CATEGORIES_KEY) || JSON.stringify(DEFAULT_CATEGORIES));
+    let savedCats = DEFAULT_CATEGORIES;
+    const catStr = safeStorage.getItem(LOCAL_STORAGE_CATEGORIES_KEY);
+    if (catStr) {
+      try { savedCats = JSON.parse(catStr); } catch (e) {}
+    }
     if (!savedCats.includes(payload.category)) {
       savedCats.push(payload.category);
-      localStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(savedCats));
+      safeStorage.setItem(LOCAL_STORAGE_CATEGORIES_KEY, JSON.stringify(savedCats));
     }
 
     return { success: true, data: newTx };
@@ -361,7 +461,7 @@ export const api = {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'addDonation', ...payload }),
-        }, 5000);
+        }, 8000);
         const json = await res.json();
         if (json.success) return json;
       } catch (err) {
