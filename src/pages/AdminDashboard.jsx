@@ -6,10 +6,11 @@ import { triggerHaptic } from '../utils/hapticsSound';
 import { ActivityLedger } from '../components/ActivityLedger';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { Navbar } from '../components/Navbar';
-import { Layers, RefreshCw, Wallet, LogOut } from 'lucide-react';
+import { Layers, RefreshCw, Wallet, LogOut, ChevronDown } from 'lucide-react';
 
 export function AdminDashboard() {
   const { logout, refreshTrigger, triggerRefresh, isSyncing } = useAuth();
+  const [isSummaryExpanded, setIsSummaryExpanded] = useState(false);
   
   const [data, setData] = useState(() => {
     try {
@@ -213,107 +214,126 @@ export function AdminDashboard() {
       {/* Segmented Tab Bar */}
       <Navbar />
 
-      {/* Hierarchical Financial Status Bar */}
-      <div className="reference-card rounded-3xl p-5 px-6 bg-gradient-to-br from-white via-slate-50/50 to-white shadow-sm border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="space-y-1 w-full sm:w-auto">
-          <div className="flex items-center justify-between sm:justify-start gap-3 w-full">
-            <div className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
-              ₹{currentBalance.toLocaleString('en-IN')}
+      {/* Hierarchical Financial Status Bar with Collapsible Financial Ledger Summary */}
+      <div className="reference-card rounded-3xl overflow-hidden bg-gradient-to-br from-white via-slate-50/50 to-white shadow-sm border border-slate-200 transition-all">
+        
+        {/* Main Header Bar (Clickable to toggle summary dropdown) */}
+        <div
+          onClick={() => {
+            triggerHaptic(10);
+            setIsSummaryExpanded((prev) => !prev);
+          }}
+          className="p-5 px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/60 transition-colors select-none"
+        >
+          <div className="space-y-1 w-full sm:w-auto">
+            <div className="flex items-center justify-between sm:justify-start gap-3 w-full">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
+                  ₹{currentBalance.toLocaleString('en-IN')}
+                </span>
+                <div className={`p-1 rounded-full text-slate-400 hover:text-[#0f52ba] transition-transform duration-200 ${
+                  isSummaryExpanded ? 'rotate-180 text-[#0f52ba] bg-blue-50' : ''
+                }`}>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+              </div>
+
+              {/* Mobile Refresh & Logout Buttons */}
+              <div className="flex items-center gap-2 sm:hidden shrink-0">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic(15);
+                    triggerRefresh();
+                  }}
+                  className="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors border border-emerald-200 active:scale-95 shadow-2xs cursor-pointer"
+                  title="Sync live data"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                </button>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    triggerHaptic(20);
+                    logout();
+                  }}
+                  className="flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 shadow-2xs cursor-pointer"
+                  title="Logout"
+                >
+                  <LogOut className="w-3 h-3" />
+                  <span>Logout</span>
+                </button>
+              </div>
             </div>
 
-            {/* Mobile Refresh & Logout Buttons */}
-            <div className="flex items-center gap-2 sm:hidden shrink-0">
-              <button
-                onClick={() => {
-                  triggerHaptic(15);
-                  triggerRefresh();
-                }}
-                className="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors border border-emerald-200 active:scale-95 shadow-2xs cursor-pointer"
-                title="Sync live data"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-              </button>
-
-              <button
-                onClick={() => {
-                  triggerHaptic(20);
-                  logout();
-                }}
-                className="flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-xl transition-all active:scale-95 shadow-2xs cursor-pointer"
-                title="Logout"
-              >
-                <LogOut className="w-3 h-3" />
-                <span>Logout</span>
-              </button>
+            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 pt-0.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span>Net Committee Balance</span>
             </div>
           </div>
 
-          <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 pt-0.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-            <span>Net Committee Balance</span>
-          </div>
+          {/* Desktop Refresh & Logout Buttons */}
+          <div className="hidden sm:flex items-center gap-3 shrink-0">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerHaptic(15);
+                triggerRefresh();
+              }}
+              className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors border border-emerald-200 active:scale-95 shadow-2xs cursor-pointer"
+              title="Sync live data"
+            >
+              <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            </button>
 
-          <div className="text-[11px] font-medium text-slate-500 pt-0.5">
-            {members.length > 0 ? `${members.length} Members Added` : '10 Members Added'}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerHaptic(20);
+                logout();
+              }}
+              className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-2.5 rounded-xl transition-all active:scale-95 shadow-2xs cursor-pointer"
+              title="Logout"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Logout</span>
+            </button>
           </div>
         </div>
 
-        {/* Desktop Refresh & Logout Buttons */}
-        <div className="hidden sm:flex items-center gap-3 shrink-0">
-          <button
-            onClick={() => {
-              triggerHaptic(15);
-              triggerRefresh();
-            }}
-            className="p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 transition-colors border border-emerald-200 active:scale-95 shadow-2xs cursor-pointer"
-            title="Sync live data"
-          >
-            <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-          </button>
+        {/* Collapsible Dropdown: Financial Ledger Summary */}
+        {isSummaryExpanded && (
+          <div className="p-5 px-6 border-t border-slate-100 bg-slate-50/70 space-y-3 animate-fade-in">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-xs font-bold text-slate-700 flex items-center gap-1.5 uppercase tracking-wider">
+                <Wallet className="w-3.5 h-3.5 text-[#0f52ba]" />
+                <span>Financial Ledger Summary</span>
+              </h2>
+              <span className="text-[11px] text-slate-400 font-medium">Live Overview</span>
+            </div>
 
-          <button
-            onClick={() => {
-              triggerHaptic(20);
-              logout();
-            }}
-            className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-2.5 rounded-xl transition-all active:scale-95 shadow-2xs cursor-pointer"
-            title="Logout"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Logout</span>
-          </button>
-        </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-center">
+              <div className="p-3 rounded-2xl bg-white border border-emerald-200 shadow-2xs">
+                <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Total Donations</span>
+                <span className="text-lg font-extrabold text-emerald-700">+ ₹{totalDonations.toLocaleString('en-IN')}</span>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-white border border-amber-200 shadow-2xs">
+                <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">Total Expenses</span>
+                <span className="text-lg font-extrabold text-amber-700">- ₹{totalExpenses.toLocaleString('en-IN')}</span>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-white border border-[#bfdbfe] shadow-2xs">
+                <span className="text-[10px] font-extrabold text-[#1e40af] uppercase tracking-wider block">Net Balance</span>
+                <span className="text-lg font-extrabold text-[#1d4ed8]">₹{currentBalance.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Financial Summary Card */}
-      <div className="reference-card p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
-          <h2 className="text-sm sm:text-base font-bold text-[#0f172a] flex items-center gap-2 truncate">
-            <Wallet className="w-4 h-4 sm:w-5 sm:h-5 text-[#0f52ba] shrink-0" />
-            <span className="truncate">Financial Ledger Summary</span>
-          </h2>
-          <span className="text-xs text-slate-400 font-medium shrink-0 whitespace-nowrap">Live Overview</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-          <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
-            <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Total Donations</span>
-            <span className="text-xl font-extrabold text-emerald-700">₹{totalDonations.toLocaleString('en-IN')}</span>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200">
-            <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">Total Expenses</span>
-            <span className="text-xl font-extrabold text-amber-700">₹{totalExpenses.toLocaleString('en-IN')}</span>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-[#edf4fc] border border-[#bfdbfe]">
-            <span className="text-[10px] font-extrabold text-[#1e40af] uppercase tracking-wider block">Net Balance</span>
-            <span className="text-xl font-extrabold text-[#1d4ed8]">₹{currentBalance.toLocaleString('en-IN')}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Section 1: Dedicated Donation Transactions Ledger (Under Financial Ledger Summary) */}
+      {/* Section 1: Dedicated Donation Transactions Ledger */}
       <ActivityLedger
         transactions={donationsOnlyList}
         showMember={false}
