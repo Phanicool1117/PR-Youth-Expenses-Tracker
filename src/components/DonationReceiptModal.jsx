@@ -323,7 +323,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
           /* ========================================================================= */
           /* 2. COMPACT STANDARD CHANDA (DONATION) RECEIPT                             */
           /* ========================================================================= */
-          <div className="p-3.5 sm:p-4 space-y-1.5 text-center bg-white">
+          <div className="p-3.5 sm:p-4 space-y-2 text-center bg-white">
             {/* Circular Logo Emblem */}
             <div className="flex justify-center">
               <div className="w-10 h-10 rounded-full border border-blue-200 bg-blue-50/80 flex items-center justify-center p-1 shadow-inner">
@@ -357,7 +357,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             </div>
 
             {/* Subtle Metadata Row on Top of Main Content (Date • Time • Mode) */}
-            <div className="flex items-center justify-center gap-2 text-[10px] text-slate-500 font-medium pt-0.5 pb-0.5">
+            <div className="flex items-center justify-center gap-2 text-[10px] text-slate-500 font-medium pt-0.5 pb-1">
               <span>{dateFormatted}</span>
               <span className="text-slate-300">•</span>
               <span>{timeFormatted}</span>
@@ -365,27 +365,27 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               <span className="font-semibold text-slate-700">{paymentMethod}</span>
             </div>
 
-            {/* Statement with 'garu' in dark text */}
-            <div className="py-1 px-1 text-center">
-              <p className="text-[12px] sm:text-xs text-slate-700 leading-snug font-normal text-center">
+            {/* Statement with 'garu' in dark text (Bigger text & Equal top/bottom breathing space) */}
+            <div className="py-2.5 px-1.5 text-center">
+              <p className="text-[13.5px] sm:text-[14.5px] text-slate-700 leading-relaxed font-normal text-center">
                 <span className="font-bold text-slate-900">Mr/Miss: </span>
-                <span className="font-black text-orange-600 text-xs sm:text-sm tracking-tight">
+                <span className="font-black text-orange-600 text-sm sm:text-base tracking-tight">
                   {donorName}
                 </span>{' '}
                 <span className="font-bold text-slate-900">garu</span>{' '}
                 has generously contributed an amount of{' '}
-                <span className="font-black text-emerald-700 text-xs sm:text-sm">₹{amountFormatted}</span> towards the{' '}
+                <span className="font-black text-emerald-700 text-sm sm:text-base">₹{amountFormatted}</span> towards the{' '}
                 <span className="font-bold text-slate-900">Vinayaka festival / Puja</span>, and the amount has been received with heartfelt thanks.
               </p>
             </div>
 
-            {/* Amount Pill */}
-            <div className="flex justify-center pt-0.5">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-300 shadow-2xs">
-                <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-emerald-800">
+            {/* Amount Pill with balanced top/bottom spacing */}
+            <div className="flex justify-center pt-1 pb-1.5">
+              <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-300 shadow-2xs">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
                   Amount Received:
                 </span>
-                <span className="text-sm sm:text-base font-black text-emerald-700 tracking-tight">
+                <span className="text-base sm:text-lg font-black text-emerald-700 tracking-tight">
                   ₹{amountFormatted}
                 </span>
               </div>
@@ -393,7 +393,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
 
             {/* Thanking Note */}
             <div className="py-1">
-              <p className="text-[11px] sm:text-xs font-bold text-[#0f52ba]">
+              <p className="text-[11.5px] sm:text-xs font-bold text-[#0f52ba]">
                 Thanking you for your contribution.
               </p>
             </div>

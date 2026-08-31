@@ -31,7 +31,7 @@ export async function createDonationReceiptCanvas(donation) {
   const scale = 3;
   const baseWidth = 390;
   // Precise tight canvas height matching content bounds with ZERO wasted white space
-  const baseHeight = isLaddu ? 635 : 440;
+  const baseHeight = isLaddu ? 635 : 465;
 
   const canvas = document.createElement('canvas');
   canvas.width = baseWidth * scale;
@@ -250,39 +250,39 @@ export async function createDonationReceiptCanvas(donation) {
 
   } else {
     // =========================================================================
-    // STANDARD CHANDA DONATION RECEIPT CANVAS (With subtle metadata on top)
+    // STANDARD CHANDA DONATION RECEIPT CANVAS (Enlarged Context & Balanced Spacing)
     // =========================================================================
     // Subtle Metadata Line on Top of Content (Date • Time • Mode)
     ctx.textAlign = 'center';
     ctx.fillStyle = '#64748b';
     ctx.font = '600 10.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText(`${dateFormatted}   •   ${timeFormatted}   •   ${paymentMethod}`, centerX, 153);
+    ctx.fillText(`${dateFormatted}   •   ${timeFormatted}   •   ${paymentMethod}`, centerX, 150);
 
     const lines = [
       [
-        { text: 'Mr/Miss: ', font: 'bold 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
-        { text: donorName, font: '900 16px "Plus Jakarta Sans", sans-serif, Arial', color: '#ea580c' },
-        { text: ' garu', font: 'bold 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
+        { text: 'Mr/Miss: ', font: 'bold 15px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
+        { text: donorName, font: '900 17.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#ea580c' },
+        { text: ' garu', font: 'bold 15px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
       ],
       [
-        { text: 'has generously contributed an amount of', font: '500 13px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
+        { text: 'has generously contributed an amount of', font: '500 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
       ],
       [
-        { text: `₹${amount.toLocaleString('en-IN')}`, font: 'bold 15.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#047857' },
-        { text: ' towards the ', font: '500 13px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
-        { text: 'Vinayaka festival /', font: 'bold 13.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
+        { text: `₹${amount.toLocaleString('en-IN')}`, font: 'bold 16.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#047857' },
+        { text: ' towards the ', font: '500 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
+        { text: 'Vinayaka festival /', font: 'bold 14.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
       ],
       [
-        { text: 'Puja', font: 'bold 13.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
-        { text: ', and the amount has been received', font: '500 13px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
+        { text: 'Puja', font: 'bold 14.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
+        { text: ', and the amount has been received', font: '500 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
       ],
       [
-        { text: 'with heartfelt thanks.', font: '500 13px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
+        { text: 'with heartfelt thanks.', font: '500 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
       ],
     ];
 
-    const statementStartY = 180;
-    const lineHeight = 24;
+    const statementStartY = 186; // Equal breathing space below metadata line
+    const lineHeight = 26;
 
     lines.forEach((segmentList, idx) => {
       const currentY = statementStartY + idx * lineHeight;
@@ -305,20 +305,20 @@ export async function createDonationReceiptCanvas(donation) {
     });
 
     const statementEndY = statementStartY + lines.length * lineHeight;
-    const pillY = statementEndY + 12;
-    const pillWidth = 230;
-    const pillHeight = 36;
+    const pillY = statementEndY + 20; // Equal breathing space above amount pill
+    const pillWidth = 240;
+    const pillHeight = 38;
     const pillX = centerX - pillWidth / 2;
 
     drawRoundedRect(pillX, pillY, pillWidth, pillHeight, pillHeight / 2, '#ecfdf5', '#6ee7b7', 1.5);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#065f46';
     ctx.font = 'bold 11px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('AMOUNT RECEIVED:', centerX - 46, pillY + 22);
+    ctx.fillText('AMOUNT RECEIVED:', centerX - 48, pillY + 23);
 
     ctx.fillStyle = '#047857';
-    ctx.font = '900 16px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText(`₹${amount.toLocaleString('en-IN')}`, centerX + 46, pillY + 23);
+    ctx.font = '900 17px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText(`₹${amount.toLocaleString('en-IN')}`, centerX + 48, pillY + 24);
 
     const thankYouY = pillY + pillHeight + 24;
     ctx.textAlign = 'center';
