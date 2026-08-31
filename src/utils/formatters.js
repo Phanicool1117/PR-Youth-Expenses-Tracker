@@ -14,11 +14,30 @@ export function formatCurrency(num) {
   }
 }
 
+// Safely parse date string into Date object without UTC timezone date shifting
+function parseSafeDate(val) {
+  if (!val) return null;
+  if (val instanceof Date) return val;
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    // Match YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      const [y, m, d] = trimmed.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+    // Match YYYY-MM-DDTHH:mm:ss...
+    const d = new Date(trimmed);
+    if (!isNaN(d.getTime())) return d;
+  }
+  const fallback = new Date(val);
+  return isNaN(fallback.getTime()) ? null : fallback;
+}
+
 export function formatDate(val) {
   if (!val) return '';
   try {
-    const d = new Date(val);
-    if (isNaN(d.getTime())) return '';
+    const d = parseSafeDate(val);
+    if (!d) return '';
     return d.toLocaleDateString('en-IN', {
       day: 'numeric',
       month: 'short',
@@ -26,7 +45,8 @@ export function formatDate(val) {
     });
   } catch (e) {
     try {
-      const d = new Date(val);
+      const d = parseSafeDate(val);
+      if (!d) return '';
       return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
     } catch (e2) {
       return '';
@@ -37,8 +57,8 @@ export function formatDate(val) {
 export function formatDateTime(val) {
   if (!val) return '';
   try {
-    const d = new Date(val);
-    if (isNaN(d.getTime())) return '';
+    const d = parseSafeDate(val);
+    if (!d) return '';
     return d.toLocaleDateString('en-IN', {
       day: 'numeric',
       month: 'short',
@@ -54,8 +74,8 @@ export function formatDateTime(val) {
 export function formatTime(val) {
   if (!val) return '';
   try {
-    const d = new Date(val);
-    if (isNaN(d.getTime())) return '';
+    const d = parseSafeDate(val);
+    if (!d) return '';
     return d.toLocaleTimeString('en-IN', {
       hour: '2-digit',
       minute: '2-digit',
@@ -63,7 +83,8 @@ export function formatTime(val) {
     });
   } catch (e) {
     try {
-      const d = new Date(val);
+      const d = parseSafeDate(val);
+      if (!d) return '';
       let hours = d.getHours();
       const minutes = d.getMinutes();
       const ampm = hours >= 12 ? 'pm' : 'am';

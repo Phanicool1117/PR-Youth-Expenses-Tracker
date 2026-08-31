@@ -297,7 +297,7 @@ function addDonation(params) {
     }
   }
   
-  var timestamp = new Date().toISOString();
+  var timestamp = params.timestamp || (params.date ? new Date(params.date).toISOString() : new Date().toISOString());
   
   // Append to Donations sheet:
   // For Laddu Auction: Fill Column A to I (Member ID, Member Name, Winner Name, Method, Amount, Timestamp, 'Laddu', Gender, Notes)

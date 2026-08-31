@@ -5,9 +5,36 @@ export function CustomDatePicker({ value, onChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
-  const selectedDate = value ? new Date(value) : new Date();
+  // Parse YYYY-MM-DD safely into local year, month, day without any timezone offset shifts
+  const parseLocalDate = (str) => {
+    if (!str) return new Date();
+    if (typeof str === 'string') {
+      const clean = str.split('T')[0];
+      const parts = clean.split('-');
+      if (parts.length === 3) {
+        const y = Number(parts[0]);
+        const m = Number(parts[1]) - 1;
+        const d = Number(parts[2]);
+        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+          return new Date(y, m, d);
+        }
+      }
+    }
+    return new Date(str);
+  };
+
+  const selectedDate = parseLocalDate(value);
   const [viewYear, setViewYear] = useState(selectedDate.getFullYear());
   const [viewMonth, setViewMonth] = useState(selectedDate.getMonth());
+
+  // Keep view in sync when value changes externally
+  useEffect(() => {
+    if (value) {
+      const parsed = parseLocalDate(value);
+      setViewYear(parsed.getFullYear());
+      setViewMonth(parsed.getMonth());
+    }
+  }, [value]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -46,15 +73,20 @@ export function CustomDatePicker({ value, onChange }) {
   };
 
   const handleSelectDay = (day) => {
-    const d = new Date(viewYear, viewMonth, day);
-    const isoDate = d.toISOString().split('T')[0];
+    const yyyy = String(viewYear);
+    const mm = String(viewMonth + 1).padStart(2, '0');
+    const dd = String(day).padStart(2, '0');
+    const isoDate = `${yyyy}-${mm}-${dd}`;
     onChange(isoDate);
     setIsOpen(false);
   };
 
   const handleSelectToday = () => {
     const today = new Date();
-    const isoDate = today.toISOString().split('T')[0];
+    const yyyy = String(today.getFullYear());
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const isoDate = `${yyyy}-${mm}-${dd}`;
     setViewYear(today.getFullYear());
     setViewMonth(today.getMonth());
     onChange(isoDate);
@@ -62,7 +94,7 @@ export function CustomDatePicker({ value, onChange }) {
   };
 
   const formattedDisplay = value
-    ? new Date(value).toLocaleDateString('en-IN', {
+    ? parseLocalDate(value).toLocaleDateString('en-IN', {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
@@ -93,7 +125,7 @@ export function CustomDatePicker({ value, onChange }) {
             <button
               type="button"
               onClick={handlePrevMonth}
-              className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors"
+              className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -103,7 +135,7 @@ export function CustomDatePicker({ value, onChange }) {
             <button
               type="button"
               onClick={handleNextMonth}
-              className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors"
+              className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -138,7 +170,7 @@ export function CustomDatePicker({ value, onChange }) {
                   key={day}
                   type="button"
                   onClick={() => handleSelectDay(day)}
-                  className={`w-8 h-8 rounded-xl font-semibold flex items-center justify-center mx-auto transition-all ${
+                  className={`w-8 h-8 rounded-xl font-semibold flex items-center justify-center mx-auto transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-[#0f52ba] text-white font-bold shadow-sm'
                       : 'text-[#0f172a] hover:bg-slate-100'
@@ -150,19 +182,19 @@ export function CustomDatePicker({ value, onChange }) {
             })}
           </div>
 
-          {/* Footer Quick Action */}
-          <div className="border-t border-slate-100 pt-3 mt-3 flex items-center justify-between">
+          {/* Today Button Footer */}
+          <div className="border-t border-slate-100 pt-2.5 mt-3 flex justify-between items-center text-xs">
             <button
               type="button"
               onClick={handleSelectToday}
-              className="text-xs font-bold text-[#0f52ba] hover:underline"
+              className="text-[#0f52ba] font-bold hover:underline py-1 px-2 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
             >
               Today
             </button>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-medium text-slate-400 hover:text-slate-600"
+              className="text-slate-400 hover:text-slate-600 font-medium py-1 px-2 cursor-pointer"
             >
               Close
             </button>

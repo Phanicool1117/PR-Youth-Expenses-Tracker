@@ -27,16 +27,24 @@ export function AdminDonations() {
   // In-Page Sub-Section Toggle State ('chanda' | 'laddu')
   const [activeSection, setActiveSection] = useState('chanda');
 
+  const getTodayLocalDateStr = () => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
   // Chanda Form State
   const [donorName, setDonorName] = useState('');
   const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(getTodayLocalDateStr);
   const [paymentMode, setPaymentMode] = useState('Cash');
 
   // Laddu Form State
   const [ladduWinnerName, setLadduWinnerName] = useState('');
   const [ladduAmount, setLadduAmount] = useState('');
-  const [ladduDate, setLadduDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [ladduDate, setLadduDate] = useState(getTodayLocalDateStr);
   const [ladduPaymentMode, setLadduPaymentMode] = useState('Cash');
   const [ladduNotes, setLadduNotes] = useState('Sri Vinayaka 2026 Laddu Auction Winner');
   const [gender, setGender] = useState('Male'); // 'Male' | 'Female'
@@ -75,13 +83,19 @@ export function AdminDonations() {
     setToastMessage(null);
 
     try {
+      const [y, m, d] = (date || getTodayLocalDateStr()).split('-').map(Number);
+      const now = new Date();
+      const txDateTime = new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds());
+      const timestamp = txDateTime.toISOString();
+
       const payload = {
         memberId: user.memberId,
         memberName: user.name,
         donorName: donorName.trim(),
         amount: numericAmount,
         paymentMethod: paymentMode,
-        date,
+        date: date,
+        timestamp: timestamp,
         notes: '',
         subType: '',
         gender: '',
@@ -137,6 +151,11 @@ export function AdminDonations() {
     setToastMessage(null);
 
     try {
+      const [y, m, d] = (ladduDate || getTodayLocalDateStr()).split('-').map(Number);
+      const now = new Date();
+      const txDateTime = new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds());
+      const timestamp = txDateTime.toISOString();
+
       const titlePrefix = gender === 'Female' ? 'Ms.' : 'Mr.';
       const payload = {
         memberId: user.memberId,
@@ -145,6 +164,7 @@ export function AdminDonations() {
         amount: numericAmount,
         paymentMethod: ladduPaymentMode,
         date: ladduDate,
+        timestamp: timestamp,
         notes: ladduNotes.trim(),
         subType: 'Laddu',
         gender: gender,
