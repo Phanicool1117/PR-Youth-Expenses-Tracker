@@ -126,9 +126,8 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
                   )}
                 </div>
 
-                {/* Line 3: Note & Date/Time */}
-                <div className="flex items-center gap-3 text-xs text-slate-500 truncate pt-0.5">
-                  {transaction.note && <span className="truncate max-w-[160px] sm:max-w-xs">{transaction.note}</span>}
+                {/* Line 3: Date/Time Only (Note removed to prevent cutoff) */}
+                <div className="flex items-center text-xs text-slate-400 pt-0.5">
                   <span className="flex items-center gap-1 shrink-0">
                     <Calendar className="w-3 h-3 text-slate-400" />
                     {dateTimeFormatted}
