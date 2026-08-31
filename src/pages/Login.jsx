@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { triggerHaptic, playSuccessSound } from '../utils/hapticsSound';
-import { ClickApp } from '../components/click/ClickApp';
 import {
   User,
   Lock,
@@ -13,13 +12,11 @@ import {
   CheckCircle2,
   ShieldCheck,
   ArrowLeft,
-  KeyRound,
-  Sparkles
+  KeyRound
 } from 'lucide-react';
 
 export function Login() {
   const { login } = useAuth();
-  const [showClickApp, setShowClickApp] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [usernameOrId, setUsernameOrId] = useState('');
   const [password, setPassword] = useState('');
@@ -28,11 +25,6 @@ export function Login() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccessState, setIsSuccessState] = useState(false);
-
-  // If user navigated into Click Photo Gallery
-  if (showClickApp) {
-    return <ClickApp onBackToLogin={() => setShowClickApp(false)} />;
-  }
 
   // Member Login Submission
   const handleMemberSubmit = async (e) => {
@@ -91,43 +83,7 @@ export function Login() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-[#dcebfa] via-[#edf5fc] to-[#f5f9fd] flex items-center justify-center p-4 sm:p-6">
-      
-      {/* Floating Top-Right Radar Pulsing "Click" App Trigger */}
-      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-40">
-        <button
-          type="button"
-          onClick={() => {
-            triggerHaptic(20);
-            setShowClickApp(true);
-          }}
-          className="relative group flex items-center gap-2 p-1.5 sm:p-2 rounded-2xl bg-white/90 hover:bg-white border border-sky-200 shadow-xl shadow-sky-500/15 backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-          title="Open Click Photo Gallery"
-        >
-          {/* Multi-Layered Radar Rippling Waves (Visual Empathy & Pulsing Attraction) */}
-          <div className="absolute -inset-1.5 rounded-2xl bg-sky-400/30 animate-ping pointer-events-none" />
-          <div className="absolute -inset-1 rounded-2xl bg-blue-500/20 animate-pulse pointer-events-none" />
-
-          {/* 3D Scalloped Frame Icon */}
-          <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-sky-400 to-blue-600 p-0.5 shadow-xs flex items-center justify-center overflow-hidden">
-            <img
-              src="/click-icon.png"
-              alt="Click Memories"
-              className="w-full h-full object-contain drop-shadow"
-            />
-          </div>
-
-          {/* Label Badge */}
-          <div className="pr-1.5 text-left hidden xs:block">
-            <div className="flex items-center gap-1">
-              <span className="text-[11px] font-black text-slate-900 tracking-tight">Click</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
-            </div>
-            <p className="text-[9px] font-bold text-sky-600 leading-none">Memories</p>
-          </div>
-        </button>
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-b from-[#dcebfa] via-[#edf5fc] to-[#f5f9fd] flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md mx-auto my-auto py-6">
         
         {/* Glassmorphic Auth Card */}
