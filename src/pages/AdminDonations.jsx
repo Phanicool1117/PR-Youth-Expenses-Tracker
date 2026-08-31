@@ -32,7 +32,6 @@ export function AdminDonations() {
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [paymentMode, setPaymentMode] = useState('Cash');
-  const [notes, setNotes] = useState('');
 
   // Laddu Form State
   const [ladduWinnerName, setLadduWinnerName] = useState('');
@@ -83,9 +82,9 @@ export function AdminDonations() {
         amount: numericAmount,
         paymentMethod: paymentMode,
         date,
-        notes: notes.trim(),
-        subType: 'Chanda',
-        gender: 'General',
+        notes: '',
+        subType: '',
+        gender: '',
         titlePrefix: 'Mr/Miss:',
       };
 
@@ -102,7 +101,6 @@ export function AdminDonations() {
         });
         setDonorName('');
         setAmount('');
-        setNotes('');
         triggerRefresh();
 
         setTimeout(() => {
@@ -324,23 +322,6 @@ export function AdminDonations() {
                   value={paymentMode}
                   onChange={(val) => setPaymentMode(val)}
                   options={paymentModeOptions}
-                />
-              </div>
-            </div>
-
-            {/* Optional Notes */}
-            <div>
-              <label className="block text-xs font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">
-                Reference Notes (Optional)
-              </label>
-              <div className="apple-input-wrapper">
-                <FileText className="apple-input-icon text-slate-400" />
-                <input
-                  type="text"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="e.g. Sent via QR Code on banner"
-                  className="apple-input apple-input-with-icon text-xs py-3"
                 />
               </div>
             </div>

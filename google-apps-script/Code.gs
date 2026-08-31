@@ -249,11 +249,11 @@ function addDonation(params) {
   var donorName = params.donorName || params.name || params.donor || '';
   var amount = Number(params.amount);
   var paymentMethod = params.paymentMethod || params.paymentMode || 'Cash';
-  var date = params.date || new Date().toISOString();
-  var subType = params.subType || 'Chanda'; // 'Chanda' | 'Laddu'
-  var gender = params.gender || (subType === 'Laddu' ? 'Male' : 'General'); // 'Male' | 'Female' | 'General'
-  var notes = params.notes || params.note || '';
-  var titlePrefix = params.titlePrefix || (gender === 'Female' ? 'Ms.' : (gender === 'Male' ? 'Mr.' : 'Mr/Miss:'));
+  var isLaddu = String(params.subType || '').toLowerCase() === 'laddu';
+  var subType = isLaddu ? 'Laddu' : 'Chanda';
+  var gender = isLaddu ? (params.gender || 'Male') : '';
+  var notes = isLaddu ? (params.notes || params.note || '') : '';
+  var titlePrefix = isLaddu ? (gender === 'Female' ? 'Ms.' : 'Mr.') : 'Mr/Miss:';
   
   if (!donorName || !amount || isNaN(amount) || amount <= 0) {
     return { success: false, message: "Invalid donation entry. Check required fields and amount." };
@@ -299,18 +299,34 @@ function addDonation(params) {
   
   var timestamp = new Date().toISOString();
   
-  // Append to Donations sheet: Column A to I (Member ID, Member Name, Donor Name, Payment Method, Amount, Timestamp, Type, Gender, Notes)
-  sheet.appendRow([
-    memberId,
-    memberName,
-    donorName,
-    paymentMethod,
-    amount,
-    timestamp,
-    subType,
-    gender,
-    notes
-  ]);
+  // Append to Donations sheet:
+  // For Laddu Auction: Fill Column A to I (Member ID, Member Name, Winner Name, Method, Amount, Timestamp, 'Laddu', Gender, Notes)
+  // For Chanda Donations: Fill Column A to F only. Columns G (Type), H (Gender), I (Notes) remain completely blank.
+  if (isLaddu) {
+    sheet.appendRow([
+      memberId,
+      memberName,
+      donorName,
+      paymentMethod,
+      amount,
+      timestamp,
+      'Laddu',
+      gender,
+      notes
+    ]);
+  } else {
+    sheet.appendRow([
+      memberId,
+      memberName,
+      donorName,
+      paymentMethod,
+      amount,
+      timestamp,
+      '',
+      '',
+      ''
+    ]);
+  }
   
   logAudit(memberId, memberName, 'Add ' + subType + ' (Admin)', 'Donation', 'Donor/Winner: ' + donorName + ' (' + titlePrefix + ') | Amount: ₹' + amount + ' | Method: ' + paymentMethod + ' | Type: ' + subType);
   
