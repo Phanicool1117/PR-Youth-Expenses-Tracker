@@ -4,7 +4,6 @@ import { MALE_AVATAR_BASE64, FEMALE_AVATAR_BASE64 } from './winnerAvatarsBase64'
 export async function createDonationReceiptCanvas(donation) {
   const donorName = donation.donorName || donation.name || 'Devotee';
   const amount = Number(donation.amount || 0);
-  const paymentMethod = donation.paymentMethod || 'Cash';
   const isLaddu = donation.subType === 'Laddu' || String(donation.note || '').toLowerCase().includes('laddu') || donation.category === 'Laddu Prasadam Auction';
   const gender = donation.gender === 'Female' ? 'Female' : 'Male';
 
@@ -21,16 +20,12 @@ export async function createDonationReceiptCanvas(donation) {
     month: 'long',
     year: 'numeric',
   });
-  const timeFormatted = txDate.toLocaleTimeString('en-IN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
 
   // Scale for ultra-crisp 3x Retina output
   const scale = 3;
   const baseWidth = 390;
-  const baseHeight = isLaddu ? 640 : 490;
+  // Precise tight canvas height matching content bounds with ZERO wasted white space
+  const baseHeight = isLaddu ? 635 : 435;
 
   const canvas = document.createElement('canvas');
   canvas.width = baseWidth * scale;
@@ -92,7 +87,7 @@ export async function createDonationReceiptCanvas(donation) {
   const logoImg = await drawImageAsync(LOGO_BASE64);
   ctx.save();
   ctx.beginPath();
-  ctx.arc(centerX, 42, 22, 0, Math.PI * 2);
+  ctx.arc(centerX, 38, 20, 0, Math.PI * 2);
   ctx.fillStyle = '#eff6ff';
   ctx.fill();
   ctx.strokeStyle = '#bfdbfe';
@@ -103,33 +98,33 @@ export async function createDonationReceiptCanvas(donation) {
   if (logoImg) {
     ctx.save();
     ctx.beginPath();
-    ctx.arc(centerX, 42, 18, 0, Math.PI * 2);
+    ctx.arc(centerX, 38, 16, 0, Math.PI * 2);
     ctx.clip();
-    ctx.drawImage(logoImg, centerX - 18, 24, 36, 36);
+    ctx.drawImage(logoImg, centerX - 16, 22, 32, 32);
     ctx.restore();
   }
 
   // 2. Header Text
   ctx.textAlign = 'center';
   ctx.fillStyle = '#0f172a';
-  ctx.font = 'bold 18px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText('Penumuli Perantalamma Youth', centerX, 84);
+  ctx.font = 'bold 17.5px "Plus Jakarta Sans", sans-serif, Arial';
+  ctx.fillText('Penumuli Perantalamma Youth', centerX, 76);
 
   ctx.fillStyle = '#64748b';
   ctx.font = '600 10.5px "Plus Jakarta Sans", sans-serif, Arial';
-  ctx.fillText('Penumuli Village, Duggirala Mandal, Guntur District', centerX, 100);
+  ctx.fillText('Penumuli Village, Duggirala Mandal, Guntur District', centerX, 92);
 
   // 3. Official Receipt Pill Badge
   if (isLaddu) {
-    drawRoundedRect(centerX - 125, 110, 250, 22, 11, '#ecfdf5', '#a7f3d0', 1);
+    drawRoundedRect(centerX - 120, 102, 240, 20, 10, '#ecfdf5', '#a7f3d0', 1);
     ctx.fillStyle = '#047857';
     ctx.font = '900 9.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('LADDU AUCTION WINNER RECEIPT', centerX, 124);
+    ctx.fillText('LADDU AUCTION WINNER RECEIPT', centerX, 115);
   } else {
-    drawRoundedRect(centerX - 95, 110, 190, 22, 11, '#ecfdf5', '#a7f3d0', 1);
+    drawRoundedRect(centerX - 95, 102, 190, 20, 10, '#ecfdf5', '#a7f3d0', 1);
     ctx.fillStyle = '#047857';
     ctx.font = 'bold 9.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('OFFICIAL DONATION RECEIPT', centerX, 124);
+    ctx.fillText('OFFICIAL DONATION RECEIPT', centerX, 115);
   }
 
   // 4. Dashed Divider 1
@@ -137,14 +132,14 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.setLineDash([4, 4]);
   ctx.strokeStyle = '#e2e8f0';
   ctx.lineWidth = 1;
-  ctx.moveTo(24, 142);
-  ctx.lineTo(baseWidth - 24, 142);
+  ctx.moveTo(24, 132);
+  ctx.lineTo(baseWidth - 24, 132);
   ctx.stroke();
   ctx.setLineDash([]);
 
   if (isLaddu) {
     // =========================================================================
-    // DEDICATED LADDU AUCTION WINNER RECEIPT CANVAS (Exact Match)
+    // DEDICATED LADDU AUCTION WINNER RECEIPT CANVAS (No Stretch & Crisp Hierarchy)
     // =========================================================================
     const avatarSrc = gender === 'Female' ? FEMALE_AVATAR_BASE64 : MALE_AVATAR_BASE64;
     const avatarImg = await drawImageAsync(avatarSrc);
@@ -152,26 +147,35 @@ export async function createDonationReceiptCanvas(donation) {
     // Radiance Glow Circle behind avatar
     ctx.save();
     ctx.beginPath();
-    ctx.arc(centerX, 235, 75, 0, Math.PI * 2);
+    ctx.arc(centerX, 230, 85, 0, Math.PI * 2);
     ctx.fillStyle = gender === 'Female' ? '#f0fdf4' : '#fff7ed';
     ctx.fill();
     ctx.restore();
 
-    // Draw Character Avatar
+    // Draw Character Avatar preserving natural aspect ratio (1.5:1 landscape container)
     if (avatarImg) {
-      ctx.drawImage(avatarImg, centerX - 75, 150, 150, 150);
+      const naturalAspect = (avatarImg.naturalWidth && avatarImg.naturalHeight)
+        ? avatarImg.naturalWidth / avatarImg.naturalHeight
+        : 1.5;
+      
+      const targetHeight = 195;
+      const targetWidth = targetHeight * naturalAspect;
+      const drawX = centerX - targetWidth / 2;
+      const drawY = 135;
+
+      ctx.drawImage(avatarImg, drawX, drawY, targetWidth, targetHeight);
     }
 
     // Congratulations
     ctx.textAlign = 'center';
     ctx.fillStyle = '#0f172a';
     ctx.font = '900 17px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('✨ Congratulations! ✨', centerX, 335);
+    ctx.fillText('✨ Congratulations! ✨', centerX, 355);
 
-    // Devotee Name (Mr:/Miss: + Name)
+    // Devotee Name (Mr: / Miss: + Name)
     ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif, Arial';
     const prefixWidth = ctx.measureText(titlePrefix).width;
-    ctx.font = '900 18px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.font = '900 18.5px "Plus Jakarta Sans", sans-serif, Arial';
     const nameWidth = ctx.measureText(donorName).width;
     const totalNameWidth = prefixWidth + nameWidth;
 
@@ -179,105 +183,67 @@ export async function createDonationReceiptCanvas(donation) {
     ctx.textAlign = 'left';
     ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText(titlePrefix, startNameX, 362);
+    ctx.fillText(titlePrefix, startNameX, 384);
 
     ctx.fillStyle = '#ea580c';
-    ctx.font = '900 18px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText(donorName, startNameX + prefixWidth, 362);
+    ctx.font = '900 18.5px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText(donorName, startNameX + prefixWidth, 384);
 
     // Subtext: is the proud winner of the
     ctx.textAlign = 'center';
     ctx.fillStyle = '#475569';
     ctx.font = '500 12.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('is the proud winner of the', centerX, 385);
+    ctx.fillText('is the proud winner of the', centerX, 408);
 
     // Ganesh Laddu Auction!
     ctx.fillStyle = '#047857';
-    ctx.font = '900 17px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('✨ Ganesh Laddu Auction! ✨', centerX, 410);
+    ctx.font = '900 17.5px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText('✨ Ganesh Laddu Auction! ✨', centerX, 434);
 
     // Winner Amount Pill
-    const pillW = 240;
-    const pillH = 38;
+    const pillW = 246;
+    const pillH = 40;
     const pillX = centerX - pillW / 2;
-    const pillY = 432;
-    drawRoundedRect(pillX, pillY, pillW, pillH, 19, '#ecfdf5', '#a7f3d0', 1.5);
+    const pillY = 455;
+    drawRoundedRect(pillX, pillY, pillW, pillH, 20, '#ecfdf5', '#a7f3d0', 1.5);
 
     ctx.textAlign = 'center';
     ctx.fillStyle = '#047857';
     ctx.font = '900 10.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('WINNER AMOUNT:', centerX - 42, pillY + 23);
+    ctx.fillText('WINNER AMOUNT:', centerX - 44, pillY + 24);
 
     ctx.fillStyle = '#065f46';
-    ctx.font = '900 17px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText(`₹${amount.toLocaleString('en-IN')}`, centerX + 48, pillY + 24);
+    ctx.font = '900 17.5px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText(`₹${amount.toLocaleString('en-IN')}`, centerX + 50, pillY + 25);
 
     // Thanking Note
     ctx.fillStyle = '#0f52ba';
     ctx.font = 'bold 13px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('Thanking you for being a part of our celebration.', centerX, 505);
+    ctx.fillText('Thanking you for being a part of our celebration.', centerX, 528);
 
     // Official Footer Verification
     ctx.fillStyle = '#64748b';
     ctx.font = '600 9.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('Penumuli Youth Committee · Authorized Digital Receipt', centerX, 535);
+    ctx.fillText('Penumuli Youth Committee · Authorized Digital Receipt', centerX, 560);
 
     ctx.fillStyle = '#94a3b8';
     ctx.font = '500 8.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('May Lord Ganesha shower blessings upon you and your family.', centerX, 552);
+    ctx.fillText('May Lord Ganesha shower blessings upon you and your family.', centerX, 578);
 
   } else {
     // =========================================================================
     // STANDARD CHANDA DONATION RECEIPT CANVAS
     // =========================================================================
-    const metaBoxX = 24;
-    const metaBoxY = 155;
-    const metaBoxW = baseWidth - 48;
-    const metaBoxH = 88;
-    drawRoundedRect(metaBoxX, metaBoxY, metaBoxW, metaBoxH, 12, '#f8fafc', '#f1f5f9', 1);
-
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#64748b';
-    ctx.font = '500 11px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('Date', metaBoxX + 14, metaBoxY + 24);
-    ctx.fillText('Paid At', metaBoxX + 14, metaBoxY + 48);
-    ctx.fillText('Payment Method', metaBoxX + 14, metaBoxY + 72);
-
-    ctx.textAlign = 'right';
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 11px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText(dateFormatted, metaBoxX + metaBoxW - 14, metaBoxY + 24);
-    ctx.fillText(timeFormatted, metaBoxX + metaBoxW - 14, metaBoxY + 48);
-
-    const methodPillW = ctx.measureText(paymentMethod).width + 16;
-    const methodPillX = metaBoxX + metaBoxW - 14 - methodPillW;
-    drawRoundedRect(methodPillX, metaBoxY + 59, methodPillW, 18, 6, '#ffffff', '#e2e8f0', 1);
-    ctx.fillStyle = '#334155';
-    ctx.font = '600 10.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(paymentMethod, methodPillX + methodPillW / 2, metaBoxY + 72);
-
-    // Dashed Divider 2
-    ctx.beginPath();
-    ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 1;
-    ctx.moveTo(24, 255);
-    ctx.lineTo(baseWidth - 24, 255);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Statement Lines
     const lines = [
       [
         { text: 'Mr/Miss: ', font: 'bold 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
-        { text: donorName, font: '900 16px "Plus Jakarta Sans", sans-serif, Arial', color: '#ea580c' },
+        { text: donorName, font: '900 16.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#ea580c' },
       ],
       [
         { text: 'has generously contributed an amount of', font: '500 13px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
       ],
       [
-        { text: `₹${amount.toLocaleString('en-IN')}`, font: 'bold 15px "Plus Jakarta Sans", sans-serif, Arial', color: '#047857' },
+        { text: `₹${amount.toLocaleString('en-IN')}`, font: 'bold 15.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#047857' },
         { text: ' towards the ', font: '500 13px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
         { text: 'Vinayaka festival /', font: 'bold 13.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
       ],
@@ -290,8 +256,8 @@ export async function createDonationReceiptCanvas(donation) {
       ],
     ];
 
-    const statementStartY = 275;
-    const lineHeight = 24;
+    const statementStartY = 165;
+    const lineHeight = 25;
 
     lines.forEach((segmentList, idx) => {
       const currentY = statementStartY + idx * lineHeight;

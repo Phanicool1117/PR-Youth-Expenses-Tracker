@@ -4,7 +4,7 @@ import { triggerHaptic } from '../utils/hapticsSound';
 import { LOGO_BASE64 } from '../utils/logoBase64';
 import { MALE_AVATAR_BASE64, FEMALE_AVATAR_BASE64 } from '../utils/winnerAvatarsBase64';
 import { formatCurrency, formatDate, formatTime } from '../utils/formatters';
-import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
+import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export function DonationReceiptModal({ isOpen, onClose, donation }) {
   const [isExporting, setIsExporting] = useState(false);
@@ -54,7 +54,6 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
 
   const donorName = donation.donorName || donation.name || 'Devotee';
   const amount = Number(donation.amount || 0);
-  const paymentMethod = donation.paymentMethod || 'Cash';
   const isLaddu = donation.subType === 'Laddu' || String(donation.note || '').toLowerCase().includes('laddu') || donation.category === 'Laddu Prasadam Auction';
   const gender = donation.gender === 'Female' ? 'Female' : 'Male';
 
@@ -117,7 +116,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
     }
   };
 
-  // Handle Native Share to WhatsApp, Telegram, System Share Sheet, etc.
+  // Handle Native Share (Without Payment Method in Text)
   const handleShareReceipt = async () => {
     triggerHaptic(15);
     setIsSharing(true);
@@ -134,8 +133,9 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         }
 
         const file = new File([blob], fileName, { type: 'image/png' });
+        // NOTE: Payment Method is intentionally excluded as requested by user
         const shareText = isLaddu
-          ? `*LADDU AUCTION WINNER RECEIPT*\n*Penumuli Perantalamma Youth*\n\n🎉 *Congratulations!*\n${titlePrefix} ${donorName}\nis the proud winner of the *Ganesh Laddu Auction!*\n\n*Winner Amount:* ₹${amountFormatted}\n*Payment Method:* ${paymentMethod}\n*Date:* ${dateFormatted}\n\nThanking you for being a part of our celebration. 🙏 May Lord Ganesha shower blessings upon you and your family!`
+          ? `*LADDU AUCTION WINNER RECEIPT*\n*Penumuli Perantalamma Youth*\n\n🎉 *Congratulations!*\n${titlePrefix} ${donorName}\nis the proud winner of the *Ganesh Laddu Auction!*\n\n*Winner Amount:* ₹${amountFormatted}\n*Date:* ${dateFormatted}\n\nThanking you for being a part of our celebration. 🙏 May Lord Ganesha shower blessings upon you and your family!`
           : `*Official Donation Receipt*\n*Penumuli Perantalamma Youth*\n\nDonor: ${donorName}\nAmount: ₹${amountFormatted}\nDate: ${dateFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -190,9 +190,9 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
       onClick={(e) => {
         if (e.target === e.currentTarget) handleClose();
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto animate-fade-in"
     >
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-[360px] sm:max-w-[390px] overflow-hidden my-auto relative animate-scale-up">
+      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-[370px] sm:max-w-[420px] overflow-hidden my-auto relative animate-scale-up">
         
         {/* Close Button */}
         <button
@@ -203,16 +203,16 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         </button>
 
         {/* Top Accent Stripe */}
-        <div className={`h-1.5 w-full ${isLaddu ? 'bg-[#0f52ba]' : 'bg-[#0f52ba]'}`} />
+        <div className="h-1.5 w-full bg-[#0f52ba]" />
 
         {/* ========================================================================= */}
-        {/* 1. DEDICATED LADDU AUCTION WINNER RECEIPT (Exact Match to Reference Image) */}
+        {/* 1. DEDICATED LADDU AUCTION WINNER RECEIPT (Exact Match & Large Hierarchy) */}
         {/* ========================================================================= */}
         {isLaddu ? (
-          <div className="p-4 sm:p-5 space-y-2 text-center bg-white">
+          <div className="p-4 sm:p-6 space-y-2.5 text-center bg-white">
             {/* Top Logo Emblem */}
             <div className="flex justify-center">
-              <div className="w-12 h-12 rounded-full border border-blue-200 bg-blue-50/80 flex items-center justify-center p-1.5 shadow-inner">
+              <div className="w-13 h-13 rounded-full border border-blue-200 bg-blue-50/80 flex items-center justify-center p-1.5 shadow-inner">
                 <img
                   src={LOGO_BASE64}
                   alt="PR Youth Logo"
@@ -241,17 +241,17 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               <div className="border-t border-dashed border-slate-200" />
             </div>
 
-            {/* Hero Character Illustration (Male or Female with Celebration Aura) */}
+            {/* Prominent High-Hierarchy Hero Devotee Illustration */}
             <div className="flex justify-center py-1">
-              <div className={`relative w-36 h-36 sm:w-40 sm:h-40 rounded-full flex items-center justify-center p-2 ${
+              <div className={`relative w-full max-w-[270px] sm:max-w-[310px] h-52 sm:h-58 rounded-2xl flex items-center justify-center p-1.5 ${
                 gender === 'Female'
-                  ? 'bg-gradient-to-b from-emerald-50/80 via-emerald-100/40 to-transparent'
-                  : 'bg-gradient-to-b from-orange-50/80 via-orange-100/40 to-transparent'
+                  ? 'bg-gradient-to-b from-emerald-50/90 via-emerald-100/30 to-transparent'
+                  : 'bg-gradient-to-b from-orange-50/90 via-orange-100/30 to-transparent'
               }`}>
                 <img
                   src={avatarImg || avatarFallback}
                   alt={gender === 'Female' ? 'Female Winner' : 'Male Winner'}
-                  className="w-full h-full object-contain drop-shadow-md select-none"
+                  className="w-full h-full object-contain drop-shadow-md select-none transition-transform hover:scale-102"
                   draggable={false}
                 />
               </div>
@@ -261,22 +261,22 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             <div className="space-y-1">
               <div className="flex items-center justify-center gap-1.5 text-xs font-black text-slate-800">
                 <span className={gender === 'Female' ? 'text-emerald-500' : 'text-orange-500'}>✨</span>
-                <span className="text-sm font-extrabold text-slate-900">Congratulations!</span>
+                <span className="text-sm sm:text-base font-black text-slate-900">Congratulations!</span>
                 <span className={gender === 'Female' ? 'text-emerald-500' : 'text-orange-500'}>✨</span>
               </div>
 
-              <div className="text-sm sm:text-base font-medium text-slate-800 leading-tight">
+              <div className="text-base sm:text-lg font-medium text-slate-800 leading-tight">
                 <span className="font-extrabold text-[#0f172a]">{titlePrefix} </span>
-                <span className="font-black text-[#ea580c] text-base sm:text-lg tracking-tight">
+                <span className="font-black text-[#ea580c] text-lg sm:text-xl tracking-tight">
                   {donorName}
                 </span>
               </div>
 
-              <p className="text-xs text-slate-600 font-medium">
+              <p className="text-xs sm:text-[13px] text-slate-600 font-medium">
                 is the proud winner of the
               </p>
 
-              <div className="flex items-center justify-center gap-1 text-sm sm:text-base font-black text-[#047857] tracking-tight">
+              <div className="flex items-center justify-center gap-1 text-base sm:text-lg font-black text-[#047857] tracking-tight">
                 <span className="text-orange-500">✨</span>
                 <span>Ganesh Laddu Auction!</span>
                 <span className="text-orange-500">✨</span>
@@ -285,11 +285,11 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
 
             {/* Winner Amount Pill */}
             <div className="flex justify-center pt-1.5">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#ecfdf5] border border-[#a7f3d0] shadow-2xs">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#047857]">
+              <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#ecfdf5] border border-[#a7f3d0] shadow-xs">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#047857]">
                   WINNER AMOUNT:
                 </span>
-                <span className="text-base sm:text-lg font-black text-[#065f46] tracking-tight">
+                <span className="text-lg sm:text-xl font-black text-[#065f46] tracking-tight">
                   ₹{amountFormatted}
                 </span>
               </div>
@@ -297,7 +297,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
 
             {/* Thanking Note */}
             <div className="pt-2 pb-0.5">
-              <p className="text-xs sm:text-[13px] font-bold text-[#0f52ba]">
+              <p className="text-xs sm:text-[13.5px] font-bold text-[#0f52ba]">
                 Thanking you for being a part of our celebration.
               </p>
             </div>
@@ -349,31 +349,8 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               <div className="border-t border-dashed border-slate-200" />
             </div>
 
-            {/* Metadata Box */}
-            <div className="space-y-1 text-[11px] text-left bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500 font-medium">Date</span>
-                <span className="font-bold text-[#0f172a]">{dateFormatted}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500 font-medium">Paid At</span>
-                <span className="font-bold text-[#0f172a]">{timeFormatted}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-500 font-medium">Payment Method</span>
-                <span className="font-semibold px-2 py-0.2 rounded bg-white text-slate-700 border border-slate-200 text-[10px]">
-                  {paymentMethod}
-                </span>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="py-0.5">
-              <div className="border-t border-dashed border-slate-200" />
-            </div>
-
             {/* Statement */}
-            <div className="py-1 px-1 text-center">
+            <div className="py-2 px-1 text-center">
               <p className="text-[13px] sm:text-sm text-slate-700 leading-snug font-normal text-center">
                 <span className="font-bold text-slate-900">Mr/Miss: </span>
                 <span className="font-black text-orange-600 text-sm sm:text-base tracking-tight">
@@ -387,18 +364,18 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
 
             {/* Amount Pill */}
             <div className="flex justify-center pt-0.5">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-300 shadow-2xs">
+              <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-300 shadow-2xs">
                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">
                   Amount Received:
                 </span>
-                <span className="text-sm sm:text-base font-black text-emerald-700 tracking-tight">
+                <span className="text-base sm:text-lg font-black text-emerald-700 tracking-tight">
                   ₹{amountFormatted}
                 </span>
               </div>
             </div>
 
             {/* Thanking Note */}
-            <div className="py-1">
+            <div className="py-1.5">
               <p className="text-xs sm:text-sm font-bold text-[#0f52ba]">
                 Thanking you for your contribution.
               </p>
