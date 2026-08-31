@@ -1,7 +1,9 @@
 import { LOGO_BASE64 } from './logoBase64';
 
 export async function createDonationReceiptCanvas(donation) {
-  const donorName = donation.donorName || donation.name || 'Devotee';
+  const rawDonorName = donation.donorName || donation.name || 'Devotee';
+  const donorName = rawDonorName.trim();
+  const donorNameWithGaru = `${donorName} garu`;
   const amount = Number(donation.amount || 0);
   const isLaddu = donation.subType === 'Laddu' || String(donation.note || '').toLowerCase().includes('laddu') || donation.category === 'Laddu Prasadam Auction';
   const gender = donation.gender === 'Female' ? 'Female' : 'Male';
@@ -144,7 +146,7 @@ export async function createDonationReceiptCanvas(donation) {
 
   if (isLaddu) {
     // =========================================================================
-    // DEDICATED LADDU AUCTION WINNER RECEIPT CANVAS (No Stretch & Crisp Hierarchy)
+    // DEDICATED LADDU AUCTION WINNER RECEIPT CANVAS (With 'garu' honorific)
     // =========================================================================
     const avatarSrc = gender === 'Female' ? '/Female.png' : '/Male.png';
     const avatarImg = await drawImageAsync(avatarSrc);
@@ -177,11 +179,11 @@ export async function createDonationReceiptCanvas(donation) {
     ctx.font = '900 17px "Plus Jakarta Sans", sans-serif, Arial';
     ctx.fillText('✨ Congratulations! ✨', centerX, 355);
 
-    // Devotee Name (Mr: / Miss: + Name)
+    // Devotee Name (Mr: / Miss: + Name garu)
     ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif, Arial';
     const prefixWidth = ctx.measureText(titlePrefix).width;
-    ctx.font = '900 18.5px "Plus Jakarta Sans", sans-serif, Arial';
-    const nameWidth = ctx.measureText(donorName).width;
+    ctx.font = '900 18px "Plus Jakarta Sans", sans-serif, Arial';
+    const nameWidth = ctx.measureText(donorNameWithGaru).width;
     const totalNameWidth = prefixWidth + nameWidth;
 
     let startNameX = centerX - totalNameWidth / 2;
@@ -191,8 +193,8 @@ export async function createDonationReceiptCanvas(donation) {
     ctx.fillText(titlePrefix, startNameX, 384);
 
     ctx.fillStyle = '#ea580c';
-    ctx.font = '900 18.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText(donorName, startNameX + prefixWidth, 384);
+    ctx.font = '900 18px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText(donorNameWithGaru, startNameX + prefixWidth, 384);
 
     // Subtext: is the proud winner of the
     ctx.textAlign = 'center';
@@ -237,12 +239,12 @@ export async function createDonationReceiptCanvas(donation) {
 
   } else {
     // =========================================================================
-    // STANDARD CHANDA DONATION RECEIPT CANVAS
+    // STANDARD CHANDA DONATION RECEIPT CANVAS (With 'garu' honorific)
     // =========================================================================
     const lines = [
       [
         { text: 'Mr/Miss: ', font: 'bold 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
-        { text: donorName, font: '900 16.5px "Plus Jakarta Sans", sans-serif, Arial', color: '#ea580c' },
+        { text: donorNameWithGaru, font: '900 16px "Plus Jakarta Sans", sans-serif, Arial', color: '#ea580c' },
       ],
       [
         { text: 'has generously contributed an amount of', font: '500 13px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },

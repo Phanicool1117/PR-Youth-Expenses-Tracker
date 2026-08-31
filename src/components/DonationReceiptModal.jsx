@@ -51,7 +51,8 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
 
   if (!isOpen || !donation) return null;
 
-  const donorName = donation.donorName || donation.name || 'Devotee';
+  const rawDonorName = donation.donorName || donation.name || 'Devotee';
+  const donorName = rawDonorName.trim();
   const amount = Number(donation.amount || 0);
   const isLaddu = donation.subType === 'Laddu' || String(donation.note || '').toLowerCase().includes('laddu') || donation.category === 'Laddu Prasadam Auction';
   const gender = donation.gender === 'Female' ? 'Female' : 'Male';
@@ -113,7 +114,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
     }
   };
 
-  // Handle Native Share (Without Payment Method in Text)
+  // Handle Native Share (Without Payment Method in Text, with 'garu' honorific)
   const handleShareReceipt = async () => {
     triggerHaptic(15);
     setIsSharing(true);
@@ -130,10 +131,10 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         }
 
         const file = new File([blob], fileName, { type: 'image/png' });
-        // NOTE: Payment Method is intentionally excluded as requested by user
+        // NOTE: Payment Method is excluded, and 'garu' is appended to donor name
         const shareText = isLaddu
-          ? `*LADDU AUCTION WINNER RECEIPT*\n*Penumuli Perantalamma Youth*\n\n🎉 *Congratulations!*\n${titlePrefix} ${donorName}\nis the proud winner of the *Ganesh Laddu Auction!*\n\n*Winner Amount:* ₹${amountFormatted}\n*Date:* ${dateFormatted}\n\nThanking you for being a part of our celebration. 🙏 May Lord Ganesha shower blessings upon you and your family!`
-          : `*Official Donation Receipt*\n*Penumuli Perantalamma Youth*\n\nDonor: ${donorName}\nAmount: ₹${amountFormatted}\nDate: ${dateFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
+          ? `*LADDU AUCTION WINNER RECEIPT*\n*Penumuli Perantalamma Youth*\n\n🎉 *Congratulations!*\n${titlePrefix} ${donorName} garu\nis the proud winner of the *Ganesh Laddu Auction!*\n\n*Winner Amount:* ₹${amountFormatted}\n*Date:* ${dateFormatted}\n\nThanking you for being a part of our celebration. 🙏 May Lord Ganesha shower blessings upon you and your family!`
+          : `*Official Donation Receipt*\n*Penumuli Perantalamma Youth*\n\nDonor: ${donorName} garu\nAmount: ₹${amountFormatted}\nDate: ${dateFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
@@ -260,7 +261,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               </div>
             </div>
 
-            {/* Congratulations & Devotee Title Section */}
+            {/* Congratulations & Devotee Title Section with 'garu' */}
             <div className="space-y-0.5">
               <div className="flex items-center justify-center gap-1 text-[11px] font-black text-slate-800">
                 <span className={gender === 'Female' ? 'text-emerald-500' : 'text-orange-500'}>✨</span>
@@ -271,7 +272,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               <div className="text-sm sm:text-base font-medium text-slate-800 leading-tight">
                 <span className="font-extrabold text-[#0f172a]">{titlePrefix} </span>
                 <span className="font-black text-[#ea580c] text-base sm:text-lg tracking-tight">
-                  {donorName}
+                  {donorName} garu
                 </span>
               </div>
 
@@ -352,12 +353,12 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               <div className="border-t border-dashed border-slate-200" />
             </div>
 
-            {/* Statement */}
+            {/* Statement with 'garu' */}
             <div className="py-1.5 px-1 text-center">
               <p className="text-[12px] sm:text-xs text-slate-700 leading-snug font-normal text-center">
                 <span className="font-bold text-slate-900">Mr/Miss: </span>
                 <span className="font-black text-orange-600 text-xs sm:text-sm tracking-tight">
-                  {donorName}
+                  {donorName} garu
                 </span>{' '}
                 has generously contributed an amount of{' '}
                 <span className="font-black text-emerald-700 text-xs sm:text-sm">₹{amountFormatted}</span> towards the{' '}
