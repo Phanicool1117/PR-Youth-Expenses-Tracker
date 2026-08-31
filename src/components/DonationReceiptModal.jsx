@@ -238,17 +238,22 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               <div className="border-t border-dashed border-slate-200" />
             </div>
 
-            {/* Hero Devotee Illustration (Prominent High-Hierarchy Zoomed Character) */}
+            {/* Hero Devotee Illustration (Full Uncut Complete Illustration with Circular Aura) */}
             <div className="flex justify-center py-1">
-              <div className={`relative w-44 h-44 sm:w-48 sm:h-48 rounded-full overflow-hidden flex items-center justify-center shadow-xs ${
-                gender === 'Female'
-                  ? 'bg-emerald-50/90 border border-emerald-200/80'
-                  : 'bg-orange-50/90 border border-orange-200/80'
-              }`}>
+              <div className="relative w-full max-w-[280px] sm:max-w-[320px] h-44 sm:h-50 flex items-center justify-center">
+                {/* Soft Circular Glow Backdrop behind character */}
+                <div
+                  className={`absolute w-36 h-36 sm:w-40 sm:h-40 rounded-full ${
+                    gender === 'Female'
+                      ? 'bg-emerald-50 border border-emerald-100'
+                      : 'bg-orange-50 border border-orange-100'
+                  }`}
+                />
+                {/* Full Complete Devotee Character (100% visible, zero cropping) */}
                 <img
                   src={avatarImg}
                   alt={gender === 'Female' ? 'Female Winner' : 'Male Winner'}
-                  className="w-full h-full object-contain scale-[1.75] origin-center drop-shadow-xs select-none pointer-events-none"
+                  className="relative z-10 w-full h-full object-contain drop-shadow-sm select-none"
                   draggable={false}
                   loading="eager"
                 />
