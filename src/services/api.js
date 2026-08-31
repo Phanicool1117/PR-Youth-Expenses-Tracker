@@ -482,4 +482,35 @@ export const api = {
     saveLocalDonations(donations);
     return { success: true, data: newDonation };
   },
+
+  // Fetch Click Photo Gallery directly from Google Drive Master Folder
+  async getClickGallery(folderId) {
+    const currentUrl = getGasUrl();
+    if (currentUrl && !currentUrl.includes('YOUR_DEPLOYMENT_ID')) {
+      try {
+        const queryParams = new URLSearchParams({
+          action: 'getClickGallery',
+          folderId: folderId || '',
+        });
+        const res = await fetchWithTimeout(`${currentUrl}?${queryParams.toString()}`, {}, 12000);
+        const json = await res.json();
+        if (json.success) return json;
+      } catch (err) {
+        console.warn('Backend getClickGallery failed, checking fallback', err);
+      }
+    }
+
+    // Local fallback when backend is unreachable or not yet configured
+    const savedGallery = safeStorage.getItem('PR_YOUTH_CLICK_GALLERY_CACHE');
+    if (savedGallery) {
+      try { return JSON.parse(savedGallery); } catch (e) {}
+    }
+
+    return {
+      success: true,
+      configured: false,
+      message: 'Drive folder not configured or empty.',
+      albums: [],
+    };
+  },
 };
