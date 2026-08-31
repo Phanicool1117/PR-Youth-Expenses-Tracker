@@ -238,17 +238,17 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               <div className="border-t border-dashed border-slate-200" />
             </div>
 
-            {/* Hero Devotee Illustration (Compact & Perfectly Sized) */}
-            <div className="flex justify-center py-0.5">
-              <div className={`relative w-full max-w-[210px] h-32 sm:h-36 rounded-2xl flex items-center justify-center p-1 ${
+            {/* Hero Devotee Illustration (Circle soft glow background matching export) */}
+            <div className="flex justify-center py-1">
+              <div className={`relative w-36 h-36 rounded-full flex items-center justify-center p-2.5 shadow-2xs ${
                 gender === 'Female'
-                  ? 'bg-gradient-to-b from-emerald-50/90 via-emerald-100/30 to-transparent'
-                  : 'bg-gradient-to-b from-orange-50/90 via-orange-100/30 to-transparent'
+                  ? 'bg-emerald-50/90 border border-emerald-100'
+                  : 'bg-orange-50/90 border border-orange-100'
               }`}>
                 <img
                   src={avatarImg}
                   alt={gender === 'Female' ? 'Female Winner' : 'Male Winner'}
-                  className="w-full h-full object-contain drop-shadow-md select-none"
+                  className="w-full h-full object-contain drop-shadow-xs select-none"
                   draggable={false}
                   loading="eager"
                 />
