@@ -31,7 +31,7 @@ export async function createDonationReceiptCanvas(donation) {
   const scale = 3;
   const baseWidth = 390;
   // Precise tight canvas height matching content bounds with ZERO wasted white space
-  const baseHeight = isLaddu ? 635 : 495;
+  const baseHeight = isLaddu ? 635 : 440;
 
   const canvas = document.createElement('canvas');
   canvas.width = baseWidth * scale;
@@ -58,7 +58,7 @@ export async function createDonationReceiptCanvas(donation) {
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + w - radius, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+    ctx.quadraticCurveTo(x + w, y + x + w, y + radius);
     ctx.lineTo(x + w, y + h - radius);
     ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
     ctx.lineTo(x + radius, y + h);
@@ -250,8 +250,14 @@ export async function createDonationReceiptCanvas(donation) {
 
   } else {
     // =========================================================================
-    // STANDARD CHANDA DONATION RECEIPT CANVAS (With 'garu', Date, Time, Mode)
+    // STANDARD CHANDA DONATION RECEIPT CANVAS (With subtle metadata on top)
     // =========================================================================
+    // Subtle Metadata Line on Top of Content (Date • Time • Mode)
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#64748b';
+    ctx.font = '600 10.5px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText(`${dateFormatted}   •   ${timeFormatted}   •   ${paymentMethod}`, centerX, 153);
+
     const lines = [
       [
         { text: 'Mr/Miss: ', font: 'bold 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
@@ -275,8 +281,8 @@ export async function createDonationReceiptCanvas(donation) {
       ],
     ];
 
-    const statementStartY = 165;
-    const lineHeight = 25;
+    const statementStartY = 180;
+    const lineHeight = 24;
 
     lines.forEach((segmentList, idx) => {
       const currentY = statementStartY + idx * lineHeight;
@@ -314,41 +320,7 @@ export async function createDonationReceiptCanvas(donation) {
     ctx.font = '900 16px "Plus Jakarta Sans", sans-serif, Arial';
     ctx.fillText(`₹${amount.toLocaleString('en-IN')}`, centerX + 46, pillY + 23);
 
-    // Metadata Details (Date, Time, Payment Mode)
-    const metaY = pillY + pillHeight + 12;
-    const metaW = 340;
-    const metaH = 42;
-    const metaX = centerX - metaW / 2;
-    drawRoundedRect(metaX, metaY, metaW, metaH, 10, '#f8fafc', '#e2e8f0', 1);
-
-    const colW = metaW / 3;
-
-    // Date Column
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 8.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('DATE', metaX + colW * 0.5, metaY + 15);
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 11px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText(dateFormatted, metaX + colW * 0.5, metaY + 30);
-
-    // Time Column
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 8.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('TIME', metaX + colW * 1.5, metaY + 15);
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 11px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText(timeFormatted, metaX + colW * 1.5, metaY + 30);
-
-    // Payment Mode Column
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'bold 8.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('PAYMENT MODE', metaX + colW * 2.5, metaY + 15);
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 11px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText(paymentMethod, metaX + colW * 2.5, metaY + 30);
-
-    const thankYouY = metaY + metaH + 20;
+    const thankYouY = pillY + pillHeight + 24;
     ctx.textAlign = 'center';
     ctx.fillStyle = '#0f52ba';
     ctx.font = 'bold 13px "Plus Jakarta Sans", sans-serif, Arial';

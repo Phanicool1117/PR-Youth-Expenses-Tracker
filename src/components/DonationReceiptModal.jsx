@@ -3,7 +3,7 @@ import { createDonationReceiptCanvas } from '../utils/donationReceiptCanvas';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { LOGO_BASE64 } from '../utils/logoBase64';
 import { formatCurrency, formatDate, formatTime } from '../utils/formatters';
-import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck, Calendar, Clock, CreditCard } from 'lucide-react';
+import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export function DonationReceiptModal({ isOpen, onClose, donation }) {
   const [isExporting, setIsExporting] = useState(false);
@@ -133,7 +133,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         }
 
         const file = new File([blob], fileName, { type: 'image/png' });
-        // NOTE: For Laddu, payment mode is excluded as requested. For Chanda, Date, Time & Mode are included.
+        // NOTE: For Laddu, payment mode is excluded. For Chanda, Date, Time & Mode are included.
         const shareText = isLaddu
           ? `*LADDU AUCTION WINNER RECEIPT*\n*Penumuli Perantalamma Youth*\n\n🎉 *Congratulations!*\n${titlePrefix} ${donorName} garu\nis the proud winner of the *Ganesh Laddu Auction!*\n\n*Winner Amount:* ₹${amountFormatted}\n*Date:* ${dateFormatted}\n\nThanking you for being a part of our celebration. 🙏 May Lord Ganesha shower blessings upon you and your family!`
           : `*Official Donation Receipt*\n*Penumuli Perantalamma Youth*\n\nDonor: ${donorName} garu\nAmount: ₹${amountFormatted}\nPayment Mode: ${paymentMethod}\nDate: ${dateFormatted}\nTime: ${timeFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
@@ -356,6 +356,15 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               <div className="border-t border-dashed border-slate-200" />
             </div>
 
+            {/* Subtle Metadata Row on Top of Main Content (Date • Time • Mode) */}
+            <div className="flex items-center justify-center gap-2 text-[10px] text-slate-500 font-medium pt-0.5 pb-0.5">
+              <span>{dateFormatted}</span>
+              <span className="text-slate-300">•</span>
+              <span>{timeFormatted}</span>
+              <span className="text-slate-300">•</span>
+              <span className="font-semibold text-slate-700">{paymentMethod}</span>
+            </div>
+
             {/* Statement with 'garu' in dark text */}
             <div className="py-1 px-1 text-center">
               <p className="text-[12px] sm:text-xs text-slate-700 leading-snug font-normal text-center">
@@ -382,33 +391,8 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               </div>
             </div>
 
-            {/* Transaction Metadata: Date, Time & Payment Mode */}
-            <div className="grid grid-cols-3 gap-1.5 py-1 px-0.5">
-              <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-1.5 text-center">
-                <div className="flex items-center justify-center gap-1 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">
-                  <Calendar className="w-2.5 h-2.5 text-slate-400" />
-                  <span>Date</span>
-                </div>
-                <p className="text-[10px] font-extrabold text-slate-700 mt-0.5 truncate">{dateFormatted}</p>
-              </div>
-              <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-1.5 text-center">
-                <div className="flex items-center justify-center gap-1 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">
-                  <Clock className="w-2.5 h-2.5 text-slate-400" />
-                  <span>Time</span>
-                </div>
-                <p className="text-[10px] font-extrabold text-slate-700 mt-0.5 truncate">{timeFormatted}</p>
-              </div>
-              <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-1.5 text-center">
-                <div className="flex items-center justify-center gap-1 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">
-                  <CreditCard className="w-2.5 h-2.5 text-slate-400" />
-                  <span>Mode</span>
-                </div>
-                <p className="text-[10px] font-extrabold text-slate-700 mt-0.5 truncate">{paymentMethod}</p>
-              </div>
-            </div>
-
             {/* Thanking Note */}
-            <div className="py-0.5">
+            <div className="py-1">
               <p className="text-[11px] sm:text-xs font-bold text-[#0f52ba]">
                 Thanking you for your contribution.
               </p>
