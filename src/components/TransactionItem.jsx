@@ -116,7 +116,7 @@ export function TransactionItem({ transaction, showMember = false, members = [] 
                   {isLaddu ? (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 shrink-0 flex items-center gap-1 group-hover:bg-orange-600 group-hover:text-white transition-colors">
                       <Receipt className="w-3 h-3 text-orange-600 group-hover:text-white shrink-0" />
-                      <span>Laddu Receipt</span>
+                      <span>Receipt</span>
                     </span>
                   ) : (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200 shrink-0 flex items-center gap-1 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
