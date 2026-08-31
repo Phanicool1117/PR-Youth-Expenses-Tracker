@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createDonationReceiptCanvas } from '../utils/donationReceiptCanvas';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { LOGO_BASE64 } from '../utils/logoBase64';
-import { MALE_AVATAR_BASE64, FEMALE_AVATAR_BASE64 } from '../utils/winnerAvatarsBase64';
 import { formatCurrency, formatDate, formatTime } from '../utils/formatters';
 import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 
@@ -17,7 +16,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
     onCloseRef.current = onClose;
   }, [onClose]);
 
-  // Mobile Hardware / Gesture Back Button Handling (Safe & persistent)
+  // Mobile Hardware / Gesture Back Button Handling
   useEffect(() => {
     if (!isOpen) return;
 
@@ -64,8 +63,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
       : 'Mr:'
     : donation.titlePrefix || 'Mr/Miss:';
 
-  const avatarImg = gender === 'Female' ? FEMALE_AVATAR_BASE64 : MALE_AVATAR_BASE64;
-  const avatarFallback = gender === 'Female' ? '/Female.png' : '/Male.png';
+  const avatarImg = gender === 'Female' ? '/Female.png' : '/Male.png';
 
   const dateFormatted = formatDate(donation.timestamp);
   const timeFormatted = formatTime(donation.timestamp);
@@ -133,7 +131,6 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         }
 
         const file = new File([blob], fileName, { type: 'image/png' });
-        // NOTE: Payment Method is intentionally excluded as requested by user
         const shareText = isLaddu
           ? `*LADDU AUCTION WINNER RECEIPT*\n*Penumuli Perantalamma Youth*\n\n🎉 *Congratulations!*\n${titlePrefix} ${donorName}\nis the proud winner of the *Ganesh Laddu Auction!*\n\n*Winner Amount:* ₹${amountFormatted}\n*Date:* ${dateFormatted}\n\nThanking you for being a part of our celebration. 🙏 May Lord Ganesha shower blessings upon you and your family!`
           : `*Official Donation Receipt*\n*Penumuli Perantalamma Youth*\n\nDonor: ${donorName}\nAmount: ₹${amountFormatted}\nDate: ${dateFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
@@ -249,10 +246,11 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
                   : 'bg-gradient-to-b from-orange-50/90 via-orange-100/30 to-transparent'
               }`}>
                 <img
-                  src={avatarImg || avatarFallback}
+                  src={avatarImg}
                   alt={gender === 'Female' ? 'Female Winner' : 'Male Winner'}
                   className="w-full h-full object-contain drop-shadow-md select-none transition-transform hover:scale-102"
                   draggable={false}
+                  loading="eager"
                 />
               </div>
             </div>

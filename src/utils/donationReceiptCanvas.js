@@ -1,5 +1,4 @@
 import { LOGO_BASE64 } from './logoBase64';
-import { MALE_AVATAR_BASE64, FEMALE_AVATAR_BASE64 } from './winnerAvatarsBase64';
 
 export async function createDonationReceiptCanvas(donation) {
   const donorName = donation.donorName || donation.name || 'Devotee';
@@ -71,13 +70,19 @@ export async function createDonationReceiptCanvas(donation) {
     }
   };
 
-  // Helper for drawing image
+  // Helper for drawing image with robust cross-origin & local handling
   const drawImageAsync = (src) =>
     new Promise((resolve) => {
+      if (!src) return resolve(null);
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
+      img.onerror = () => {
+        const retryImg = new Image();
+        retryImg.onload = () => resolve(retryImg);
+        retryImg.onerror = () => resolve(null);
+        retryImg.src = src;
+      };
       img.src = src;
     });
 
@@ -141,7 +146,7 @@ export async function createDonationReceiptCanvas(donation) {
     // =========================================================================
     // DEDICATED LADDU AUCTION WINNER RECEIPT CANVAS (No Stretch & Crisp Hierarchy)
     // =========================================================================
-    const avatarSrc = gender === 'Female' ? FEMALE_AVATAR_BASE64 : MALE_AVATAR_BASE64;
+    const avatarSrc = gender === 'Female' ? '/Female.png' : '/Male.png';
     const avatarImg = await drawImageAsync(avatarSrc);
 
     // Radiance Glow Circle behind avatar
