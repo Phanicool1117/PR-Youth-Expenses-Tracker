@@ -53,18 +53,18 @@ export async function createDonationReceiptCanvas(donation) {
   ctx.fillStyle = '#0f52ba';
   ctx.fillRect(0, 0, baseWidth, 5);
 
-  // Helper for rounded rectangle
+  // Helper for rounded rectangle with rock-solid browser compatibility
   const drawRoundedRect = (x, y, w, h, radius, fill, stroke, strokeWidth = 1) => {
     ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + w - radius, y);
-    ctx.quadraticCurveTo(x + w, y + x + w, y + radius);
-    ctx.lineTo(x + w, y + h - radius);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
-    ctx.lineTo(x + radius, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(x, y, w, h, radius);
+    } else {
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + w, y, x + w, y + h, radius);
+      ctx.arcTo(x + w, y + h, x, y + h, radius);
+      ctx.arcTo(x, y + h, x, y, radius);
+      ctx.arcTo(x, y, x + w, y, radius);
+    }
     ctx.closePath();
     if (fill) {
       ctx.fillStyle = fill;
