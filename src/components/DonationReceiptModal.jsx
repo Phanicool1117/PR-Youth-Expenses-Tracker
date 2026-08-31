@@ -272,8 +272,9 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               <div className="text-sm sm:text-base font-medium text-slate-800 leading-tight">
                 <span className="font-extrabold text-[#0f172a]">{titlePrefix} </span>
                 <span className="font-black text-[#ea580c] text-base sm:text-lg tracking-tight">
-                  {donorName} garu
+                  {donorName}
                 </span>
+                <span className="font-extrabold text-[#0f172a]"> garu</span>
               </div>
 
               <p className="text-[11px] text-slate-600 font-medium">
@@ -341,7 +342,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
                 Penumuli Village, Duggirala Mandal, Guntur District
               </p>
               <div className="pt-0.5 flex justify-center">
-                <span className="inline-flex items-center gap-1 text-[8.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="inline-flex items-center gap-1 text-[8.5px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                   <ShieldCheck className="w-3 h-3 text-emerald-600" />
                   <span>OFFICIAL DONATION RECEIPT</span>
                 </span>
@@ -353,13 +354,14 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               <div className="border-t border-dashed border-slate-200" />
             </div>
 
-            {/* Statement with 'garu' */}
+            {/* Statement with 'garu' in dark text */}
             <div className="py-1.5 px-1 text-center">
               <p className="text-[12px] sm:text-xs text-slate-700 leading-snug font-normal text-center">
                 <span className="font-bold text-slate-900">Mr/Miss: </span>
                 <span className="font-black text-orange-600 text-xs sm:text-sm tracking-tight">
-                  {donorName} garu
+                  {donorName}
                 </span>{' '}
+                <span className="font-bold text-slate-900">garu</span>{' '}
                 has generously contributed an amount of{' '}
                 <span className="font-black text-emerald-700 text-xs sm:text-sm">₹{amountFormatted}</span> towards the{' '}
                 <span className="font-bold text-slate-900">Vinayaka festival / Puja</span>, and the amount has been received with heartfelt thanks.

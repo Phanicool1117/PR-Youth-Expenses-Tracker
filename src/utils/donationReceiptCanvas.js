@@ -179,12 +179,14 @@ export async function createDonationReceiptCanvas(donation) {
     ctx.font = '900 17px "Plus Jakarta Sans", sans-serif, Arial';
     ctx.fillText('✨ Congratulations! ✨', centerX, 355);
 
-    // Devotee Name (Mr: / Miss: + Name garu)
+    // Devotee Name (Mr: / Miss: + Name (orange) + garu (dark))
     ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif, Arial';
     const prefixWidth = ctx.measureText(titlePrefix).width;
     ctx.font = '900 18px "Plus Jakarta Sans", sans-serif, Arial';
-    const nameWidth = ctx.measureText(donorNameWithGaru).width;
-    const totalNameWidth = prefixWidth + nameWidth;
+    const nameWidth = ctx.measureText(donorName).width;
+    ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif, Arial';
+    const garuWidth = ctx.measureText(' garu').width;
+    const totalNameWidth = prefixWidth + nameWidth + garuWidth;
 
     let startNameX = centerX - totalNameWidth / 2;
     ctx.textAlign = 'left';
@@ -194,7 +196,11 @@ export async function createDonationReceiptCanvas(donation) {
 
     ctx.fillStyle = '#ea580c';
     ctx.font = '900 18px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText(donorNameWithGaru, startNameX + prefixWidth, 384);
+    ctx.fillText(donorName, startNameX + prefixWidth, 384);
+
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText(' garu', startNameX + prefixWidth + nameWidth, 384);
 
     // Subtext: is the proud winner of the
     ctx.textAlign = 'center';
@@ -244,7 +250,8 @@ export async function createDonationReceiptCanvas(donation) {
     const lines = [
       [
         { text: 'Mr/Miss: ', font: 'bold 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
-        { text: donorNameWithGaru, font: '900 16px "Plus Jakarta Sans", sans-serif, Arial', color: '#ea580c' },
+        { text: donorName, font: '900 16px "Plus Jakarta Sans", sans-serif, Arial', color: '#ea580c' },
+        { text: ' garu', font: 'bold 14px "Plus Jakarta Sans", sans-serif, Arial', color: '#0f172a' },
       ],
       [
         { text: 'has generously contributed an amount of', font: '500 13px "Plus Jakarta Sans", sans-serif, Arial', color: '#334155' },
