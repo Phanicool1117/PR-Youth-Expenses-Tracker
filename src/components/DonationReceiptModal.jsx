@@ -3,7 +3,7 @@ import { createDonationReceiptCanvas } from '../utils/donationReceiptCanvas';
 import { triggerHaptic } from '../utils/hapticsSound';
 import { LOGO_BASE64 } from '../utils/logoBase64';
 import { formatCurrency, formatDate, formatTime } from '../utils/formatters';
-import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { X, Download, Share2, Loader2, CheckCircle2, ShieldCheck, Calendar, Clock, CreditCard } from 'lucide-react';
 
 export function DonationReceiptModal({ isOpen, onClose, donation }) {
   const [isExporting, setIsExporting] = useState(false);
@@ -67,6 +67,8 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
   const avatarImg = gender === 'Female' ? '/Female.png' : '/Male.png';
 
   const dateFormatted = formatDate(donation.timestamp);
+  const timeFormatted = formatTime(donation.timestamp);
+  const paymentMethod = donation.paymentMethod || donation.paymentMode || 'Cash';
   const amountFormatted = formatCurrency(amount);
 
   // Handle Export / Download PNG directly
@@ -114,7 +116,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
     }
   };
 
-  // Handle Native Share (Without Payment Method in Text, with 'garu' honorific)
+  // Handle Native Share
   const handleShareReceipt = async () => {
     triggerHaptic(15);
     setIsSharing(true);
@@ -131,10 +133,10 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
         }
 
         const file = new File([blob], fileName, { type: 'image/png' });
-        // NOTE: Payment Method is excluded, and 'garu' is appended to donor name
+        // NOTE: For Laddu, payment mode is excluded as requested. For Chanda, Date, Time & Mode are included.
         const shareText = isLaddu
           ? `*LADDU AUCTION WINNER RECEIPT*\n*Penumuli Perantalamma Youth*\n\n🎉 *Congratulations!*\n${titlePrefix} ${donorName} garu\nis the proud winner of the *Ganesh Laddu Auction!*\n\n*Winner Amount:* ₹${amountFormatted}\n*Date:* ${dateFormatted}\n\nThanking you for being a part of our celebration. 🙏 May Lord Ganesha shower blessings upon you and your family!`
-          : `*Official Donation Receipt*\n*Penumuli Perantalamma Youth*\n\nDonor: ${donorName} garu\nAmount: ₹${amountFormatted}\nDate: ${dateFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
+          : `*Official Donation Receipt*\n*Penumuli Perantalamma Youth*\n\nDonor: ${donorName} garu\nAmount: ₹${amountFormatted}\nPayment Mode: ${paymentMethod}\nDate: ${dateFormatted}\nTime: ${timeFormatted}\n\nThanking you for your generous contribution towards Lord Vinayaka Festival! 🙏`;
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
@@ -261,7 +263,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               </div>
             </div>
 
-            {/* Congratulations & Devotee Title Section with 'garu' */}
+            {/* Congratulations & Devotee Title Section with 'garu' in dark text */}
             <div className="space-y-0.5">
               <div className="flex items-center justify-center gap-1 text-[11px] font-black text-slate-800">
                 <span className={gender === 'Female' ? 'text-emerald-500' : 'text-orange-500'}>✨</span>
@@ -355,7 +357,7 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
             </div>
 
             {/* Statement with 'garu' in dark text */}
-            <div className="py-1.5 px-1 text-center">
+            <div className="py-1 px-1 text-center">
               <p className="text-[12px] sm:text-xs text-slate-700 leading-snug font-normal text-center">
                 <span className="font-bold text-slate-900">Mr/Miss: </span>
                 <span className="font-black text-orange-600 text-xs sm:text-sm tracking-tight">
@@ -380,8 +382,33 @@ export function DonationReceiptModal({ isOpen, onClose, donation }) {
               </div>
             </div>
 
+            {/* Transaction Metadata: Date, Time & Payment Mode */}
+            <div className="grid grid-cols-3 gap-1.5 py-1 px-0.5">
+              <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-1.5 text-center">
+                <div className="flex items-center justify-center gap-1 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">
+                  <Calendar className="w-2.5 h-2.5 text-slate-400" />
+                  <span>Date</span>
+                </div>
+                <p className="text-[10px] font-extrabold text-slate-700 mt-0.5 truncate">{dateFormatted}</p>
+              </div>
+              <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-1.5 text-center">
+                <div className="flex items-center justify-center gap-1 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">
+                  <Clock className="w-2.5 h-2.5 text-slate-400" />
+                  <span>Time</span>
+                </div>
+                <p className="text-[10px] font-extrabold text-slate-700 mt-0.5 truncate">{timeFormatted}</p>
+              </div>
+              <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-1.5 text-center">
+                <div className="flex items-center justify-center gap-1 text-[8.5px] font-bold text-slate-400 uppercase tracking-wider">
+                  <CreditCard className="w-2.5 h-2.5 text-slate-400" />
+                  <span>Mode</span>
+                </div>
+                <p className="text-[10px] font-extrabold text-slate-700 mt-0.5 truncate">{paymentMethod}</p>
+              </div>
+            </div>
+
             {/* Thanking Note */}
-            <div className="py-1">
+            <div className="py-0.5">
               <p className="text-[11px] sm:text-xs font-bold text-[#0f52ba]">
                 Thanking you for your contribution.
               </p>

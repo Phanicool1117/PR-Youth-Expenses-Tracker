@@ -3,7 +3,6 @@ import { LOGO_BASE64 } from './logoBase64';
 export async function createDonationReceiptCanvas(donation) {
   const rawDonorName = donation.donorName || donation.name || 'Devotee';
   const donorName = rawDonorName.trim();
-  const donorNameWithGaru = `${donorName} garu`;
   const amount = Number(donation.amount || 0);
   const isLaddu = donation.subType === 'Laddu' || String(donation.note || '').toLowerCase().includes('laddu') || donation.category === 'Laddu Prasadam Auction';
   const gender = donation.gender === 'Female' ? 'Female' : 'Male';
@@ -18,15 +17,21 @@ export async function createDonationReceiptCanvas(donation) {
   const txDate = donation.timestamp ? new Date(donation.timestamp) : new Date();
   const dateFormatted = txDate.toLocaleDateString('en-IN', {
     day: 'numeric',
-    month: 'long',
+    month: 'short',
     year: 'numeric',
   });
+  const timeFormatted = txDate.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+  const paymentMethod = donation.paymentMethod || donation.paymentMode || 'Cash';
 
   // Scale for ultra-crisp 3x Retina output
   const scale = 3;
   const baseWidth = 390;
   // Precise tight canvas height matching content bounds with ZERO wasted white space
-  const baseHeight = isLaddu ? 635 : 435;
+  const baseHeight = isLaddu ? 635 : 495;
 
   const canvas = document.createElement('canvas');
   canvas.width = baseWidth * scale;
@@ -245,7 +250,7 @@ export async function createDonationReceiptCanvas(donation) {
 
   } else {
     // =========================================================================
-    // STANDARD CHANDA DONATION RECEIPT CANVAS (With 'garu' honorific)
+    // STANDARD CHANDA DONATION RECEIPT CANVAS (With 'garu', Date, Time, Mode)
     // =========================================================================
     const lines = [
       [
@@ -309,20 +314,54 @@ export async function createDonationReceiptCanvas(donation) {
     ctx.font = '900 16px "Plus Jakarta Sans", sans-serif, Arial';
     ctx.fillText(`₹${amount.toLocaleString('en-IN')}`, centerX + 46, pillY + 23);
 
-    const thankYouY = pillY + pillHeight + 26;
+    // Metadata Details (Date, Time, Payment Mode)
+    const metaY = pillY + pillHeight + 12;
+    const metaW = 340;
+    const metaH = 42;
+    const metaX = centerX - metaW / 2;
+    drawRoundedRect(metaX, metaY, metaW, metaH, 10, '#f8fafc', '#e2e8f0', 1);
+
+    const colW = metaW / 3;
+
+    // Date Column
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'bold 8.5px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText('DATE', metaX + colW * 0.5, metaY + 15);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 11px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText(dateFormatted, metaX + colW * 0.5, metaY + 30);
+
+    // Time Column
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'bold 8.5px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText('TIME', metaX + colW * 1.5, metaY + 15);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 11px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText(timeFormatted, metaX + colW * 1.5, metaY + 30);
+
+    // Payment Mode Column
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'bold 8.5px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText('PAYMENT MODE', metaX + colW * 2.5, metaY + 15);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 11px "Plus Jakarta Sans", sans-serif, Arial';
+    ctx.fillText(paymentMethod, metaX + colW * 2.5, metaY + 30);
+
+    const thankYouY = metaY + metaH + 20;
     ctx.textAlign = 'center';
     ctx.fillStyle = '#0f52ba';
     ctx.font = 'bold 13px "Plus Jakarta Sans", sans-serif, Arial';
     ctx.fillText('Thanking you for your contribution.', centerX, thankYouY);
 
-    const footerY = thankYouY + 26;
+    const footerY = thankYouY + 24;
     ctx.fillStyle = '#64748b';
     ctx.font = '600 9.5px "Plus Jakarta Sans", sans-serif, Arial';
     ctx.fillText('Penumuli Youth Committee · Authorized Digital Receipt', centerX, footerY);
 
     ctx.fillStyle = '#94a3b8';
     ctx.font = '500 8.5px "Plus Jakarta Sans", sans-serif, Arial';
-    ctx.fillText('May Lord Ganesha shower blessings upon you and your family.', centerX, footerY + 16);
+    ctx.fillText('May Lord Ganesha shower blessings upon you and your family.', centerX, footerY + 15);
   }
 
   return canvas;
