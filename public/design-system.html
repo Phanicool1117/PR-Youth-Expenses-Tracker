@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PR Youth Expenses Tracker — Design System & Style Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(180deg, #dcebfa 0%, #edf5fc 40%, #f5f9fd 100%);
+      color: #0f172a;
+      min-height: 100vh;
+    }
+    .swatch-card {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .swatch-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; }
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-8 md:p-12">
+  <div class="max-w-5xl mx-auto space-y-10">
+    
+    <!-- Top Header -->
+    <header class="bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-xl border border-white flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center p-1.5 shadow-sm">
+            <img src="/Logo.png" alt="Logo" class="w-full h-full object-contain" />
+          </div>
+          <div>
+            <span class="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-blue-100 text-[#0f52ba]">Design System v2.4</span>
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">PR Youth Expenses Tracker</h1>
+          </div>
+        </div>
+        <p class="text-xs sm:text-sm font-medium text-slate-600">
+          Complete architectural design tokens, colors, typography, Apple HIG inputs, and Canvas 2D receipt engine specs.
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center gap-2 no-print">
+        <button onclick="downloadMarkdown()" class="px-4 py-2 rounded-2xl bg-[#0f52ba] hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span>Download Markdown</span>
+        </button>
+
+        <button onclick="downloadJSON()" class="px-4 py-2 rounded-2xl bg-slate-900 hover:bg-black text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          <span>Download JSON Tokens</span>
+        </button>
+
+        <button onclick="window.print()" class="px-3.5 py-2 rounded-2xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-all cursor-pointer">
+          Print / PDF
+        </button>
+      </div>
+    </header>
+
+    <!-- SECTION 1: COLOR PALETTE SWATCHES -->
+    <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 space-y-6">
+      <div>
+        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+          <span>1. Color Palette & Semantic Tokens</span>
+        </h2>
+        <p class="text-xs text-slate-500 font-medium">Click any card to copy its Hex code.</p>
+      </div>
+
+      <!-- Primary Brand Colors -->
+      <div class="space-y-3">
+        <h3 class="text-xs font-black uppercase tracking-wider text-[#0f52ba]">Primary Brand (Royal Blue Identity)</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div onclick="copyHex('#0F52BA')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#0F52BA] mb-2 shadow-inner"></div>
+            <p class="text-xs font-extrabold text-slate-900">#0F52BA</p>
+            <p class="text-[10px] font-semibold text-slate-500">Primary Brand / Top Accent</p>
+          </div>
+          <div onclick="copyHex('#1E40AF')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#1E40AF] mb-2 shadow-inner"></div>
+            <p class="text-xs font-extrabold text-slate-900">#1E40AF</p>
+            <p class="text-[10px] font-semibold text-slate-500">Deep Indigo / Active State</p>
+          </div>
+          <div onclick="copyHex('#DBEAFE')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#DBEAFE] mb-2 border border-blue-200"></div>
+            <p class="text-xs font-extrabold text-slate-900">#DBEAFE</p>
+            <p class="text-[10px] font-semibold text-slate-500">Soft Blue Pill Fill</p>
+          </div>
+          <div onclick="copyHex('#EFF6FF')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#EFF6FF] mb-2 border border-blue-100"></div>
+            <p class="text-xs font-extrabold text-slate-900">#EFF6FF</p>
+            <p class="text-[10px] font-semibold text-slate-500">Ice Blue Logo Crest</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saffron & Laddu Auction -->
+      <div class="space-y-3 pt-2">
+        <h3 class="text-xs font-black uppercase tracking-wider text-[#ea580c]">Festive Saffron (Laddu Auction & Winners)</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div onclick="copyHex('#EA580C')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#EA580C] mb-2 shadow-inner"></div>
+            <p class="text-xs font-extrabold text-slate-900">#EA580C</p>
+            <p class="text-[10px] font-semibold text-slate-500">Devotee / Winner Name</p>
+          </div>
+          <div onclick="copyHex('#F97316')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#F97316] mb-2 shadow-inner"></div>
+            <p class="text-xs font-extrabold text-slate-900">#F97316</p>
+            <p class="text-[10px] font-semibold text-slate-500">Festive Sparkle Accents</p>
+          </div>
+          <div onclick="copyHex('#FFF7ED')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#FFF7ED] mb-2 border border-orange-200"></div>
+            <p class="text-xs font-extrabold text-slate-900">#FFF7ED</p>
+            <p class="text-[10px] font-semibold text-slate-500">Male Winner Aura Glow</p>
+          </div>
+          <div onclick="copyHex('#FED7AA')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#FED7AA] mb-2 border border-orange-300"></div>
+            <p class="text-xs font-extrabold text-slate-900">#FED7AA</p>
+            <p class="text-[10px] font-semibold text-slate-500">Festive Badge Border</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emerald Financial Inflow -->
+      <div class="space-y-3 pt-2">
+        <h3 class="text-xs font-black uppercase tracking-wider text-[#047857]">Emerald Green (Donations & Official Receipts)</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div onclick="copyHex('#047857')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#047857] mb-2 shadow-inner"></div>
+            <p class="text-xs font-extrabold text-slate-900">#047857</p>
+            <p class="text-[10px] font-semibold text-slate-500">Official Badge & Amount Text</p>
+          </div>
+          <div onclick="copyHex('#059669')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#059669] mb-2 shadow-inner"></div>
+            <p class="text-xs font-extrabold text-slate-900">#059669</p>
+            <p class="text-[10px] font-semibold text-slate-500">Share Receipt Button</p>
+          </div>
+          <div onclick="copyHex('#ECFDF5')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#ECFDF5] mb-2 border border-emerald-200"></div>
+            <p class="text-xs font-extrabold text-slate-900">#ECFDF5</p>
+            <p class="text-[10px] font-semibold text-slate-500">Amount Received Pill Fill</p>
+          </div>
+          <div onclick="copyHex('#A7F3D0')" class="swatch-card p-3 rounded-2xl border border-slate-200 cursor-pointer bg-white">
+            <div class="h-14 rounded-xl bg-[#A7F3D0] mb-2 border border-emerald-300"></div>
+            <p class="text-xs font-extrabold text-slate-900">#A7F3D0</p>
+            <p class="text-[10px] font-semibold text-slate-500">Pill Border Outline</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: TYPOGRAPHY HIERARCHY -->
+    <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 space-y-6">
+      <div>
+        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+          2. Typography Scale & Specimen
+        </h2>
+        <p class="text-xs text-slate-500 font-medium">Font Family: 'Plus Jakarta Sans', sans-serif</p>
+      </div>
+
+      <div class="space-y-4 divide-y divide-slate-100">
+        <div class="pt-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+          <span class="text-xs font-bold text-slate-400 w-36">Display (28px/900)</span>
+          <span class="text-3xl font-black text-slate-900 tracking-tight">₹1,48,500.00 Net Balance</span>
+        </div>
+
+        <div class="pt-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+          <span class="text-xs font-bold text-slate-400 w-36">Page Title (22px/800)</span>
+          <span class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Penumuli Perantalamma Youth</span>
+        </div>
+
+        <div class="pt-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+          <span class="text-xs font-bold text-slate-400 w-36">Receipt Statement (14.5px)</span>
+          <p class="text-[14.5px] text-slate-700 leading-relaxed font-normal">
+            <span class="font-bold text-slate-900">Mr/Miss: </span>
+            <span class="font-black text-[#ea580c] tracking-tight">Bhimavarapu Phaneendra Reddy</span>
+            <span class="font-bold text-slate-900"> garu</span> has generously contributed an amount of 
+            <span class="font-black text-emerald-700">₹5,000</span> towards the 
+            <span class="font-bold text-slate-900">Vinayaka festival / Puja</span>.
+          </p>
+        </div>
+
+        <div class="pt-3 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+          <span class="text-xs font-bold text-slate-400 w-36">Metadata Row (10.5px)</span>
+          <span class="text-[10.5px] font-semibold text-slate-500">31 Aug 2026 • 11:21 AM • UPI Transfer</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: COMPONENT SPECIMENS -->
+    <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 space-y-6">
+      <div>
+        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+          3. UI Component Specimens
+        </h2>
+        <p class="text-xs text-slate-500 font-medium">Interactive preview of Apple HIG inputs, buttons, and badges.</p>
+      </div>
+
+      <!-- Buttons Grid -->
+      <div class="space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Buttons & Actions</h3>
+        <div class="flex flex-wrap items-center gap-3">
+          <button class="px-5 py-2.5 rounded-2xl bg-[#0f52ba] hover:bg-blue-700 text-white font-bold text-xs shadow-sm">
+            Primary Action Button
+          </button>
+          <button class="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm">
+            Share Receipt
+          </button>
+          <button class="px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs">
+            Pill Filter Chip
+          </button>
+        </div>
+      </div>
+
+      <!-- Badges Grid -->
+      <div class="space-y-3 pt-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Pills & Status Badges</h3>
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="inline-flex items-center gap-1 text-[9.5px] font-extrabold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300">
+            OFFICIAL DONATION RECEIPT
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-300">
+            <span class="text-[9.5px] font-extrabold text-emerald-800">AMOUNT RECEIVED:</span>
+            <span class="text-sm font-black text-emerald-700">₹3,116</span>
+          </span>
+          <span class="text-[9.5px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+            Receipt
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: CANVAS 2D RECEIPT ENGINE BLUEPRINT -->
+    <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 space-y-4">
+      <div>
+        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+          4. Canvas 2D Digital Receipt Engine Blueprint
+        </h2>
+        <p class="text-xs text-slate-500 font-medium">Coordinate mapping for high-DPI (3x) image generation.</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left text-slate-700 border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 bg-slate-50">
+              <th class="py-2.5 px-3 font-extrabold">Element</th>
+              <th class="py-2.5 px-3 font-extrabold">Y-Coordinate</th>
+              <th class="py-2.5 px-3 font-extrabold">Typography / Styling</th>
+              <th class="py-2.5 px-3 font-extrabold">Color</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr>
+              <td class="py-2 px-3 font-bold">Top Accent Stripe</td>
+              <td class="py-2 px-3">Y: 0px – 5px</td>
+              <td class="py-2 px-3">Solid Bar (W: 390px)</td>
+              <td class="py-2 px-3 font-mono">#0F52BA</td>
+            </tr>
+            <tr>
+              <td class="py-2 px-3 font-bold">Logo Emblem</td>
+              <td class="py-2 px-3">Y: 36px (Radius 18px)</td>
+              <td class="py-2 px-3">Circular Clip + Border</td>
+              <td class="py-2 px-3 font-mono">#EFF6FF</td>
+            </tr>
+            <tr>
+              <td class="py-2 px-3 font-bold">Official Receipt Badge</td>
+              <td class="py-2 px-3">Y: 98px, H: 20px</td>
+              <td class="py-2 px-3">Bold 9.5px, Pill Radius 10px</td>
+              <td class="py-2 px-3 font-mono">#ECFDF5 / #047857</td>
+            </tr>
+            <tr>
+              <td class="py-2 px-3 font-bold">Top Metadata Row</td>
+              <td class="py-2 px-3">Y: 144px</td>
+              <td class="py-2 px-3">SemiBold 10.5px (Date • Time • Mode)</td>
+              <td class="py-2 px-3 font-mono">#64748B</td>
+            </tr>
+            <tr>
+              <td class="py-2 px-3 font-bold">Main Contribution Context</td>
+              <td class="py-2 px-3">Y: 172px</td>
+              <td class="py-2 px-3">5 lines, LineHeight 24px, 14.5px/16.5px</td>
+              <td class="py-2 px-3 font-mono">#0F172A / #EA580C</td>
+            </tr>
+            <tr>
+              <td class="py-2 px-3 font-bold">Amount Received Pill</td>
+              <td class="py-2 px-3">Y: 295px, H: 36px</td>
+              <td class="py-2 px-3">Dynamically Centered Auto-Width</td>
+              <td class="py-2 px-3 font-mono">#ECFDF5 / #A7F3D0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-500 py-4">
+      Penumuli Perantalamma Youth Committee · Design System Documentation
+    </footer>
+
+  </div>
+
+  <script>
+    function copyHex(hex) {
+      navigator.clipboard.writeText(hex);
+      alert('Copied ' + hex + ' to clipboard!');
+    }
+
+    function downloadMarkdown() {
+      fetch('/DESIGN_SYSTEM.md')
+        .then(res => res.text())
+        .then(text => {
+          const blob = new Blob([text], { type: 'text/markdown' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'PR_Youth_Design_System.md';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        });
+    }
+
+    function downloadJSON() {
+      fetch('/design-tokens.json')
+        .then(res => res.json())
+        .then(json => {
+          const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'design-tokens.json';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+{
+  "name": "PR Youth Tracker Design Tokens",
+  "version": "2.4.0",
+  "author": "Penumuli Perantalamma Youth Committee",
+  "tokens": {
+    "color": {
+      "primary": {
+        "royalBlue": { "value": "#0F52BA", "type": "color", "usage": "Brand Primary, Top Accent Stripe" },
+        "deepIndigo": { "value": "#1E40AF", "type": "color", "usage": "Active Brand Links & Dark Accents" },
+        "softBlue": { "value": "#DBEAFE", "type": "color", "usage": "Subtle Pill Containers & Card Borders" },
+        "iceBlue": { "value": "#EFF6FF", "type": "color", "usage": "Logo Emblem Backdrop" }
+      },
+      "saffron": {
+        "deepOrange": { "value": "#EA580C", "type": "color", "usage": "Devotee & Winner Highlighted Name" },
+        "vibrantOrange": { "value": "#F97316", "type": "color", "usage": "Festive Sparkles & Active Indicators" },
+        "auraBackdrop": { "value": "#FFF7ED", "type": "color", "usage": "Male Winner Circular Backdrop" },
+        "border": { "value": "#FED7AA", "type": "color", "usage": "Festive Badges Border" }
+      },
+      "emerald": {
+        "deepGreen": { "value": "#047857", "type": "color", "usage": "Official Receipt Badges & Text" },
+        "primaryGreen": { "value": "#059669", "type": "color", "usage": "Share Receipt Action Button" },
+        "lightGreen": { "value": "#ECFDF5", "type": "color", "usage": "Amount Received Pill Background" },
+        "borderGreen": { "value": "#A7F3D0", "type": "color", "usage": "Amount Pill Border" }
+      },
+      "rose": {
+        "deepRose": { "value": "#E11D48", "type": "color", "usage": "Expense Outflow Amount (-₹)" },
+        "primaryRose": { "value": "#F43F5E", "type": "color", "usage": "Admin Badges & Danger Actions" },
+        "lightRose": { "value": "#FFF1F2", "type": "color", "usage": "Expense Card Background" }
+      },
+      "neutral": {
+        "slate900": { "value": "#0F172A", "type": "color", "usage": "Primary Headings & 'garu' Honorific" },
+        "slate700": { "value": "#334155", "type": "color", "usage": "Body Text & Form Labels" },
+        "slate500": { "value": "#64748B", "type": "color", "usage": "Date, Time, & Payment Mode Metadata" },
+        "slate400": { "value": "#94A3B8", "type": "color", "usage": "Committee Blessings Subtext" },
+        "slate200": { "value": "#E2E8F0", "type": "color", "usage": "Card Borders & Dashed Dividers" },
+        "slate100": { "value": "#F1F5F9", "type": "color", "usage": "Pill Backgrounds & Inactive Tabs" },
+        "white": { "value": "#FFFFFF", "type": "color", "usage": "Surface & Card Background" }
+      },
+      "gradient": {
+        "canvas": {
+          "start": "#DCEBFA",
+          "middle": "#EDF5FC",
+          "end": "#F5F9FD",
+          "css": "linear-gradient(180deg, #dcebfa 0%, #edf5fc 40%, #f5f9fd 100%)"
+        }
+      }
+    },
+    "typography": {
+      "fontFamily": {
+        "primary": "Plus Jakarta Sans, Inter, system-ui, -apple-system, sans-serif"
+      },
+      "fontSize": {
+        "display": "28px",
+        "h1": "22px",
+        "h2": "18px",
+        "h3": "15px",
+        "bodyLarge": "14.5px",
+        "body": "13px",
+        "metadata": "10.5px",
+        "pill": "9.5px",
+        "caption": "8.5px"
+      },
+      "fontWeight": {
+        "regular": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700,
+        "extrabold": 800,
+        "black": 900
+      }
+    },
+    "borderRadius": {
+      "pill": "9999px",
+      "card": "24px",
+      "cardLarge": "28px",
+      "input": "16px",
+      "badge": "12px"
+    },
+    "spacing": {
+      "containerMax": "576px",
+      "inputIconPadding": "44px"
+    },
+    "canvasSpecs": {
+      "scale": 3,
+      "width": 390,
+      "heightChanda": 418,
+      "heightLaddu": 635
+    }
+  }
+}
