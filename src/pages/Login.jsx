@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { triggerHaptic, playSuccessSound } from '../utils/hapticsSound';
+import { ScanQRModal } from '../components/ScanQRModal';
 import {
   User,
   Lock,
@@ -12,11 +13,13 @@ import {
   CheckCircle2,
   ShieldCheck,
   ArrowLeft,
-  KeyRound
+  KeyRound,
+  QrCode
 } from 'lucide-react';
 
 export function Login() {
   const { login } = useAuth();
+  const [showScanModal, setShowScanModal] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [usernameOrId, setUsernameOrId] = useState('');
   const [password, setPassword] = useState('');
@@ -83,7 +86,40 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#dcebfa] via-[#edf5fc] to-[#f5f9fd] flex items-center justify-center p-4 sm:p-6">
+    <div className="relative min-h-screen bg-gradient-to-b from-[#dcebfa] via-[#edf5fc] to-[#f5f9fd] flex items-center justify-center p-4 sm:p-6">
+      
+      {/* Floating Top-Right Scan QR Trigger Button */}
+      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-30">
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic(15);
+            setShowScanModal(true);
+          }}
+          className="relative group flex items-center gap-2 p-2 sm:p-2.5 rounded-2xl bg-white/95 hover:bg-white border border-blue-200 shadow-xl shadow-blue-500/10 backdrop-blur-md transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+          title="Scan QR to Pay (GPay & PhonePe)"
+        >
+          {/* Subtle Halo */}
+          <div className="absolute -inset-1 rounded-2xl bg-blue-400/20 animate-pulse pointer-events-none" />
+
+          {/* Scanner Icon */}
+          <div className="relative w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0f52ba] to-blue-500 text-white flex items-center justify-center shadow-xs">
+            <QrCode className="w-4.5 h-4.5" />
+          </div>
+
+          <div className="pr-1 text-left hidden xs:block">
+            <span className="block text-[11px] font-black text-slate-900 leading-tight">Scan QR</span>
+            <span className="block text-[9px] font-bold text-[#0f52ba] leading-tight">GPay · PhonePe</span>
+          </div>
+        </button>
+      </div>
+
+      {/* QR Code Stamp Modal */}
+      <ScanQRModal
+        isOpen={showScanModal}
+        onClose={() => setShowScanModal(false)}
+      />
+
       <div className="w-full max-w-md mx-auto my-auto py-6">
         
         {/* Glassmorphic Auth Card */}
