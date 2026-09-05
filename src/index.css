@@ -179,40 +179,22 @@ select.apple-input {
   animation: spin-reverse 1.2s linear infinite;
 }
 
-/* Authentic Postage Stamp & Scanner Ray Animations */
-@keyframes scanRay {
+/* Bottom Sheet Spring Slide-Up Animation */
+@keyframes modalSlideUp {
   0% {
-    top: 2%;
-    opacity: 0.2;
-  }
-  15% {
-    opacity: 1;
-  }
-  85% {
-    opacity: 1;
+    transform: translateY(100%);
+    opacity: 0.3;
   }
   100% {
-    top: 94%;
-    opacity: 0.2;
+    transform: translateY(0%);
+    opacity: 1;
   }
 }
 
-.animate-scan-ray {
-  animation: scanRay 2.4s ease-in-out infinite alternate;
+.animate-bottom-sheet {
+  animation: modalSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(56, 189, 248, 0.4), 0 0 30px rgba(56, 189, 248, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 25px rgba(56, 189, 248, 0.7), 0 0 50px rgba(56, 189, 248, 0.4);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
 
 
 /* Completely Hide Vercel Feedback & Live Toolbar elements */

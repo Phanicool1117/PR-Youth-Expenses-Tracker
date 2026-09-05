@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { X, Copy, Check, QrCode, Sparkles, Smartphone, ShieldCheck, Sun } from 'lucide-react';
+import { X, Copy, Check, Sun } from 'lucide-react';
 import { triggerHaptic, playSuccessSound } from '../utils/hapticsSound';
 
 export function ScanQRModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('gpay'); // 'gpay' | 'phonepe'
   const [copied, setCopied] = useState(false);
 
-  // Screen WakeLock & High Brightness Simulation
+  // Screen WakeLock
   useEffect(() => {
     if (!isOpen) return;
     let wakeLock = null;
@@ -53,9 +53,7 @@ export function ScanQRModal({ isOpen, onClose }) {
   const upiId = isGPay ? '9849590408-1@okbizaxis' : 'Q178007075@ybl';
   const payeeName = isGPay ? 'Bhimavarapu Phaneendra Reddy' : 'PhonePe Merchant (PR Youth)';
   const qrImage = isGPay ? '/Gpay-QR.jpeg' : '/Phonepe-QR.jpeg';
-  const stampTitleTop = isGPay ? 'Gpay' : 'PhonePe';
-  const stampTitleSub = 'QR';
-  const underStampTitle = isGPay ? 'Gpay QR' : 'PhonePe QR';
+  const headerTitle = isGPay ? 'GPay QR Code' : 'PhonePe QR Code';
 
   const handleCopyUpi = () => {
     triggerHaptic(15);
@@ -80,13 +78,13 @@ export function ScanQRModal({ isOpen, onClose }) {
       onClick={(e) => {
         if (e.target === e.currentTarget) handleClose();
       }}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-fade-in select-none"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-fade-in select-none"
     >
-      {/* High Luminance Background Radiance (80%+ Brightness Effect for camera scans) */}
+      {/* High Luminance Background Radiance */}
       <div className="absolute inset-0 bg-gradient-to-t from-white/10 via-transparent to-white/15 pointer-events-none" />
 
-      {/* Bottom Sheet Modal Container matching Reference Image */}
-      <div className="bg-white rounded-t-[36px] sm:rounded-[32px] shadow-2xl border border-slate-200/90 w-full max-w-sm sm:max-w-md overflow-hidden relative animate-slide-up sm:animate-scale-up p-5 sm:p-7 space-y-4">
+      {/* Bottom Sheet Modal Container with Smooth Spring Slide-Up Animation */}
+      <div className="bg-white rounded-t-[36px] sm:rounded-[32px] shadow-2xl border border-slate-200/90 w-full max-w-sm sm:max-w-md overflow-hidden relative animate-bottom-sheet p-5 sm:p-7 space-y-4">
         
         {/* Top Close Button */}
         <button
@@ -98,7 +96,7 @@ export function ScanQRModal({ isOpen, onClose }) {
           <X className="w-5 h-5" />
         </button>
 
-        {/* Tab Switcher (Gpay & Phonepe) */}
+        {/* Tab Switcher (GPay & PhonePe) */}
         <div className="flex items-center justify-center pt-1">
           <div className="bg-slate-100 p-1 rounded-2xl flex items-center gap-1 border border-slate-200/80 shadow-inner">
             <button
@@ -135,32 +133,32 @@ export function ScanQRModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Heading matching Screenshot */}
+        {/* Heading at Top: "GPay QR Code" or "PhonePe QR Code" */}
         <div className="text-center space-y-0.5">
           <h2 className="text-2xl sm:text-[26px] font-black text-slate-900 tracking-tight">
-            {isGPay ? 'Gpay QR Code' : 'Phonepe QR Code'}
+            {headerTitle}
           </h2>
           <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-500">
-            <Sun className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-            <span>High Brightness & Scanner Enhanced</span>
+            <Sun className="w-3.5 h-3.5 text-amber-500" />
+            <span>High Brightness for Quick Scanning</span>
           </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* AUTHENTIC POSTAGE STAMP CONTAINER (Exact Match to User Reference Image)   */}
+        {/* PURE POSTAGE STAMP CONTAINER (Only QR Code Inside Stamp)                   */}
         {/* ========================================================================= */}
-        <div className="flex justify-center py-1">
+        <div className="flex justify-center py-2">
           <div className="relative w-[270px] sm:w-[290px] filter drop-shadow-[0_12px_24px_rgba(147,51,234,0.18)]">
             
             {/* SVG Authentic Scalloped Stamp Background with True Perforated Teeth */}
             <svg
-              viewBox="0 0 280 340"
+              viewBox="0 0 280 310"
               className="w-full h-auto drop-shadow-sm"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
               <defs>
-                <linearGradient id="stampBg" x1="0" y1="0" x2="280" y2="340" gradientUnits="userSpaceOnUse">
+                <linearGradient id="stampBg" x1="0" y1="0" x2="280" y2="310" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stopColor="#faf5ff" />
                   <stop offset="50%" stopColor="#f5effa" />
                   <stop offset="100%" stopColor="#f3e8f8" />
@@ -170,7 +168,7 @@ export function ScanQRModal({ isOpen, onClose }) {
                 </filter>
               </defs>
 
-              {/* Scalloped Stamp Path: Top, Right, Bottom, Left circular notches */}
+              {/* Scalloped Stamp Path */}
               <path
                 d="
                   M 14 6
@@ -221,35 +219,31 @@ export function ScanQRModal({ isOpen, onClose }) {
                   A 6 6 0 0 0 274 278
                   A 6 6 0 0 0 274 290
                   A 6 6 0 0 0 274 302
-                  A 6 6 0 0 0 274 314
-                  A 6 6 0 0 0 274 326
-                  L 274 334
-                  L 266 334
-                  A 6 6 0 0 0 254 334
-                  A 6 6 0 0 0 242 334
-                  A 6 6 0 0 0 230 334
-                  A 6 6 0 0 0 218 334
-                  A 6 6 0 0 0 206 334
-                  A 6 6 0 0 0 194 334
-                  A 6 6 0 0 0 182 334
-                  A 6 6 0 0 0 170 334
-                  A 6 6 0 0 0 158 334
-                  A 6 6 0 0 0 146 334
-                  A 6 6 0 0 0 134 334
-                  A 6 6 0 0 0 122 334
-                  A 6 6 0 0 0 110 334
-                  A 6 6 0 0 0 98 334
-                  A 6 6 0 0 0 86 334
-                  A 6 6 0 0 0 74 334
-                  A 6 6 0 0 0 62 334
-                  A 6 6 0 0 0 50 334
-                  A 6 6 0 0 0 38 334
-                  A 6 6 0 0 0 26 334
-                  A 6 6 0 0 0 14 334
-                  L 6 334
-                  L 6 326
-                  A 6 6 0 0 0 6 314
-                  A 6 6 0 0 0 6 302
+                  L 274 304
+                  L 266 304
+                  A 6 6 0 0 0 254 304
+                  A 6 6 0 0 0 242 304
+                  A 6 6 0 0 0 230 304
+                  A 6 6 0 0 0 218 304
+                  A 6 6 0 0 0 206 304
+                  A 6 6 0 0 0 194 304
+                  A 6 6 0 0 0 182 304
+                  A 6 6 0 0 0 170 304
+                  A 6 6 0 0 0 158 304
+                  A 6 6 0 0 0 146 304
+                  A 6 6 0 0 0 134 304
+                  A 6 6 0 0 0 122 304
+                  A 6 6 0 0 0 110 304
+                  A 6 6 0 0 0 98 304
+                  A 6 6 0 0 0 86 304
+                  A 6 6 0 0 0 74 304
+                  A 6 6 0 0 0 62 304
+                  A 6 6 0 0 0 50 304
+                  A 6 6 0 0 0 38 304
+                  A 6 6 0 0 0 26 304
+                  A 6 6 0 0 0 14 304
+                  L 6 304
+                  L 6 302
                   A 6 6 0 0 0 6 290
                   A 6 6 0 0 0 6 278
                   A 6 6 0 0 0 6 266
@@ -284,73 +278,25 @@ export function ScanQRModal({ isOpen, onClose }) {
               />
             </svg>
 
-            {/* Stamp Inner Content Overlay */}
-            <div className="absolute inset-0 p-4 sm:p-5 flex flex-col justify-between">
-              
-              {/* Header inside Stamp */}
-              <div className="flex items-start justify-between pl-1 pr-1 pt-1">
-                {/* Top-Left Stamp Title matching "The / OG King" */}
-                <div className="text-left font-black text-slate-900 leading-[1.15]">
-                  <p className="text-xs sm:text-[13px] tracking-tight">{stampTitleTop}</p>
-                  <p className="text-xs sm:text-[13px] text-purple-700 tracking-tight font-black">{stampTitleSub}</p>
-                </div>
-
-                {/* Top-Right Vintage Postal Cancellation Watermark Waves (No text numbers) */}
-                <div className="opacity-40 select-none pointer-events-none transform rotate-[-8deg] -mr-1">
-                  <svg width="48" height="24" viewBox="0 0 48 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 6 Q 8 2, 14 6 T 26 6 T 38 6 T 46 6" stroke="#9333ea" strokeWidth="1.2" fill="none" strokeDasharray="2,2"/>
-                    <path d="M2 12 Q 8 8, 14 12 T 26 12 T 38 12 T 46 12" stroke="#9333ea" strokeWidth="1.2" fill="none"/>
-                    <path d="M2 18 Q 8 14, 14 18 T 26 18 T 38 18 T 46 18" stroke="#9333ea" strokeWidth="1.2" fill="none" strokeDasharray="3,1"/>
-                  </svg>
-                </div>
+            {/* Stamp Center: ONLY the QR Code inside the Stamp */}
+            <div className="absolute inset-0 p-5 flex items-center justify-center">
+              <div className="relative bg-white p-3 rounded-2xl shadow-lg border border-purple-200/90">
+                <img
+                  src={qrImage}
+                  alt={`${isGPay ? 'GPay' : 'PhonePe'} QR Code`}
+                  className="w-48 h-48 sm:w-52 sm:h-52 object-contain rounded-xl select-none filter contrast-[1.08] brightness-[1.05]"
+                  draggable={false}
+                />
               </div>
-
-              {/* ========================================================================= */}
-              {/* CENTER QR CODE WITH LIVE GLOWING SCAN RAY BEAM                            */}
-              {/* ========================================================================= */}
-              <div className="relative flex items-center justify-center my-auto py-1">
-                
-                {/* High Contrast White QR Container with 80%+ Luminance */}
-                <div className="relative bg-white p-2.5 sm:p-3 rounded-2xl shadow-xl shadow-purple-950/15 border border-purple-200 overflow-hidden group">
-                  
-                  {/* High Resolution Sharp QR Image */}
-                  <img
-                    src={qrImage}
-                    alt={`${isGPay ? 'GPay' : 'PhonePe'} QR Code`}
-                    className="w-44 h-44 sm:w-48 sm:h-48 object-contain rounded-xl select-none filter contrast-[1.08] brightness-[1.05]"
-                    draggable={false}
-                  />
-
-                  {/* Active Neon Scanning Ray / Laser Beam sweeping vertically */}
-                  <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_14px_3px_rgba(56,189,248,0.9)] animate-scan-ray pointer-events-none z-10" />
-                  <div className="absolute inset-x-0 h-10 bg-gradient-to-b from-cyan-400/25 via-cyan-400/10 to-transparent pointer-events-none animate-scan-ray z-10" />
-                </div>
-
-              </div>
-
-              {/* Bottom Tagline inside Stamp */}
-              <div className="text-center pb-1">
-                <p className="text-[8.5px] font-bold text-purple-900/70 tracking-wide uppercase">
-                  Penumuli Perantalamma Youth Fund
-                </p>
-              </div>
-
             </div>
 
           </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* UNDER THE STAMP: TITLE & UPI ID (Matching "The OG King" Hierarchy)        */}
+        {/* UPI ID & ONE-TAP COPY (Directly Under the Stamp)                           */}
         {/* ========================================================================= */}
-        <div className="space-y-2 text-center pt-1">
-          
-          {/* Title under Stamp matching Reference Image */}
-          <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
-            {underStampTitle}
-          </h3>
-
-          {/* UPI ID Pill with One-Tap Copy */}
+        <div className="space-y-1.5 text-center pt-1">
           <div className="flex items-center justify-center">
             <button
               type="button"
