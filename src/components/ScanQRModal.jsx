@@ -55,6 +55,33 @@ export function ScanQRModal({ isOpen, onClose }) {
   const qrImage = isGPay ? '/Gpay-QR.jpeg' : '/Phonepe-QR.jpeg';
   const headerTitle = isGPay ? 'GPay QR Code' : 'PhonePe QR Code';
 
+  // Theme configuration: Orange glowing shade for GPay, Greenish glowing shade for PhonePe
+  const theme = isGPay
+    ? {
+        name: 'gpay',
+        tabActiveClass: 'bg-white text-orange-600 shadow-sm border border-orange-200 scale-102',
+        dropShadowClass: 'drop-shadow-[0_12px_28px_rgba(249,115,22,0.30)]',
+        bgStart: '#fff7ed',
+        bgMid: '#fffaf5',
+        bgEnd: '#ffedd5',
+        stroke: '#fb923c',
+        floodColor: '#f97316',
+        qrBorder: 'border-orange-200/90',
+        activeIndicator: 'bg-orange-500',
+      }
+    : {
+        name: 'phonepe',
+        tabActiveClass: 'bg-white text-emerald-700 shadow-sm border border-emerald-200 scale-102',
+        dropShadowClass: 'drop-shadow-[0_12px_28px_rgba(34,197,94,0.30)]',
+        bgStart: '#f0fdf4',
+        bgMid: '#f7fee7',
+        bgEnd: '#dcfce7',
+        stroke: '#4ade80',
+        floodColor: '#22c55e',
+        qrBorder: 'border-emerald-200/90',
+        activeIndicator: 'bg-emerald-500',
+      };
+
   const handleCopyUpi = () => {
     triggerHaptic(15);
     if (navigator.clipboard) {
@@ -78,13 +105,13 @@ export function ScanQRModal({ isOpen, onClose }) {
       onClick={(e) => {
         if (e.target === e.currentTarget) handleClose();
       }}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-fade-in select-none"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md overflow-hidden animate-fade-in select-none"
     >
       {/* High Luminance Background Radiance */}
       <div className="absolute inset-0 bg-gradient-to-t from-white/10 via-transparent to-white/15 pointer-events-none" />
 
-      {/* Bottom Sheet Modal Container with Smooth Spring Slide-Up Animation */}
-      <div className="bg-white rounded-t-[36px] sm:rounded-[32px] shadow-2xl border border-slate-200/90 w-full max-w-sm sm:max-w-md overflow-hidden relative animate-bottom-sheet p-5 sm:p-7 space-y-4">
+      {/* Bottom Sheet Modal Container with Pure Vertical Slide-Up (No horizontal drift) */}
+      <div className="w-full max-w-sm sm:max-w-md bg-white rounded-t-[36px] sm:rounded-[32px] shadow-2xl border border-slate-200/90 overflow-hidden relative animate-bottom-sheet p-5 sm:p-7 space-y-4">
         
         {/* Top Close Button */}
         <button
@@ -108,7 +135,7 @@ export function ScanQRModal({ isOpen, onClose }) {
               }}
               className={`px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                 isGPay
-                  ? 'bg-white text-[#0f52ba] shadow-sm border border-blue-100 scale-102'
+                  ? theme.tabActiveClass
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -124,7 +151,7 @@ export function ScanQRModal({ isOpen, onClose }) {
               }}
               className={`px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
                 !isGPay
-                  ? 'bg-white text-[#6739b7] shadow-sm border border-purple-100 scale-102'
+                  ? theme.tabActiveClass
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -145,26 +172,26 @@ export function ScanQRModal({ isOpen, onClose }) {
         </div>
 
         {/* ========================================================================= */}
-        {/* PURE POSTAGE STAMP CONTAINER (Only QR Code Inside Stamp)                   */}
+        {/* PURE POSTAGE STAMP CONTAINER (Adaptive Orange for GPay, Green for PhonePe) */}
         {/* ========================================================================= */}
         <div className="flex justify-center py-2">
-          <div className="relative w-[270px] sm:w-[290px] filter drop-shadow-[0_12px_24px_rgba(147,51,234,0.18)]">
+          <div className={`relative w-[270px] sm:w-[290px] filter ${theme.dropShadowClass} transition-all duration-300`}>
             
-            {/* SVG Authentic Scalloped Stamp Background with True Perforated Teeth */}
+            {/* SVG Authentic Scalloped Stamp Background with Color Glow */}
             <svg
               viewBox="0 0 280 310"
-              className="w-full h-auto drop-shadow-sm"
+              className="w-full h-auto"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
               <defs>
-                <linearGradient id="stampBg" x1="0" y1="0" x2="280" y2="310" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#faf5ff" />
-                  <stop offset="50%" stopColor="#f5effa" />
-                  <stop offset="100%" stopColor="#f3e8f8" />
+                <linearGradient id={`stampBg-${theme.name}`} x1="0" y1="0" x2="280" y2="310" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor={theme.bgStart} />
+                  <stop offset="50%" stopColor={theme.bgMid} />
+                  <stop offset="100%" stopColor={theme.bgEnd} />
                 </linearGradient>
-                <filter id="softGlow" x="-10%" y="-10%" width="120%" height="120%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#9333ea" floodOpacity="0.08" />
+                <filter id={`softGlow-${theme.name}`} x="-10%" y="-10%" width="120%" height="120%">
+                  <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor={theme.floodColor} floodOpacity="0.16" />
                 </filter>
               </defs>
 
@@ -271,16 +298,16 @@ export function ScanQRModal({ isOpen, onClose }) {
                   L 6 6
                   Z
                 "
-                fill="url(#stampBg)"
-                stroke="#e9d5ff"
+                fill={`url(#stampBg-${theme.name})`}
+                stroke={theme.stroke}
                 strokeWidth="1.5"
-                filter="url(#softGlow)"
+                filter={`url(#softGlow-${theme.name})`}
               />
             </svg>
 
             {/* Stamp Center: ONLY the QR Code inside the Stamp */}
             <div className="absolute inset-0 p-5 flex items-center justify-center">
-              <div className="relative bg-white p-3 rounded-2xl shadow-lg border border-purple-200/90">
+              <div className={`relative bg-white p-3 rounded-2xl shadow-md border ${theme.qrBorder}`}>
                 <img
                   src={qrImage}
                   alt={`${isGPay ? 'GPay' : 'PhonePe'} QR Code`}

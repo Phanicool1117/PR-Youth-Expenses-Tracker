@@ -179,21 +179,25 @@ select.apple-input {
   animation: spin-reverse 1.2s linear infinite;
 }
 
-/* Bottom Sheet Spring Slide-Up Animation */
+/* Bottom Sheet Spring Slide-Up Animation (Zero horizontal shift) */
 @keyframes modalSlideUp {
   0% {
-    transform: translateY(100%);
-    opacity: 0.3;
+    transform: translate3d(0, 100%, 0);
+    opacity: 0.2;
   }
   100% {
-    transform: translateY(0%);
+    transform: translate3d(0, 0, 0);
     opacity: 1;
   }
 }
 
 .animate-bottom-sheet {
-  animation: modalSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
 }
+
 
 
 
