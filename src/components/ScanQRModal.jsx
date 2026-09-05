@@ -1,21 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { X, Copy, Check, Sun } from 'lucide-react';
+import { X, Copy, Check } from 'lucide-react';
 import { triggerHaptic, playSuccessSound } from '../utils/hapticsSound';
 
 export function ScanQRModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('gpay'); // 'gpay' | 'phonepe'
   const [copied, setCopied] = useState(false);
 
-  // Screen WakeLock
+  // Automatic Screen Brightness & WakeLock Lifecycle
   useEffect(() => {
     if (!isOpen) return;
+
+    // Automatically boost screen brightness & contrast for effortless camera scanning
+    const previousFilter = document.documentElement.style.filter;
+    document.documentElement.style.filter = 'brightness(1.18) contrast(1.05)';
+
     let wakeLock = null;
     if ('wakeLock' in navigator) {
       navigator.wakeLock.request('screen').then((wl) => {
         wakeLock = wl;
       }).catch(() => {});
     }
+
+    // Automatically restore normal screen brightness when modal is closed
     return () => {
+      document.documentElement.style.filter = previousFilter || '';
       if (wakeLock) {
         wakeLock.release().catch(() => {});
       }
@@ -55,31 +63,27 @@ export function ScanQRModal({ isOpen, onClose }) {
   const qrImage = isGPay ? '/Gpay-QR.jpeg' : '/Phonepe-QR.jpeg';
   const headerTitle = isGPay ? 'GPay QR Code' : 'PhonePe QR Code';
 
-  // Theme configuration: Orange glowing shade for GPay, Greenish glowing shade for PhonePe
+  // Theme configuration: Soft Orange glow for GPay, Soft Green glow for PhonePe (Zero outlines)
   const theme = isGPay
     ? {
         name: 'gpay',
-        tabActiveClass: 'bg-white text-orange-600 shadow-sm border border-orange-200 scale-102',
-        dropShadowClass: 'drop-shadow-[0_12px_28px_rgba(249,115,22,0.30)]',
+        tabActiveClass: 'bg-white text-orange-600 shadow-sm border-0 font-black',
+        tabInactiveClass: 'text-slate-600 hover:text-slate-900 border-0 font-bold',
+        dropShadowClass: 'drop-shadow-[0_16px_36px_rgba(249,115,22,0.32)]',
         bgStart: '#fff7ed',
         bgMid: '#fffaf5',
         bgEnd: '#ffedd5',
-        stroke: '#fb923c',
         floodColor: '#f97316',
-        qrBorder: 'border-orange-200/90',
-        activeIndicator: 'bg-orange-500',
       }
     : {
         name: 'phonepe',
-        tabActiveClass: 'bg-white text-emerald-700 shadow-sm border border-emerald-200 scale-102',
-        dropShadowClass: 'drop-shadow-[0_12px_28px_rgba(34,197,94,0.30)]',
+        tabActiveClass: 'bg-white text-emerald-700 shadow-sm border-0 font-black',
+        tabInactiveClass: 'text-slate-600 hover:text-slate-900 border-0 font-bold',
+        dropShadowClass: 'drop-shadow-[0_16px_36px_rgba(34,197,94,0.32)]',
         bgStart: '#f0fdf4',
         bgMid: '#f7fee7',
         bgEnd: '#dcfce7',
-        stroke: '#4ade80',
         floodColor: '#22c55e',
-        qrBorder: 'border-emerald-200/90',
-        activeIndicator: 'bg-emerald-500',
       };
 
   const handleCopyUpi = () => {
@@ -110,7 +114,7 @@ export function ScanQRModal({ isOpen, onClose }) {
       {/* High Luminance Background Radiance */}
       <div className="absolute inset-0 bg-gradient-to-t from-white/10 via-transparent to-white/15 pointer-events-none" />
 
-      {/* Bottom Sheet Modal Container with Pure Vertical Slide-Up (No horizontal drift) */}
+      {/* Bottom Sheet Modal Container with Pure Vertical Slide-Up */}
       <div className="w-full max-w-sm sm:max-w-md bg-white rounded-t-[36px] sm:rounded-[32px] shadow-2xl border border-slate-200/90 overflow-hidden relative animate-bottom-sheet p-5 sm:p-7 space-y-4">
         
         {/* Top Close Button */}
@@ -123,9 +127,9 @@ export function ScanQRModal({ isOpen, onClose }) {
           <X className="w-5 h-5" />
         </button>
 
-        {/* Tab Switcher (GPay & PhonePe) */}
+        {/* Tab Switcher (GPay & PhonePe) - Zero Border Lines */}
         <div className="flex items-center justify-center pt-1">
-          <div className="bg-slate-100 p-1 rounded-2xl flex items-center gap-1 border border-slate-200/80 shadow-inner">
+          <div className="bg-slate-100 p-1 rounded-2xl flex items-center gap-1 shadow-inner border-0">
             <button
               type="button"
               onClick={() => {
@@ -133,10 +137,8 @@ export function ScanQRModal({ isOpen, onClose }) {
                 setActiveTab('gpay');
                 setCopied(false);
               }}
-              className={`px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                isGPay
-                  ? theme.tabActiveClass
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`px-5 py-2 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                isGPay ? theme.tabActiveClass : 'text-slate-600 hover:text-slate-900 border-0 font-bold'
               }`}
             >
               <span>GPay</span>
@@ -149,10 +151,8 @@ export function ScanQRModal({ isOpen, onClose }) {
                 setActiveTab('phonepe');
                 setCopied(false);
               }}
-              className={`px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                !isGPay
-                  ? theme.tabActiveClass
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`px-5 py-2 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                !isGPay ? theme.tabActiveClass : 'text-slate-600 hover:text-slate-900 border-0 font-bold'
               }`}
             >
               <span>PhonePe</span>
@@ -161,23 +161,19 @@ export function ScanQRModal({ isOpen, onClose }) {
         </div>
 
         {/* Heading at Top: "GPay QR Code" or "PhonePe QR Code" */}
-        <div className="text-center space-y-0.5">
+        <div className="text-center pt-1 pb-0.5">
           <h2 className="text-2xl sm:text-[26px] font-black text-slate-900 tracking-tight">
             {headerTitle}
           </h2>
-          <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-500">
-            <Sun className="w-3.5 h-3.5 text-amber-500" />
-            <span>High Brightness for Quick Scanning</span>
-          </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* PURE POSTAGE STAMP CONTAINER (Adaptive Orange for GPay, Green for PhonePe) */}
+        {/* PURE POSTAGE STAMP CONTAINER (Only Ambient Glow - No Outline)             */}
         {/* ========================================================================= */}
         <div className="flex justify-center py-2">
           <div className={`relative w-[270px] sm:w-[290px] filter ${theme.dropShadowClass} transition-all duration-300`}>
             
-            {/* SVG Authentic Scalloped Stamp Background with Color Glow */}
+            {/* SVG Authentic Scalloped Stamp Background with Ambient Glow (stroke="none") */}
             <svg
               viewBox="0 0 280 310"
               className="w-full h-auto"
@@ -190,12 +186,12 @@ export function ScanQRModal({ isOpen, onClose }) {
                   <stop offset="50%" stopColor={theme.bgMid} />
                   <stop offset="100%" stopColor={theme.bgEnd} />
                 </linearGradient>
-                <filter id={`softGlow-${theme.name}`} x="-10%" y="-10%" width="120%" height="120%">
-                  <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor={theme.floodColor} floodOpacity="0.16" />
+                <filter id={`softGlow-${theme.name}`} x="-15%" y="-15%" width="130%" height="130%">
+                  <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor={theme.floodColor} floodOpacity="0.22" />
                 </filter>
               </defs>
 
-              {/* Scalloped Stamp Path */}
+              {/* Scalloped Stamp Path without Colored Border Lines */}
               <path
                 d="
                   M 14 6
@@ -299,15 +295,14 @@ export function ScanQRModal({ isOpen, onClose }) {
                   Z
                 "
                 fill={`url(#stampBg-${theme.name})`}
-                stroke={theme.stroke}
-                strokeWidth="1.5"
+                stroke="none"
                 filter={`url(#softGlow-${theme.name})`}
               />
             </svg>
 
-            {/* Stamp Center: ONLY the QR Code inside the Stamp */}
+            {/* Stamp Center: ONLY the pure QR Code inside (No border) */}
             <div className="absolute inset-0 p-5 flex items-center justify-center">
-              <div className={`relative bg-white p-3 rounded-2xl shadow-md border ${theme.qrBorder}`}>
+              <div className="relative bg-white p-3.5 rounded-2xl shadow-md border-0">
                 <img
                   src={qrImage}
                   alt={`${isGPay ? 'GPay' : 'PhonePe'} QR Code`}
