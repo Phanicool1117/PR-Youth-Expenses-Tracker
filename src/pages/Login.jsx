@@ -88,8 +88,8 @@ export function Login() {
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-[#dcebfa] via-[#edf5fc] to-[#f5f9fd] flex items-center justify-center p-4 sm:p-6">
       
-      {/* Floating Top-Right Scan QR Trigger Button */}
-      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-30">
+      {/* Scan QR Trigger Button */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-30">
         <button
           type="button"
           onClick={() => {

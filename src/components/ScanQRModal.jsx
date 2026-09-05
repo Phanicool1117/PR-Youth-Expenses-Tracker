@@ -5,6 +5,36 @@ import { triggerHaptic, playSuccessSound } from '../utils/hapticsSound';
 export function ScanQRModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('gpay'); // 'gpay' | 'phonepe'
   const [copied, setCopied] = useState(false);
+  const [isRendered, setIsRendered] = useState(isOpen);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Smooth Entry & Exit Transition Manager
+  useEffect(() => {
+    let animFrame1;
+    let animFrame2;
+    let closeTimer;
+
+    if (isOpen) {
+      setIsRendered(true);
+      // Double RAF ensures DOM is painted before triggering CSS transition
+      animFrame1 = requestAnimationFrame(() => {
+        animFrame2 = requestAnimationFrame(() => {
+          setIsAnimating(true);
+        });
+      });
+    } else {
+      setIsAnimating(false);
+      closeTimer = setTimeout(() => {
+        setIsRendered(false);
+      }, 450); // Matches smooth transition duration
+    }
+
+    return () => {
+      if (animFrame1) cancelAnimationFrame(animFrame1);
+      if (animFrame2) cancelAnimationFrame(animFrame2);
+      if (closeTimer) clearTimeout(closeTimer);
+    };
+  }, [isOpen]);
 
   // Screen WakeLock & High Brightness Simulation
   useEffect(() => {
@@ -47,7 +77,7 @@ export function ScanQRModal({ isOpen, onClose }) {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isRendered) return null;
 
   const isGPay = activeTab === 'gpay';
   const upiId = isGPay ? '9849590408-1@okbizaxis' : 'Q178007075@ybl';
@@ -78,13 +108,23 @@ export function ScanQRModal({ isOpen, onClose }) {
       onClick={(e) => {
         if (e.target === e.currentTarget) handleClose();
       }}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-fade-in select-none"
+      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto select-none transition-opacity duration-400 ease-out ${
+        isAnimating ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}
     >
       {/* High Luminance Background Radiance (80%+ Brightness Effect for camera scans) */}
-      <div className="absolute inset-0 bg-gradient-to-t from-white/10 via-transparent to-white/15 pointer-events-none" />
+      <div className={`absolute inset-0 bg-gradient-to-t from-white/10 via-transparent to-white/15 pointer-events-none transition-opacity duration-500 ${
+        isAnimating ? 'opacity-100' : 'opacity-0'
+      }`} />
 
-      {/* Bottom Sheet Modal Container */}
-      <div className="bg-white rounded-t-[36px] sm:rounded-[32px] shadow-2xl border border-slate-200/90 w-full max-w-sm sm:max-w-md overflow-hidden relative animate-slide-up sm:animate-scale-up p-5 sm:p-7 space-y-4">
+      {/* Bottom Sheet Modal Container with Apple Spring Physics */}
+      <div
+        className={`bg-white rounded-t-[36px] sm:rounded-[32px] shadow-2xl border border-slate-200/90 w-full max-w-sm sm:max-w-md overflow-hidden relative p-5 sm:p-7 space-y-4 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] transform will-change-transform ${
+          isAnimating
+            ? 'translate-y-0 opacity-100 scale-100'
+            : 'translate-y-full sm:translate-y-10 opacity-0 sm:scale-95'
+        }`}
+      >
         
         {/* Top Close Button */}
         <button

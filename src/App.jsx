@@ -14,6 +14,16 @@ import { QrCode } from 'lucide-react';
 export function App() {
   const { user, activeTab } = useAuth();
   const [showScanModal, setShowScanModal] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Auto-hide scan button on scroll down to prevent overlapping content
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   if (!user) {
     return <Login />;
@@ -41,8 +51,10 @@ export function App() {
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-[#dcebfa] via-[#edf5fc] to-[#f5f9fd]">
       
-      {/* Global Floating Top-Right Scan QR Trigger Button across all logged-in screens */}
-      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-30">
+      {/* Scan QR Trigger Button (Anchored to top, disappears on scroll down) */}
+      <div className={`absolute top-4 right-4 sm:top-6 sm:right-6 z-30 transition-all duration-300 transform ${
+        isScrolled ? 'opacity-0 pointer-events-none -translate-y-3' : 'opacity-100 translate-y-0'
+      }`}>
         <button
           type="button"
           onClick={() => {
