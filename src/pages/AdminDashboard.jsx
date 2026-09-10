@@ -446,21 +446,39 @@ export function AdminDashboard() {
         {isSummaryExpanded && (
           <div className="p-3.5 sm:p-4 border-t border-slate-100 bg-slate-50/80 space-y-3 animate-fade-in">
             
-            {/* Row 1: 3-Pill Compact Financial Overview */}
-            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
-              <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 shadow-2xs">
-                <span className="text-[9px] sm:text-[10px] font-extrabold text-emerald-800 uppercase block truncate">Donations</span>
-                <span className="text-xs sm:text-sm font-black text-emerald-700 block truncate">+₹{totalDonations.toLocaleString('en-IN')}</span>
+            {/* Row 1: High-Hierarchy Executive Financial Summary (Donations, Expenses, Net Total) */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {/* Total Donations */}
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-b from-emerald-50 to-emerald-100/40 border border-emerald-200 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center gap-1 text-emerald-800 mb-1">
+                  <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600 shrink-0 hidden xs:block" />
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider truncate">Donations</span>
+                </div>
+                <div className="text-xs xs:text-sm sm:text-lg font-black text-emerald-700 tracking-tight truncate">
+                  +₹{totalDonations.toLocaleString('en-IN')}
+                </div>
               </div>
 
-              <div className="p-2 sm:p-2.5 rounded-xl bg-rose-50 border border-rose-200 shadow-2xs">
-                <span className="text-[9px] sm:text-[10px] font-extrabold text-rose-800 uppercase block truncate">Expenses</span>
-                <span className="text-xs sm:text-sm font-black text-rose-700 block truncate">-₹{totalExpenses.toLocaleString('en-IN')}</span>
+              {/* Total Expenses */}
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-b from-rose-50 to-rose-100/40 border border-rose-200 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center gap-1 text-rose-800 mb-1">
+                  <ArrowDownRight className="w-3.5 h-3.5 text-rose-600 shrink-0 hidden xs:block" />
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider truncate">Expenses</span>
+                </div>
+                <div className="text-xs xs:text-sm sm:text-lg font-black text-rose-700 tracking-tight truncate">
+                  -₹{totalExpenses.toLocaleString('en-IN')}
+                </div>
               </div>
 
-              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-50 border border-blue-200 shadow-2xs">
-                <span className="text-[9px] sm:text-[10px] font-extrabold text-[#1e40af] uppercase block truncate">Net Total</span>
-                <span className="text-xs sm:text-sm font-black text-[#1d4ed8] block truncate">₹{currentBalance.toLocaleString('en-IN')}</span>
+              {/* Net Balance Total */}
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-b from-blue-50 to-blue-100/40 border border-blue-200 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center gap-1 text-blue-900 mb-1">
+                  <Wallet className="w-3.5 h-3.5 text-[#0f52ba] shrink-0 hidden xs:block" />
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider truncate">Net Total</span>
+                </div>
+                <div className="text-xs xs:text-sm sm:text-lg font-black text-[#0f52ba] tracking-tight truncate">
+                  ₹{currentBalance.toLocaleString('en-IN')}
+                </div>
               </div>
             </div>
 
