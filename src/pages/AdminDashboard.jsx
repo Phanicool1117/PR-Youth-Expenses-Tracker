@@ -444,34 +444,34 @@ export function AdminDashboard() {
 
         {/* Collapsible Dropdown: Reference-Style Financial Summary (Top to Bottom) */}
         {isSummaryExpanded && (
-          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/70 space-y-3 sm:space-y-3.5 animate-fade-in">
+          <div className="p-3.5 sm:p-4 border-t border-slate-100 bg-slate-50/70 space-y-2.5 sm:space-y-3 animate-fade-in">
             
             {/* 1. Total Donations Card */}
-            <div className="py-3.5 sm:py-4 px-4 rounded-2xl sm:rounded-3xl bg-[#f0fdf4] border-2 border-[#86efac] flex flex-col items-center justify-center text-center shadow-2xs">
-              <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#065f46]">
+            <div className="py-2.5 sm:py-3 px-4 rounded-2xl bg-[#f0fdf4] border-2 border-[#86efac] flex flex-col items-center justify-center text-center shadow-2xs">
+              <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-[#065f46]">
                 TOTAL DONATIONS
               </span>
-              <span className="text-2xl sm:text-3xl font-black text-[#047857] tracking-tight mt-0.5">
+              <span className="text-lg sm:text-xl font-black text-[#047857] tracking-tight mt-0.5">
                 ₹{totalDonations.toLocaleString('en-IN')}
               </span>
             </div>
 
-            {/* 2. Total Expenses Card */}
-            <div className="py-3.5 sm:py-4 px-4 rounded-2xl sm:rounded-3xl bg-[#fefce8] border-2 border-[#fde047] flex flex-col items-center justify-center text-center shadow-2xs">
-              <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#92400e]">
+            {/* 2. Total Expenses Card (Reddish styling for financial outflow) */}
+            <div className="py-2.5 sm:py-3 px-4 rounded-2xl bg-[#fff1f2] border-2 border-[#fca5a5] flex flex-col items-center justify-center text-center shadow-2xs">
+              <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-[#9f1239]">
                 TOTAL EXPENSES
               </span>
-              <span className="text-2xl sm:text-3xl font-black text-[#b45309] tracking-tight mt-0.5">
+              <span className="text-lg sm:text-xl font-black text-[#e11d48] tracking-tight mt-0.5">
                 ₹{totalExpenses.toLocaleString('en-IN')}
               </span>
             </div>
 
             {/* 3. Net Balance Card */}
-            <div className="py-3.5 sm:py-4 px-4 rounded-2xl sm:rounded-3xl bg-[#eff6ff] border-2 border-[#93c5fd] flex flex-col items-center justify-center text-center shadow-2xs">
-              <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#1e40af]">
+            <div className="py-2.5 sm:py-3 px-4 rounded-2xl bg-[#eff6ff] border-2 border-[#93c5fd] flex flex-col items-center justify-center text-center shadow-2xs">
+              <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-[#1e40af]">
                 NET BALANCE
               </span>
-              <span className="text-2xl sm:text-3xl font-black text-[#2563eb] tracking-tight mt-0.5">
+              <span className="text-lg sm:text-xl font-black text-[#2563eb] tracking-tight mt-0.5">
                 {currentBalance < 0 
                   ? `₹-${Math.abs(currentBalance).toLocaleString('en-IN')}` 
                   : `₹${currentBalance.toLocaleString('en-IN')}`}
