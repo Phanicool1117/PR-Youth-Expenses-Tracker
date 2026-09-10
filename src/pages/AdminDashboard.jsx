@@ -264,61 +264,46 @@ export function AdminDashboard() {
     ? activeCategories
     : sortedCategories.slice(0, 4);
 
-  // Dual Payment Pathways Calculation (Online vs Cash with QR, UPI, PhonePe breakdown)
+  // Dual Payment Pathways Calculation (Online vs Cash)
   const paymentPathways = useMemo(() => {
     let onlineDonations = 0;
     let cashDonations = 0;
     let qrDonations = 0;
     let upiDonations = 0;
-    let phonepeDonations = 0;
-    let bankDonations = 0;
-
-    const classifyMethod = (method) => {
-      const m = String(method || '').trim().toLowerCase();
-      if (m === 'cash' || m.includes('cash')) return 'cash';
-      if (m.includes('qr')) return 'qr';
-      if (m.includes('phone')) return 'phonepe';
-      if (m.includes('upi')) return 'upi';
-      if (m.includes('bank') || m.includes('deposit') || m.includes('transfer') || m.includes('card')) return 'bank';
-      return 'online_other';
-    };
 
     donationsOnlyList.forEach((d) => {
       const amt = Number(d.amount) || 0;
-      const cat = classifyMethod(d.paymentMethod || d.paymentMode);
-      if (cat === 'cash') {
+      const pm = String(d.paymentMethod || d.paymentMode || '').trim().toLowerCase();
+      if (pm === 'cash' || pm.includes('cash')) {
         cashDonations += amt;
       } else {
         onlineDonations += amt;
-        if (cat === 'qr') qrDonations += amt;
-        else if (cat === 'phonepe') phonepeDonations += amt;
-        else if (cat === 'upi') upiDonations += amt;
-        else bankDonations += amt;
+        if (pm.includes('qr')) {
+          qrDonations += amt;
+        } else {
+          // UPI, PhonePe, Bank transfer, and other online methods all roll cleanly under UPI
+          upiDonations += amt;
+        }
       }
     });
 
     let onlineExpenses = 0;
-    let cashExpenses = 0;
-
     expensesOnlyList.forEach((e) => {
-      const amt = Number(e.amount) || 0;
-      const cat = classifyMethod(e.paymentMethod || e.paymentMode);
-      if (cat === 'cash') {
-        cashExpenses += amt;
-      } else {
-        onlineExpenses += amt;
-      }
+      onlineExpenses += Number(e.amount) || 0;
     });
 
-    // Fallback if donationsOnlyList was not populated yet but backend gave paymentBreakdown
+    if (totalExpenses > 0 && onlineExpenses === 0) {
+      onlineExpenses = totalExpenses;
+    }
+
     if (donationsOnlyList.length === 0 && data?.paymentBreakdown) {
       cashDonations = data.paymentBreakdown.cash || 0;
-      upiDonations = data.paymentBreakdown.upi || 0;
       onlineDonations = Math.max(0, totalDonations - cashDonations);
+      upiDonations = onlineDonations;
     }
 
     const netOnline = onlineDonations - onlineExpenses;
-    const netCash = cashDonations - cashExpenses;
+    const netCash = cashDonations;
 
     return {
       netOnline,
@@ -326,16 +311,13 @@ export function AdminDashboard() {
       onlineDonations,
       onlineExpenses,
       cashDonations,
-      cashExpenses,
       platforms: {
         qr: qrDonations,
         upi: upiDonations,
-        phonepe: phonepeDonations,
-        bank: bankDonations,
         cash: cashDonations
       }
     };
-  }, [donationsOnlyList, expensesOnlyList, data, totalDonations]);
+  }, [donationsOnlyList, expensesOnlyList, data, totalDonations, totalExpenses]);
 
   return (
     <div className="centered-container py-6 sm:py-10 space-y-6">
@@ -367,9 +349,9 @@ export function AdminDashboard() {
             triggerHaptic(10);
             setIsSummaryExpanded((prev) => !prev);
           }}
-          className="p-5 px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/60 transition-colors select-none"
+          className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 cursor-pointer hover:bg-slate-50/60 transition-colors select-none"
         >
-          <div className="space-y-1.5 w-full sm:w-auto">
+          <div className="space-y-1 w-full sm:w-auto">
             <div className="flex items-center justify-between sm:justify-start gap-3 w-full">
               <div className="flex items-center gap-2">
                 <span className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tracking-tight">
@@ -460,169 +442,98 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        {/* Collapsible Dropdown: Financial Ledger Summary & Pathway Breakdown */}
+        {/* Collapsible Dropdown: Compact & Space-Efficient Financial Ledger Summary */}
         {isSummaryExpanded && (
-          <div className="p-5 px-6 border-t border-slate-100 bg-slate-50/70 space-y-4 animate-fade-in">
+          <div className="p-3.5 sm:p-4 border-t border-slate-100 bg-slate-50/80 space-y-3 animate-fade-in">
             
-            {/* Top Row: Overall Totals */}
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-xs font-bold text-slate-700 flex items-center gap-1.5 uppercase tracking-wider">
-                <Wallet className="w-3.5 h-3.5 text-[#0f52ba]" />
-                <span>Financial Ledger Summary</span>
-              </h2>
-              <span className="text-[11px] text-slate-400 font-medium">Live Reconciliation</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-center">
-              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 shadow-2xs">
-                <span className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider block">Total Donations</span>
-                <span className="text-lg font-extrabold text-emerald-700">+ ₹{totalDonations.toLocaleString('en-IN')}</span>
+            {/* Row 1: 3-Pill Compact Financial Overview */}
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
+              <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 shadow-2xs">
+                <span className="text-[9px] sm:text-[10px] font-extrabold text-emerald-800 uppercase block truncate">Donations</span>
+                <span className="text-xs sm:text-sm font-black text-emerald-700 block truncate">+₹{totalDonations.toLocaleString('en-IN')}</span>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 shadow-2xs">
-                <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">Total Expenses</span>
-                <span className="text-lg font-extrabold text-amber-700">- ₹{totalExpenses.toLocaleString('en-IN')}</span>
+              <div className="p-2 sm:p-2.5 rounded-xl bg-rose-50 border border-rose-200 shadow-2xs">
+                <span className="text-[9px] sm:text-[10px] font-extrabold text-rose-800 uppercase block truncate">Expenses</span>
+                <span className="text-xs sm:text-sm font-black text-rose-700 block truncate">-₹{totalExpenses.toLocaleString('en-IN')}</span>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-[#edf4fc] border border-[#bfdbfe] shadow-2xs">
-                <span className="text-[10px] font-extrabold text-[#1e40af] uppercase tracking-wider block">Net Committee Balance</span>
-                <span className="text-lg font-extrabold text-[#1d4ed8]">₹{currentBalance.toLocaleString('en-IN')}</span>
+              <div className="p-2 sm:p-2.5 rounded-xl bg-blue-50 border border-blue-200 shadow-2xs">
+                <span className="text-[9px] sm:text-[10px] font-extrabold text-[#1e40af] uppercase block truncate">Net Total</span>
+                <span className="text-xs sm:text-sm font-black text-[#1d4ed8] block truncate">₹{currentBalance.toLocaleString('en-IN')}</span>
               </div>
             </div>
 
-            {/* Bottom Row: Dual Payment Pathway Breakdown (Online vs Cash with platforms) */}
-            <div className="space-y-2 pt-1 border-t border-slate-200/70">
-              <div className="flex items-center justify-between gap-2 pt-1">
-                <span className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#0f52ba]" />
-                  <span>Net Balance Source Pathways</span>
-                </span>
-                <span className="text-[10px] text-slate-400 font-semibold">Online & Cash Reconciliation</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* 1. Online Pathway Card (QR Code, UPI, PhonePe) */}
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50/90 via-sky-50/40 to-white border border-blue-200/90 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
-                        <Globe className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-black text-slate-900 leading-tight">Online Pathway</h4>
-                        <p className="text-[10px] font-medium text-slate-500">QR, UPI & PhonePe</p>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <span className="text-[10px] font-extrabold uppercase text-blue-800 tracking-wider block">Net Online</span>
-                      <span className="text-base font-black text-[#0f52ba]">
-                        ₹{paymentPathways.netOnline.toLocaleString('en-IN')}
-                      </span>
-                    </div>
+            {/* Row 2: Compact Dual Pathway Split (Online vs Cash) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
+              
+              {/* 1. Online Pathway Card */}
+              <div className="p-3 rounded-2xl bg-white border border-blue-200 shadow-2xs space-y-2">
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-[#0f52ba]" />
+                    <span className="text-xs font-black text-slate-900">Online Pathway</span>
                   </div>
-
-                  {/* Flow Inflow vs Outflow */}
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 bg-white/80 p-2 rounded-xl border border-blue-100/80">
-                    <span className="text-emerald-700 flex items-center gap-1 font-bold">
-                      <ArrowUpRight className="w-3.5 h-3.5" /> +₹{paymentPathways.onlineDonations.toLocaleString('en-IN')}
+                  <div className="text-right">
+                    <span className="text-xs sm:text-sm font-black text-[#0f52ba]">
+                      ₹{paymentPathways.netOnline.toLocaleString('en-IN')}
                     </span>
-                    <span className="text-rose-600 flex items-center gap-1 font-bold">
-                      <ArrowDownRight className="w-3.5 h-3.5" /> -₹{paymentPathways.onlineExpenses.toLocaleString('en-IN')}
-                    </span>
-                  </div>
-
-                  {/* Platforms Breakdown Badges */}
-                  <div className="space-y-1.5 pt-0.5">
-                    <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block">Online Platforms Received:</span>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      <div className="p-2 rounded-xl bg-white border border-blue-100 shadow-2xs text-center">
-                        <div className="flex items-center justify-center gap-1 text-[10px] font-bold text-slate-600 mb-0.5">
-                          <QrCode className="w-3 h-3 text-[#0f52ba]" />
-                          <span>QR Code</span>
-                        </div>
-                        <span className="text-xs font-extrabold text-slate-900">
-                          ₹{paymentPathways.platforms.qr.toLocaleString('en-IN')}
-                        </span>
-                      </div>
-
-                      <div className="p-2 rounded-xl bg-white border border-blue-100 shadow-2xs text-center">
-                        <div className="flex items-center justify-center gap-1 text-[10px] font-bold text-slate-600 mb-0.5">
-                          <Smartphone className="w-3 h-3 text-emerald-600" />
-                          <span>UPI</span>
-                        </div>
-                        <span className="text-xs font-extrabold text-slate-900">
-                          ₹{paymentPathways.platforms.upi.toLocaleString('en-IN')}
-                        </span>
-                      </div>
-
-                      <div className="p-2 rounded-xl bg-white border border-blue-100 shadow-2xs text-center">
-                        <div className="flex items-center justify-center gap-1 text-[10px] font-bold text-slate-600 mb-0.5">
-                          <span className="w-2 h-2 rounded-full bg-purple-600 shrink-0" />
-                          <span>PhonePe</span>
-                        </div>
-                        <span className="text-xs font-extrabold text-slate-900">
-                          ₹{paymentPathways.platforms.phonepe.toLocaleString('en-IN')}
-                        </span>
-                      </div>
-                    </div>
-
-                    {paymentPathways.platforms.bank > 0 && (
-                      <div className="p-1.5 px-2.5 rounded-xl bg-white border border-blue-100 flex items-center justify-between text-[10.5px]">
-                        <span className="font-semibold text-slate-500">Bank / Other Transfers:</span>
-                        <span className="font-extrabold text-slate-900">₹{paymentPathways.platforms.bank.toLocaleString('en-IN')}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
 
-                {/* 2. Cash Pathway Card */}
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-white border border-emerald-200/90 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
-                        <Banknote className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-black text-slate-900 leading-tight">Cash Pathway</h4>
-                        <p className="text-[10px] font-medium text-slate-500">Physical In-Hand Cash</p>
-                      </div>
-                    </div>
+                {/* Inflow vs Outflow Mini Line */}
+                <div className="flex items-center justify-between text-[10px] font-bold bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                  <span className="text-emerald-700 font-extrabold">In: +₹{paymentPathways.onlineDonations.toLocaleString('en-IN')}</span>
+                  <span className="text-rose-600 font-extrabold">Out: -₹{paymentPathways.onlineExpenses.toLocaleString('en-IN')}</span>
+                </div>
 
-                    <div className="text-right">
-                      <span className="text-[10px] font-extrabold uppercase text-emerald-800 tracking-wider block">Net Cash</span>
-                      <span className="text-base font-black text-emerald-700">
-                        ₹{paymentPathways.netCash.toLocaleString('en-IN')}
-                      </span>
-                    </div>
+                {/* Platforms: Only QR Code & UPI */}
+                <div className="grid grid-cols-2 gap-1 text-center pt-0.5">
+                  <div className="p-1.5 rounded-lg bg-blue-50/60 border border-blue-100 flex items-center justify-between px-2">
+                    <span className="text-[10px] font-bold text-slate-600 flex items-center gap-1">
+                      <QrCode className="w-3 h-3 text-[#0f52ba]" /> QR
+                    </span>
+                    <span className="text-[11px] font-extrabold text-slate-900">₹{paymentPathways.platforms.qr.toLocaleString('en-IN')}</span>
                   </div>
 
-                  {/* Flow Inflow vs Outflow */}
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 bg-white/80 p-2 rounded-xl border border-emerald-100/80">
-                    <span className="text-emerald-700 flex items-center gap-1 font-bold">
-                      <ArrowUpRight className="w-3.5 h-3.5" /> +₹{paymentPathways.cashDonations.toLocaleString('en-IN')}
+                  <div className="p-1.5 rounded-lg bg-blue-50/60 border border-blue-100 flex items-center justify-between px-2">
+                    <span className="text-[10px] font-bold text-slate-600 flex items-center gap-1">
+                      <Smartphone className="w-3 h-3 text-emerald-600" /> UPI
                     </span>
-                    <span className="text-rose-600 flex items-center gap-1 font-bold">
-                      <ArrowDownRight className="w-3.5 h-3.5" /> -₹{paymentPathways.cashExpenses.toLocaleString('en-IN')}
-                    </span>
-                  </div>
-
-                  {/* Platform Inflow Badges */}
-                  <div className="space-y-1.5 pt-0.5">
-                    <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block">Physical Cash Breakdown:</span>
-                    <div className="p-2.5 rounded-xl bg-white border border-emerald-100 shadow-2xs flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
-                        <Banknote className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Direct Cash Handover</span>
-                      </div>
-                      <span className="text-xs font-extrabold text-slate-900">
-                        ₹{paymentPathways.platforms.cash.toLocaleString('en-IN')}
-                      </span>
-                    </div>
+                    <span className="text-[11px] font-extrabold text-slate-900">₹{paymentPathways.platforms.upi.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
               </div>
+
+              {/* 2. Cash Pathway Card (No minus outgoing) */}
+              <div className="p-3 rounded-2xl bg-white border border-emerald-200 shadow-2xs space-y-2 flex flex-col justify-between">
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <Banknote className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="text-xs font-black text-slate-900">Cash Pathway</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs sm:text-sm font-black text-emerald-700">
+                      ₹{paymentPathways.netCash.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Cash In-Hand Inflow Label */}
+                <div className="text-[10px] font-bold bg-emerald-50/70 text-emerald-800 p-1.5 rounded-lg border border-emerald-100 flex items-center justify-between">
+                  <span>Physical Cash In-Hand</span>
+                  <span className="font-extrabold">+₹{paymentPathways.cashDonations.toLocaleString('en-IN')}</span>
+                </div>
+
+                {/* Direct Handover note */}
+                <div className="p-1.5 rounded-lg bg-slate-50 border border-slate-100 text-[10px] text-slate-500 font-semibold flex items-center justify-between px-2">
+                  <span>Direct Cash Handover</span>
+                  <span className="text-emerald-700 font-extrabold">100% In-Hand</span>
+                </div>
+              </div>
+
             </div>
+
           </div>
         )}
       </div>
