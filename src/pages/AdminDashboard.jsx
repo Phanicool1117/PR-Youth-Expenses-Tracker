@@ -442,74 +442,40 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        {/* Collapsible Dropdown: High-Hierarchy Executive Financial Summary (Top to Bottom) */}
+        {/* Collapsible Dropdown: Reference-Style Financial Summary (Top to Bottom) */}
         {isSummaryExpanded && (
-          <div className="p-3.5 sm:p-5 border-t border-slate-100 bg-slate-50/80 space-y-2.5 sm:space-y-3 animate-fade-in">
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/70 space-y-3 sm:space-y-3.5 animate-fade-in">
             
             {/* 1. Total Donations Card */}
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-emerald-200 shadow-2xs flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
-                  <ArrowUpRight className="w-5 h-5 text-emerald-600" />
-                </div>
-                <div>
-                  <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-emerald-800 block">
-                    Total Donations
-                  </span>
-                  <span className="text-[11px] text-slate-500 font-medium block">
-                    All collections & contributions
-                  </span>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-base sm:text-xl font-black text-emerald-700 tracking-tight block">
-                  +₹{totalDonations.toLocaleString('en-IN')}
-                </span>
-              </div>
+            <div className="py-3.5 sm:py-4 px-4 rounded-2xl sm:rounded-3xl bg-[#f0fdf4] border-2 border-[#86efac] flex flex-col items-center justify-center text-center shadow-2xs">
+              <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#065f46]">
+                TOTAL DONATIONS
+              </span>
+              <span className="text-2xl sm:text-3xl font-black text-[#047857] tracking-tight mt-0.5">
+                ₹{totalDonations.toLocaleString('en-IN')}
+              </span>
             </div>
 
             {/* 2. Total Expenses Card */}
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-rose-200 shadow-2xs flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center shrink-0">
-                  <ArrowDownRight className="w-5 h-5 text-rose-600" />
-                </div>
-                <div>
-                  <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-rose-800 block">
-                    Total Expenses
-                  </span>
-                  <span className="text-[11px] text-slate-500 font-medium block">
-                    All vendor payouts & festival costs
-                  </span>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-base sm:text-xl font-black text-rose-700 tracking-tight block">
-                  -₹{totalExpenses.toLocaleString('en-IN')}
-                </span>
-              </div>
+            <div className="py-3.5 sm:py-4 px-4 rounded-2xl sm:rounded-3xl bg-[#fefce8] border-2 border-[#fde047] flex flex-col items-center justify-center text-center shadow-2xs">
+              <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#92400e]">
+                TOTAL EXPENSES
+              </span>
+              <span className="text-2xl sm:text-3xl font-black text-[#b45309] tracking-tight mt-0.5">
+                ₹{totalExpenses.toLocaleString('en-IN')}
+              </span>
             </div>
 
-            {/* 3. Net Total Balance Card */}
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-blue-50/70 border border-blue-200 shadow-2xs flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-100 border border-blue-200 flex items-center justify-center shrink-0">
-                  <Wallet className="w-5 h-5 text-[#0f52ba]" />
-                </div>
-                <div>
-                  <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-[#0f52ba] block">
-                    Net Committee Balance
-                  </span>
-                  <span className="text-[11px] text-slate-500 font-medium block">
-                    Remaining surplus funds in treasury
-                  </span>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-base sm:text-xl font-black text-[#0f52ba] tracking-tight block">
-                  ₹{currentBalance.toLocaleString('en-IN')}
-                </span>
-              </div>
+            {/* 3. Net Balance Card */}
+            <div className="py-3.5 sm:py-4 px-4 rounded-2xl sm:rounded-3xl bg-[#eff6ff] border-2 border-[#93c5fd] flex flex-col items-center justify-center text-center shadow-2xs">
+              <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#1e40af]">
+                NET BALANCE
+              </span>
+              <span className="text-2xl sm:text-3xl font-black text-[#2563eb] tracking-tight mt-0.5">
+                {currentBalance < 0 
+                  ? `₹-${Math.abs(currentBalance).toLocaleString('en-IN')}` 
+                  : `₹${currentBalance.toLocaleString('en-IN')}`}
+              </span>
             </div>
 
           </div>
