@@ -90,6 +90,14 @@ export function AdminDashboard() {
       return [];
     }
   });
+  const [expensesList, setExpensesList] = useState(() => {
+    try {
+      const cached = safeStorage.getSessionItem('ADMIN_EXPENSES_DATA');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
 
   const [loading, setLoading] = useState(false);
 
@@ -99,11 +107,12 @@ export function AdminDashboard() {
 
   const loadDashboard = async () => {
     try {
-      const [dashRes, memRes, catRes, donRes] = await Promise.all([
+      const [dashRes, memRes, catRes, donRes, expRes] = await Promise.all([
         api.getAdminDashboard(),
         api.getMembers(),
         api.getCategories(),
         api.getAllDonations(),
+        api.getAllExpenses ? api.getAllExpenses() : Promise.resolve({ success: false }),
       ]);
 
       if (dashRes.success && dashRes.data) {
@@ -136,6 +145,11 @@ export function AdminDashboard() {
       if (donRes.success && Array.isArray(donRes.data) && donRes.data.length > 0) {
         setDonationsList(donRes.data);
         safeStorage.setSessionItem('ADMIN_DONATIONS_DATA', JSON.stringify(donRes.data));
+      }
+
+      if (expRes && expRes.success && Array.isArray(expRes.data) && expRes.data.length > 0) {
+        setExpensesList(expRes.data);
+        safeStorage.setSessionItem('ADMIN_EXPENSES_DATA', JSON.stringify(expRes.data));
       }
     } catch (err) {
       console.error('Failed to load executive admin dashboard', err);
@@ -208,25 +222,32 @@ export function AdminDashboard() {
   const expensesOnlyList = useMemo(() => {
     const map = new Map();
 
+    const processExpense = (tx) => {
+      const isDonation = tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName);
+      if (!isDonation) {
+        const key = tx.id || `EXP_${tx.timestamp || ''}_${tx.amount || 0}_${tx.category || ''}_${tx.memberId || ''}`;
+        map.set(key, {
+          ...tx,
+          id: tx.id || key,
+          type: tx.type || 'Expenses',
+          category: tx.category || 'General Expense',
+          paymentMethod: tx.paymentMethod || tx.paymentMode || 'Cash',
+        });
+      }
+    };
+
+    if (Array.isArray(expensesList)) {
+      expensesList.forEach(processExpense);
+    }
+
     if (Array.isArray(recentActivity)) {
-      recentActivity.forEach((tx) => {
-        const isDonation = tx.type === 'Donation' || tx.type === 'Donations' || Boolean(tx.donorName);
-        if (!isDonation) {
-          const key = `EXP_${tx.timestamp || ''}_${tx.amount || 0}_${tx.category || ''}_${tx.memberId || ''}`;
-          map.set(key, {
-            ...tx,
-            id: tx.id || key,
-            type: tx.type || 'Expenses',
-            category: tx.category || 'General Expense',
-          });
-        }
-      });
+      recentActivity.forEach(processExpense);
     }
 
     const list = Array.from(map.values());
     list.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
     return list;
-  }, [recentActivity]);
+  }, [expensesList, recentActivity]);
 
   const mergedCategoryBreakdown = useMemo(() => {
     const map = {};
@@ -265,6 +286,7 @@ export function AdminDashboard() {
     : sortedCategories.slice(0, 4);
 
   // Dual Payment Pathways Calculation (Online vs Cash)
+  // Ensures Cash expenses are debited from Cash, and Online expenses are debited from Online
   const paymentPathways = useMemo(() => {
     let onlineDonations = 0;
     let cashDonations = 0;
@@ -288,13 +310,17 @@ export function AdminDashboard() {
     });
 
     let onlineExpenses = 0;
-    expensesOnlyList.forEach((e) => {
-      onlineExpenses += Number(e.amount) || 0;
-    });
+    let cashExpenses = 0;
 
-    if (totalExpenses > 0 && onlineExpenses === 0) {
-      onlineExpenses = totalExpenses;
-    }
+    expensesOnlyList.forEach((e) => {
+      const amt = Number(e.amount) || 0;
+      const pm = String(e.paymentMethod || e.paymentMode || '').trim().toLowerCase();
+      if (pm === 'cash' || pm.includes('cash')) {
+        cashExpenses += amt;
+      } else {
+        onlineExpenses += amt;
+      }
+    });
 
     if (donationsOnlyList.length === 0 && data?.paymentBreakdown) {
       cashDonations = data.paymentBreakdown.cash || 0;
@@ -302,8 +328,20 @@ export function AdminDashboard() {
       upiDonations = onlineDonations;
     }
 
+    if (totalExpenses > 0 && onlineExpenses === 0 && cashExpenses === 0) {
+      if (data?.expensePaymentBreakdown?.cash) {
+        cashExpenses = Number(data.expensePaymentBreakdown.cash) || 0;
+        onlineExpenses = Math.max(0, totalExpenses - cashExpenses);
+      } else {
+        onlineExpenses = totalExpenses;
+      }
+    }
+
+    // Mathematical balance:
+    // Net Online = Online Collections - Online Outflows
+    // Net Cash = Cash Collections - Cash Outflows
     const netOnline = onlineDonations - onlineExpenses;
-    const netCash = cashDonations;
+    const netCash = cashDonations - cashExpenses;
 
     return {
       netOnline,
@@ -311,6 +349,7 @@ export function AdminDashboard() {
       onlineDonations,
       onlineExpenses,
       cashDonations,
+      cashExpenses,
       platforms: {
         qr: qrDonations,
         upi: upiDonations,
